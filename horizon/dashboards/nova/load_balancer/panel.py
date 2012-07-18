@@ -21,7 +21,7 @@ from horizon.dashboards.nova import dashboard
 
 
 class InstancesAndVolumes(horizon.Panel):
-    name = _("Load Balancer")
+    name = _("Load Balancers")
     slug = 'load_balancer'
 
 

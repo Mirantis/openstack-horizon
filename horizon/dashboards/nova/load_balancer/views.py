@@ -24,42 +24,28 @@ Views for Instances and Volumes.
 """
 import logging
 
-from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
-from django.utils.datastructures import SortedDict
-from novaclient import exceptions as novaclient_exceptions
 
 from horizon import api
 from horizon import exceptions
 from horizon import tables
-from horizon import forms
-from .devices.tables import LBTable
+
+from .tables import LoadBalancersTable
+
 
 LOG = logging.getLogger(__name__)
 
-class IndexView(tables.MultiTableView):
-    table_classes = (LBTable,)
+
+class IndexView(tables.DataTableView):
+    table_class = LoadBalancersTable
     template_name = 'nova/load_balancer/index.html'
 
-    def get_balancers_data(self):
+    def get_data(self):
+        LOG.debug("Retrieve loadbalancers list %r" % self.request)
         try:
-            LOG.debug("Retrieve loadbalancers list %s" % self.request)
-            devices = api.balancer_get_loadbalancers(self.request)
-            for dev in devices:
-                nodes = api.balancer_get_nodes_of_lb(self.request, dev.id)
-                str = ""
-                for node in nodes:
-                    str = str + node.vm_instance+ "(" + node.address+":" + node.port+")["+self.statusMark(node['state'])+"] "
-                dev.set('nodes',  str) 
-            LOG.debug("Got the list: %s"%devices)
+            lbs = api.lb_list(self.request)
         except:
-            devices = []
-            exceptions.handle(self.request, _('Unable to retrieve devices.'))
-        return devices
-        
-    def statusMark(self,  status):
-        if status == "inservice":
-            return 'A'
-        else:
-            return 'D'
-
+            lbs = []
+            exceptions.handle(self.request,
+                    _('Unable to retrieve load balancers information.'))
+        return lbs

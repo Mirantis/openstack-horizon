@@ -1,32 +1,39 @@
 import logging
 
-from django import template
 from django.utils.translation import ugettext_lazy as _
 
+from horizon import api
 from horizon import tables
 
 
 LOG = logging.getLogger(__name__)
 
 
-def get_enabled(service, reverse=False):
-    options = ["Enabled", "Disabled"]
-    if reverse:
-        options.reverse()
-    return options[0] if not service.disabled else options[1]
+class DeleteLoadBalancer(tables.DeleteAction):
+    data_type_singular = _("Load Balancer")
+    data_type_plural = _("Load Balancers")
+
+    def delete(self, request, lb_id):
+        api.lb_delete(request, lb_id)
 
 
-class ServicesTable(tables.DataTable):
-    id = tables.Column("id", verbose_name=_('Id'), hidden=True)
+class LoadBalancersTable(tables.DataTable):
+    STATUS_CHOICES = (
+        ("active", True),
+        ('build',  None),
+        ('',  None),
+        ('error',  False),
+    )
+    id = tables.Column("id", verbose_name=_('id'), hidden=True)
     name = tables.Column("name", verbose_name=_('Name'))
-    service_type = tables.Column("type", verbose_name=_('Type'))
-    enabled = tables.Column(get_enabled,
-                            verbose_name=_('Enabled'),
-                            status=True)
+    algorithm = tables.Column("algorithm", verbose_name=_("Algorithm"))
+    status = tables.Column("status",
+                           verbose_name=_("Status"),
+                           status=True,
+                           status_choices=STATUS_CHOICES)
 
     class Meta:
-        name = "load_balancer"
-        verbose_name = _("Load Balancer")
-        table_actions = (ServiceFilterAction,)
-        multi_select = False
-        status_columns = ["enabled"]
+        name = "loadbalancers"
+        verbose_name = _("Load Balancers")
+        status_columns = ["status"]
+        row_actions = (DeleteLoadBalancer,)
