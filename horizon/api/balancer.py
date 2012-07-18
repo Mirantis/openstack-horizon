@@ -40,8 +40,8 @@ def balancerclient(request):
     o = urlparse.urlparse(base.url_for(request, 'loadbalancer'))
     url = "://".join((o.scheme, o.netloc))
     LOG.debug('balancerclient connection created using token "%s" and url "%s"'
-              % (request.user.token.id, url))
-    return balancer_client.Client(endpoint=url, token=request.user.token.id)
+              % (request.user.token, url))
+    return balancer_client.Client(endpoint=url, token=request.user.token)
 
 
 # LoadBalancer
