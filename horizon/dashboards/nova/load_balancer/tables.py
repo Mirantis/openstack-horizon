@@ -17,6 +17,20 @@ class DeleteLoadBalancer(tables.DeleteAction):
         api.lb_delete(request, lb_id)
 
 
+class CreateLoadBalancer(tables.LinkAction):
+    name = "create"
+    verbose_name = _("Create Load Balancer")
+    url = "horizon:nova:load_balancer:create"
+    classes = ("ajax-modal", "btn-create")
+
+
+class EditLoadBalancer(tables.LinkAction):
+    name = "edit"
+    verbose_name = _("Edit Load Balancer")
+    url = "horizon:nova:load_balancer:update"
+    classes = ("ajax-modal", "btn-edit")
+
+
 class LoadBalancersTable(tables.DataTable):
     STATUS_CHOICES = (
         ("active", True),
@@ -36,4 +50,5 @@ class LoadBalancersTable(tables.DataTable):
         name = "loadbalancers"
         verbose_name = _("Load Balancers")
         status_columns = ["status"]
-        row_actions = (DeleteLoadBalancer,)
+        row_actions = (EditLoadBalancer, DeleteLoadBalancer)
+        table_actions = (CreateLoadBalancer, DeleteLoadBalancer)
