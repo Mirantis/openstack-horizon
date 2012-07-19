@@ -24,13 +24,16 @@ Views for Instances and Volumes.
 """
 import logging
 
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import api
 from horizon import exceptions
 from horizon import tables
+from horizon import forms
 
 from .tables import LoadBalancersTable
+from .forms import CreateForm, UpdateForm
 
 
 LOG = logging.getLogger(__name__)
@@ -49,3 +52,31 @@ class IndexView(tables.DataTableView):
             exceptions.handle(self.request,
                     _('Unable to retrieve load balancers information.'))
         return lbs
+
+
+class CreateView(forms.ModalFormView):
+    form_class = CreateForm
+    template_name = 'nova/load_balancer/create.html'
+
+
+class UpdateView(forms.ModalFormView):
+    form_class = UpdateForm
+    template_name = 'nova/load_balancer/update.html'
+    context_object_name = 'lb'
+
+    def get_object(self, *args, **kwargs):
+        if not hasattr(self, 'object'):
+            lb_id = self.kwargs['lb_id']
+            try:
+                self.object = api.lb_get(self.request, lb_id)
+            except:
+                redirect = reverse("horizon:nova:load_balancer:index")
+                msg = _('Unable to retrieve load balancer details.')
+                exceptions.handle(self.request, msg, redirect=redirect)
+        return self.object
+
+    def get_initial(self):
+        return {'lb': self.kwargs['lb_id'],
+                'name': self.object.name,
+                'algorithm': self.object.algorithm,
+                'port': getattr(self.object, 'port', '')}

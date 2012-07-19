@@ -20,11 +20,12 @@
 
 from django.conf.urls.defaults import *
 
-from .devices import urls as devices_urls
-from .views import IndexView
+from .views import IndexView, CreateView, UpdateView
 
 
-urlpatterns = patterns('horizon.dashboards.nova.load_balancer',
+urlpatterns = patterns('horizon.dashboards.nova.load_balancer.views',
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^devices/', include(devices_urls, namespace='devices')),
+    url(r'^create/$', CreateView.as_view(), name='create'),
+    url(r'^(?P<lb_id>[^/]+)/update$', UpdateView.as_view(), name='update'),
+#    url(r'^devices/', include(devices_urls, namespace='devices')),
 )
