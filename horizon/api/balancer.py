@@ -28,8 +28,11 @@ from balancerclient.v1 import client as balancer_client
 from horizon.api import base
 
 
-__all__ = ('lb_algorithms_get', 'lb_get', 'lb_list', 'lb_delete', 'lb_create',
-           'lb_update', 'lb_get_for_vm')
+__all__ = ('lb_algorithms_get', 'lb_create', 'lb_delete', 'lb_get',
+           'lb_get_for_vm', 'lb_list', 'lb_update', 'node_create',
+           'node_delete', 'node_get', 'node_list', 'node_update',
+           'probe_create', 'probe_delete', 'probe_get', 'probe_list',
+           'sticky_create', 'sticky_delete', 'sticky_get', 'sticky_list')
 
 
 LOG = logging.getLogger(__name__)
