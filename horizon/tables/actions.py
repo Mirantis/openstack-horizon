@@ -262,14 +262,17 @@ class LinkAction(BaseAction):
         if callable(self.url):
             return self.url(datum, **self.kwargs)
         try:
-            if datum:
-                obj_id = self.table.get_object_id(datum)
-                return urlresolvers.reverse(self.url, args=(obj_id,))
-            else:
-                return urlresolvers.reverse(self.url)
+            args = self.get_link_args(datum)
+            return urlresolvers.reverse(self.url, args=args)
         except urlresolvers.NoReverseMatch, ex:
             LOG.info('No reverse found for "%s": %s' % (self.url, ex))
             return self.url
+
+    def get_link_args(self, datum=None):
+        """ Return arguments to resolve final URL. """
+        if datum:
+            return (self.table.get_object_id(datum),)
+        return ()
 
 
 class FilterAction(BaseAction):
