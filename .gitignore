@@ -10,6 +10,7 @@ pylint.txt
 reports
 horizon.egg-info
 openstack_dashboard/local/local_settings.py
+openstack_dashboard/local/dashboard_openstack.sqlite3
 docs/build/
 docs/source/sourcecode
 .venv

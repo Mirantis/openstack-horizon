@@ -4,7 +4,6 @@
 # Administrator of the National Aeronautics and Space Administration.
 # All Rights Reserved.
 #
-# Copyright 2012 Nebula, Inc.
 # Copyright 2012 OpenStack LLC
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -19,9 +18,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""
-Views for Instances and Volumes.
-"""
 import logging
 
 from django.core.urlresolvers import reverse
@@ -34,6 +30,10 @@ from horizon import forms
 
 from .tables import LoadBalancersTable
 from .forms import CreateForm, UpdateForm
+from .nodes.tables import NodesTable
+from .probes.tables import ProbesTable
+
+from balancerclient.common import exceptions as balancerclient_exceptions
 
 
 LOG = logging.getLogger(__name__)
@@ -69,7 +69,8 @@ class UpdateView(forms.ModalFormView):
             lb_id = self.kwargs['lb_id']
             try:
                 self.object = api.lb_get(self.request, lb_id)
-            except:
+            except balancerclient_exceptions.ClientException, e:
+                LOG.exception('ClientException in get lb')
                 redirect = reverse("horizon:nova:load_balancer:index")
                 msg = _('Unable to retrieve load balancer details.')
                 exceptions.handle(self.request, msg, redirect=redirect)
@@ -80,3 +81,32 @@ class UpdateView(forms.ModalFormView):
                 'name': self.object.name,
                 'algorithm': self.object.algorithm,
                 'port': getattr(self.object, 'port', '')}
+
+
+
+class DetailView(tables.MultiTableView):
+    table_classes = (NodesTable, ProbesTable)
+    template_name = 'nova/load_balancer/detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context['lb'] = api.lb_get(self.request, self.kwargs['lb_id'])
+        return context
+
+    def get_nodes_data(self):
+        try:
+            nodes = api.node_list(self.request, self.kwargs['lb_id'])
+        except balancerclient_exceptions.ClientException, e:
+            LOG.exception('ClientException in nodes list')
+            nodes = []
+            messages.error(self.request, _("Unable to fetch nodes: %s") % e)
+        return nodes
+
+    def get_probes_data(self):
+        try:
+            probes = api.probe_list(self.request, self.kwargs['lb_id'])
+        except balancerclient_exceptions.ClientException, e:
+            LOG.exception('ClientException in probes list')
+            probes = []
+            messages.error(self.request, _("Unable to fetch probes: %s") % e)
+        return probes

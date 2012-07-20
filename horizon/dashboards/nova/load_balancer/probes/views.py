@@ -18,22 +18,27 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import *
+import logging
 
-from .views import IndexView, CreateView, UpdateView, DetailView
-from .nodes import urls as nodes_urls
-from .probes import urls as probes_urls
+from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext_lazy as _
+
+from horizon import api
+from horizon import exceptions
+from horizon import tables
+from horizon import forms
+
+from .forms import CreateForm
+
+from balancerclient.common import exceptions as balancerclient_exceptions
 
 
-lbs_urlpatterns = patterns('horizon.dashboards.nova.load_balancer.views',
-    url(r'^$', DetailView.as_view(), name='detail'),
-    url(r'^update$', UpdateView.as_view(), name='update'),
-    url(r'^nodes/', include(nodes_urls, namespace='nodes')),
-    url(r'^probes/', include(probes_urls, namespace='probes')),
-)
+LOG = logging.getLogger(__name__)
 
-urlpatterns = patterns('horizon.dashboards.nova.load_balancer.views',
-    url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^create/$', CreateView.as_view(), name='create'),
-    url(r'^(?P<lb_id>[^/]+)/', include(lbs_urlpatterns)),
-)
+
+class CreateView(forms.ModalFormView):
+    form_class = CreateForm
+    template_name = 'nova/load_balancer/probes/create.html'
+
+    def get_initial(self):
+        return {'lb_id': self.kwargs['lb_id']}

@@ -20,20 +20,9 @@
 
 from django.conf.urls.defaults import *
 
-from .views import IndexView, CreateView, UpdateView, DetailView
-from .nodes import urls as nodes_urls
-from .probes import urls as probes_urls
+from .views import CreateView, UpdateView
 
-
-lbs_urlpatterns = patterns('horizon.dashboards.nova.load_balancer.views',
-    url(r'^$', DetailView.as_view(), name='detail'),
-    url(r'^update$', UpdateView.as_view(), name='update'),
-    url(r'^nodes/', include(nodes_urls, namespace='nodes')),
-    url(r'^probes/', include(probes_urls, namespace='probes')),
-)
-
-urlpatterns = patterns('horizon.dashboards.nova.load_balancer.views',
-    url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^create/$', CreateView.as_view(), name='create'),
-    url(r'^(?P<lb_id>[^/]+)/', include(lbs_urlpatterns)),
+urlpatterns = patterns('horizon.dashboards.nova.load_balancer.nodes.views',
+    url(r'^create$', CreateView.as_view(), name='create'),
+    url(r'^(?P<node_id>[^/]+)/update$', UpdateView.as_view(), name='update'),
 )

@@ -1,3 +1,23 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
+# Copyright 2012 United States Government as represented by the
+# Administrator of the National Aeronautics and Space Administration.
+# All Rights Reserved.
+#
+# Copyright 2012 OpenStack LLC
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
 import logging
 
 from django.utils.translation import ugettext_lazy as _
@@ -7,6 +27,13 @@ from horizon import tables
 
 
 LOG = logging.getLogger(__name__)
+
+
+class SubLBLinkAction(tables.LinkAction):
+    def get_link_args(self, datum=None):
+        lb_id = self.table.kwargs['lb_id']
+        args = super(SubLBLinkAction, self).get_link_args(datum)
+        return (lb_id,) + args
 
 
 class DeleteLoadBalancer(tables.DeleteAction):
@@ -39,7 +66,8 @@ class LoadBalancersTable(tables.DataTable):
         ('error',  False),
     )
     id = tables.Column("id", verbose_name=_('id'), hidden=True)
-    name = tables.Column("name", verbose_name=_('Name'))
+    name = tables.Column("name", verbose_name=_('Name'),
+                         link='horizon:nova:load_balancer:detail')
     algorithm = tables.Column("algorithm", verbose_name=_("Algorithm"))
     status = tables.Column("status",
                            verbose_name=_("Status"),

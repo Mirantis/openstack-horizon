@@ -1,0 +1,11 @@
+{% extends 'nova/base.html' %}
+{% load i18n %}
+{% block title %}Create Node{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Create a Node") %}
+{% endblock page_header %}
+
+{% block dash_main %}
+    {% include 'nova/load_balancer/nodes/_create.html' %}
+{% endblock %}

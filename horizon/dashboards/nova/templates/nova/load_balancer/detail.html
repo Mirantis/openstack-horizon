@@ -1,0 +1,17 @@
+{% extends 'nova/base.html' %}
+{% load i18n %}
+{% block title %}Load Balancer Details{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title="Load Balancer Detail: "|add:lb.name %}
+{% endblock page_header %}
+
+{% block dash_main %}
+  <div id="nodes">
+      {{ nodes_table.render }}
+  </div>
+
+  <div id="probes">
+      {{ probes_table.render }}
+  </div>
+{% endblock %}
