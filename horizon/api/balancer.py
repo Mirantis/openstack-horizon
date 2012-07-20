@@ -129,7 +129,7 @@ def probe_list(request, lb_id):
 
 
 def probe_delete(request, lb_id, probe_id):
-    balancerclient(request).probes.delete(probe_id)
+    balancerclient(request).probes.delete(lb_id, probe_id)
 
 
 def probe_create(request, lb_id, name, type, **extra):
