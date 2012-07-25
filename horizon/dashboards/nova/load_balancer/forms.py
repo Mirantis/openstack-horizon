@@ -43,7 +43,7 @@ LB_PROTOCOLS = (
 )
 
 
-class CreateForm(forms.SelfHandlingForm):
+class CreateLoadBalancer(forms.SelfHandlingForm):
     name = forms.CharField(max_length="255", label=_("Load Balancer Name"))
     algorithm = forms.ChoiceField(choices=LB_ALGORITHMS,
                         label=_("Node selection algorithm of load balancing."))
@@ -66,7 +66,7 @@ class CreateForm(forms.SelfHandlingForm):
         return shortcuts.redirect("horizon:nova:load_balancer:index")
 
 
-class UpdateForm(forms.SelfHandlingForm):
+class UpdateLoadBalancer(forms.SelfHandlingForm):
     lb = forms.CharField(widget=forms.TextInput(
                                         attrs={'readonly': 'readonly'}))
     name = forms.CharField(widget=forms.TextInput(

@@ -29,7 +29,7 @@ from horizon import tables
 from horizon import forms
 
 from .tables import LoadBalancersTable
-from .forms import CreateForm, UpdateForm
+from .forms import CreateLoadBalancer, UpdateLoadBalancer
 from .nodes.tables import NodesTable
 from .probes.tables import ProbesTable
 
@@ -55,12 +55,12 @@ class IndexView(tables.DataTableView):
 
 
 class CreateView(forms.ModalFormView):
-    form_class = CreateForm
+    form_class = CreateLoadBalancer
     template_name = 'nova/load_balancer/create.html'
 
 
 class UpdateView(forms.ModalFormView):
-    form_class = UpdateForm
+    form_class = UpdateLoadBalancer
     template_name = 'nova/load_balancer/update.html'
     context_object_name = 'lb'
 
