@@ -80,8 +80,8 @@ class UpdateView(forms.ModalFormView):
         return {'lb': self.kwargs['lb_id'],
                 'name': self.object.name,
                 'algorithm': self.object.algorithm,
+                'protocol': self.object.protocol,
                 'port': getattr(self.object, 'port', '')}
-
 
 
 class DetailView(tables.MultiTableView):
@@ -90,8 +90,20 @@ class DetailView(tables.MultiTableView):
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)
-        context['lb'] = api.lb_get(self.request, self.kwargs['lb_id'])
+        context['lb'] = self.get_lb()
         return context
+
+    def get_lb(self):
+        lb_id = self.kwargs['lb_id']
+        try:
+            return api.lb_get(self.request, lb_id)
+        except balancerclient_exceptions.ClientException, e:
+            LOG.exception('ClientException in get lb')
+            redirect = reverse('horion:nova:load_balancer:index')
+            exceptions.handle(self.request,
+                              _("Unable to retrieve details for load "
+                                "balancer \"%s\".") % lb_id,
+                              redirect=redirect)
 
     def get_nodes_data(self):
         try:
