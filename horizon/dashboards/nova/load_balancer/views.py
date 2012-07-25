@@ -19,9 +19,13 @@
 #    under the License.
 
 import logging
+import os
 
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
+from django.contrib import messages
+from django.views import generic
+from django import http
 
 from horizon import api
 from horizon import exceptions
@@ -122,3 +126,102 @@ class DetailView(tables.MultiTableView):
             probes = []
             messages.error(self.request, _("Unable to fetch probes: %s") % e)
         return probes
+
+
+class MultiTypeForm(generic.TemplateView):
+    form_class = None
+    form_list = None
+    initial = {}
+    initial_list = {}
+
+    def get_template_names(self):
+        if self.request.is_ajax():
+            if not hasattr(self, 'ajax_template_name'):
+                # Transform standard template name to ajax name (leading "_")
+                bits = list(os.path.split(self.template_name))
+                bits[1] = "".join(("_", bits[1]))
+                self.ajax_template_name = os.path.join(*bits)
+            template = self.ajax_template_name
+        else:
+            template = self.template_name
+        return template
+
+    def get_object(self, *args, **kwargs):
+        return None
+
+    def get_initial(self):
+        return self.initial
+
+    def get_initial_list(self):
+        initial_list = {}
+        for form_name in self.form_list.keys():
+            func_name = "get_%s_data" % form_name.lower()
+            init_func = getattr(self, func_name, None)
+            if init_func is not None:
+                initial_list[form_name] = init_func()
+            else:
+                initial_list[form_name] = self.initial_list.get(form_name)
+        return initial_list
+
+    def get_form(self, request, form_class, *args, **kwargs):
+        if request.method != 'POST':
+            return form_class(*args, **kwargs)
+        if request.FILES:
+            return form_class(data=request.POST, files=request.FILES,
+                              *args, **kwargs)
+        else:
+            return form_class(data=request.POST, *args, **kwargs)
+
+    def get_form_list(self, request, *args, **kwargs):
+        initial_list = self.get_initial_list()
+        forms = {}
+        for name, form_class in self.form_list.items():
+            forms[name] = self.get_form(request, form_class,
+                                        prefix=name,
+                                        initial=initial_list[name],
+                                        *args, **kwargs)
+        return forms
+
+    def maybe_handle(self, request, **kwargs):
+        form = self.get_form(request, self.form_class,
+                             initial=self.get_initial())
+        forms = self.get_form_list(request)
+        if request.method == 'POST' and form.is_valid():
+            data = form.cleaned_data.copy()
+            type_form = forms[data['type']]
+            if type_form.is_valid():
+                data.update(type_form.cleaned_data)
+                try:
+                    return form, forms, self.handle(request, data)
+                except Exception:
+                    exceptions.handle(request)
+                    return form, forms, None
+        return form, forms, None
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object(*args, **kwargs)
+        form, forms, handled = self.maybe_handle(request, **kwargs)
+        if handled:
+            if self.request.is_ajax():
+                # TODO(gabriel): This is not a long-term solution to how
+                # AJAX should be handled, but it's an expedient solution
+                # until the blueprint for AJAX handling is architected
+                # and implemented.
+                response = http.HttpResponse()
+                response['X-Horizon-Location'] = handled['location']
+                return response
+            return handled
+        context = self.get_context_data(**kwargs)
+        context.update({'object': self.object,
+                        'form': form,
+                        'forms': forms})
+        if self.request.is_ajax():
+            context['hide'] = True
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        """ Placeholder to allow POST; handled the same as GET. """
+        return self.get(request, *args, **kwargs)
+
+    def handle(self, request, data):
+        raise NotImplementedError

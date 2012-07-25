@@ -1,0 +1,20 @@
+{% include "horizon/common/_form_fields.html" %}
+{% for name, item in forms.items %}
+    <div class="multitypeform multitypeform-{{ name }}">
+        {% include "horizon/common/_form_fields.html" with form=item %}
+    </div>
+{% endfor %}
+</fieldset>
+<script type="text/javascript">
+    //NOTE(akscram): horizon.addInitFunction run only once at
+    //               document ready, but modal forms loaded by AJAX,
+    //               at this reason used JQuery document ready.
+    $(document).ready(function() {
+        var select_multitypeform = function() {
+            $(".multitypeform").hide();
+            $(".multitypeform-" + $("#id_type").val()).show();
+        }
+        select_multitypeform();
+        $("#id_type").change(select_multitypeform);
+    });
+</script>
