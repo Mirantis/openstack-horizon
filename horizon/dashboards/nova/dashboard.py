@@ -34,10 +34,16 @@ class ObjectStorePanels(horizon.PanelGroup):
     panels = ('containers',)
 
 
+class LoadBalancerPanels(horizon.PanelGroup):
+    slug = "load_balancer"
+    name = _("Load Balancing")
+    pabels = ('load_balancer',)
+
+
 class Nova(horizon.Dashboard):
     name = _("Project")
     slug = "nova"
-    panels = (BasePanels, ObjectStorePanels)
+    panels = (BasePanels, ObjectStorePanels, LoadBalancerPanels)
     default_panel = 'overview'
     supports_tenants = True
 
