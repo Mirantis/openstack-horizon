@@ -20,15 +20,14 @@
 
 import logging
 
-from django.core.urlresolvers import reverse
+from django import shortcuts
+from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import api
-from horizon import exceptions
-from horizon import tables
-from horizon import forms
 
-from .forms import CreateForm
+from .forms import CreateProbe, CreateICMPProbe, CreateHTTPProbe
+from ..views import MultiTypeForm
 
 from balancerclient.common import exceptions as balancerclient_exceptions
 
@@ -36,9 +35,24 @@ from balancerclient.common import exceptions as balancerclient_exceptions
 LOG = logging.getLogger(__name__)
 
 
-class CreateView(forms.ModalFormView):
-    form_class = CreateForm
+class CreateView(MultiTypeForm):
+    form_class = CreateProbe
+    form_list = {'ICMP': CreateICMPProbe,
+                 'HTTP': CreateHTTPProbe}
     template_name = 'nova/load_balancer/probes/create.html'
 
-    def get_initial(self):
-        return {'lb_id': self.kwargs['lb_id']}
+    def handle(self, request, data):
+        probe_name = data.pop('name')
+        probe_type = data.pop('type')
+        try:
+            api.probe_create(request, self.kwargs['lb_id'], probe_name,
+                             probe_type, **data)
+            message = "Creating probe \"%s\"" % (probe_name,)
+            LOG.info(message)
+            messages.info(request, message)
+        except balancerclient_exceptions.ClientException, e:
+            LOG.exception('ClientException in CreateProbe')
+            messages.error(request,
+                           _("Error Creating probe: %s") % e.message)
+        return shortcuts.redirect('horizon:nova:load_balancer:detail',
+                                  lb_id=self.kwargs['lb_id'])

@@ -20,13 +20,10 @@
 
 import logging
 
-from django import shortcuts
-from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
+from django.forms import widgets
 
 from horizon import forms
-from horizon import api
-from horizon import exceptions
 
 from balancerclient.common import exceptions as balancerclient_exceptions
 
@@ -34,26 +31,28 @@ from balancerclient.common import exceptions as balancerclient_exceptions
 LOG = logging.getLogger(__name__)
 
 
-class CreateForm(forms.SelfHandlingForm):
+class CreateProbe(forms.Form):
     TYPE_CHOICES = (
         ('ICMP', 'ICMP'),
         ('HTTP', 'HTTP'),
     )
-    lb_id = forms.CharField(widget=forms.HiddenInput())
-    name = forms.CharField(max_length='255', label=_('Node Name'))
-    type = forms.ChoiceField(choices=TYPE_CHOICES, label=_('Probe Type'))
-    # FIXME(akscram): not specified attributes for different types.
+    name = forms.CharField(max_length='255', label=_('Probe Name'))
+    type = forms.ChoiceField(choices=TYPE_CHOICES, label=_('Proe Type'))
+    interval = forms.IntegerField(label=_('Probe Interval'))
 
-    def handle(self, request, data):
-        try:
-            api.probe_create(request, data['lb_id'], data['name'],
-                             data['type'])
-            message = "Creating probe \"%s\"" % data['name']
-            LOG.info(message)
-            messages.info(request, message)
-        except balancerclient_exceptions.ClientException, e:
-            LOG.exception('ClientException in CreateProbe')
-            messages.error(request,
-                           _("Error Creating probe: %s") % e.message)
-        return shortcuts.redirect('horizon:nova:load_balancer:detail',
-                                  lb_id=data['lb_id'])
+
+class CreateICMPProbe(forms.Form):
+    delay = forms.IntegerField(label=_('Probe delay'))
+    attempts = forms.IntegerField(label=_('Attempts before deactivation'))
+    timeout = forms.IntegerField(label=_('Timeout'))
+
+
+class CreateHTTPProbe(forms.Form):
+    METHOD_CHOICES = (
+        ('GET', 'GET'),
+        ('HEAD', 'HEAD'),
+    )
+    path = forms.URLField(max_length=255, label=_('Probe HTTP URL'))
+    method = forms.ChoiceField(choices=METHOD_CHOICES,
+                               label=_('Probe HTTP Method'))
+    status = forms.IntegerField(label=_('Expected HTTP Status'))
