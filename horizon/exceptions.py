@@ -28,6 +28,7 @@ from cloudfiles import errors as swiftclient
 from glance.common import exception as glanceclient
 from keystoneclient import exceptions as keystoneclient
 from novaclient import exceptions as novaclient
+from balancerclient.common import exceptions as balancerclient
 
 
 LOG = logging.getLogger(__name__)
@@ -130,14 +131,17 @@ UNAUTHORIZED = (keystoneclient.Unauthorized,
                 glanceclient.AuthorizationFailure,
                 glanceclient.NotAuthorized,
                 swiftclient.AuthenticationFailed,
-                swiftclient.AuthenticationError)
+                swiftclient.AuthenticationError,
+                balancerclient.Unauthorized,
+                balancerclient.Forbidden)
 UNAUTHORIZED += tuple(EXCEPTION_CONFIG.get('unauthorized', []))
 
 NOT_FOUND = (keystoneclient.NotFound,
              novaclient.NotFound,
              glanceclient.NotFound,
              swiftclient.NoSuchContainer,
-             swiftclient.NoSuchObject)
+             swiftclient.NoSuchObject,
+             balancerclient.NotFound)
 NOT_FOUND += tuple(EXCEPTION_CONFIG.get('not_found', []))
 
 
@@ -148,6 +152,7 @@ RECOVERABLE = (keystoneclient.ClientException,
                novaclient.ClientException,
                glanceclient.GlanceException,
                swiftclient.Error,
+               balancerclient.ClientException,
                AlreadyExists)
 RECOVERABLE += tuple(EXCEPTION_CONFIG.get('recoverable', []))
 
