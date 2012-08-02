@@ -15,8 +15,12 @@
 #    under the License.
 
 import logging
+import urlparse
+import urllib
 
 from django import template
+from django import shortcuts
+from django.core import urlresolvers
 from django.template.defaultfilters import title
 from django.utils.translation import ugettext_lazy as _
 
@@ -158,6 +162,24 @@ class SnapshotLink(tables.LinkAction):
         return instance.status in ACTIVE_STATES
 
 
+class AddToLB(tables.LinkAction):
+    name = "addtolb"
+    verbose_name = _("Add To Load Balancing")
+    url = "horizon:nova:instances_and_volumes:instances:addtolb"
+    classes = ("ajax-modal", "btn-camera")
+
+    def allowed(self, request, instance=None):
+        return instance.status in ACTIVE_STATES
+
+
+class LoadBalancing(tables.LinkAction):
+    name = "loadbalancing"
+    verbose_name = _("Load Balancing")
+    verbose_name_plural = verbose_name
+    url = "horizon:nova:load_balancer:loadbalancing"
+    classes = ("ajax-modal-loadbalancing", "btn-camera",)
+
+
 class ConsoleLink(tables.LinkAction):
     name = "console"
     verbose_name = _("VNC Console")
@@ -256,7 +278,7 @@ class InstancesTable(tables.DataTable):
         verbose_name = _("Instances")
         status_columns = ["status", "task"]
         row_class = UpdateRow
-        table_actions = (LaunchLink, TerminateInstance)
-        row_actions = (EditInstance, ConsoleLink, LogLink, SnapshotLink,
-                       TogglePause, ToggleSuspend, RebootInstance,
-                       TerminateInstance)
+        table_actions = (LoadBalancing, LaunchLink, TerminateInstance)
+        row_actions = (EditInstance, AddToLB, ConsoleLink, LogLink,
+                       SnapshotLink, TogglePause, ToggleSuspend,
+                       RebootInstance, TerminateInstance)

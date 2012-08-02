@@ -20,9 +20,8 @@
 
 from django.conf.urls.defaults import *
 
-from .views import CreateView, UpdateView
+from .views import UpdateView
 
 urlpatterns = patterns('horizon.dashboards.nova.load_balancer.nodes.views',
-    url(r'^create$', CreateView.as_view(), name='create'),
     url(r'^(?P<node_id>[^/]+)/update$', UpdateView.as_view(), name='update'),
 )

@@ -21,6 +21,7 @@
 import logging
 
 from django import shortcuts
+from django.forms import formsets
 from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
 
@@ -40,34 +41,71 @@ CONDITION_CHOICES = (
 )
 
 
-class CreateForm(forms.SelfHandlingForm):
-    lb_id = forms.CharField(widget=forms.HiddenInput())
+class BaseNodeFormSet(formsets.BaseFormSet):
+    def get_node_address_choices(self, instance):
+        choices = []
+        for label, addresses in instance.addresses.items():
+            for address in addresses:
+                item_label = "%s [%s]" % (address['addr'], label)
+                choices.append((address['addr'], item_label))
+        return choices
+
+    def add_fields(self, form, index):
+        super(BaseNodeFormSet, self).add_fields(form, index)
+        instance = self.initial[index]['instance']
+        choices = self.get_node_address_choices(instance)
+        form.fields['address'] = forms.ChoiceField(label=_('Node Address'),
+                                    choices=self.get_node_address_choices(instance))
+
+
+class AddNode(forms.SelfHandlingForm):
+    instance_id = forms.CharField(widget=forms.HiddenInput(
+                                             attrs={'readonly': 'readonly'}))
     name = forms.CharField(max_length='255', label=_('Node Name'))
-    address = forms.IPAddressField(label=_('Node Address'))
+    address = forms.ChoiceField(label=_('Node Address'))
+    lb = forms.ChoiceField(label=_('Load Balancer'))
     port = forms.IntegerField(min_value=1, max_value=65536, initial=80,
                               label=_('Port of load balancing.'))
     weight = forms.IntegerField(label=_('Node Weight'))
     condition = forms.ChoiceField(choices=CONDITION_CHOICES,
                                   label=_('Node Condition'))
 
+    def __init__(self, *args, **kwargs):
+        lb_choices = kwargs.pop('lb_choices')
+        address_choices = kwargs.pop('address_choices')
+        super(AddNode, self).__init__(*args, **kwargs)
+        self.fields['lb'].choices = lb_choices
+        self.fields['address'].choices = address_choices
+
     def handle(self, request, data):
         try:
-            # FIXME(akscram): type and status are hardcoded.
-            api.node_create(request, data['lb_id'], data['name'], 'HW',
-                            data['address'], data['port'], data['weight'], '',
-                            condition=data['condition'])
-            message = "Creating node \"%s\"" % data['name']
-            LOG.info(message)
-            messages.info(request, message)
+            # NOTE(akscram): hardcoded NOVA_INSTANCE for horizon.
+            api.node_create(request, data['lb'], data['name'], 'NOVA_INSTANCE',
+                            data['address'], data['port'], data['weight'],
+                            data['condition'],
+                            instance_id=data['instance_id'])
+            msg = "Creating node \"%s\"" % data['name']
+            messages.info(request, msg)
         except balancerclient_exceptions.ClientException, e:
-            LOG.exception('ClientException in CreateNode')
-            messages.error(request,
-                           _("Error Creating node: %s") % e.message)
-        return shortcuts.redirect('horizon:nova:load_balancer:detail',
-                                  lb_id=data['lb_id'])
+            exceptions.handle(request,
+                              _("Error to create node: %r") % (e.message,))
+        return shortcuts.redirect('horizon:nova:instances_and_volumes:index')
 
 
-class UpdateForm(forms.SelfHandlingForm):
+class CreateNode(forms.Form):
+    instance_id = forms.CharField(widget=forms.HiddenInput(
+                                               attrs={'readonly': 'readonly'}))
+    name = forms.CharField(max_length='255', label=_('Node Name'))
+    # NOTE(akscram): the field 'address' replaced in formset.
+    address = forms.CharField()
+    port = forms.IntegerField(min_value=1, max_value=65536, initial=80,
+                              label=_('Port of load balancing.'))
+    weight = forms.IntegerField(label=_('Node Weight'))
+    condition = forms.ChoiceField(choices=CONDITION_CHOICES,
+                                  label=_('Node Condition'))
+
+
+class UpdateNode(forms.SelfHandlingForm):
     lb_id = forms.CharField(widget=forms.HiddenInput())
     node_id = forms.CharField(widget=forms.TextInput(
                                             attrs={'readonly': 'readonly'}))

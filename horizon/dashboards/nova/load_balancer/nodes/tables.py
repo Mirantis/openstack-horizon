@@ -32,13 +32,6 @@ from ..tables import SubLBLinkAction
 LOG = logging.getLogger(__name__)
 
 
-class CreateNode(SubLBLinkAction):
-    name = 'create'
-    verbose_name = _('Create Node')
-    url = 'horizon:nova:load_balancer:nodes:create'
-    classes = ('ajax-modal', 'btn-create')
-
-
 class EditNode(SubLBLinkAction):
     name = 'edit'
     verbose_name = _('Edit Node')
@@ -55,17 +48,26 @@ class DeleteNode(tables.DeleteAction):
 
 
 class NodesTable(tables.DataTable):
-    id = tables.Column('id', verbose_name=_('id'), hidden=True)
+    STATUS_CHOICES = (
+        ('inservice', True),
+        ('', None),
+        ('outservice', False),
+    )
+    id = tables.Column('id', hidden=True)
     name = tables.Column('name', verbose_name=_('Name'))
-    type = tables.Column('type', verbose_name=_('Type'))
     address = tables.Column('address', verbose_name=_('Address'))
     port = tables.Column('port', verbose_name=_('Port'))
     weight = tables.Column('weight', verbose_name=_('Weight'))
-    status = tables.Column('status', verbose_name=_('Status'), status=True)
+    type = tables.Column('type', verbose_name=_('Type'))
+    status = tables.Column('status', verbose_name=_('Status'),
+                           status=True,
+                           status_choices=STATUS_CHOICES)
+    condition = tables.Column('condition', verbose_name=_('Condition'),
+                              status=True)
 
     class Meta:
         name = 'nodes'
         verbose_name = _('Nodes')
-        status_columns = ['status']
+        status_columns = ['status', 'condition']
         row_actions = (EditNode, DeleteNode)
-        table_actions = (CreateNode, DeleteNode)
+        table_actions = (DeleteNode,)

@@ -8,3 +8,8 @@
     {% include "horizon/_messages.html" %}
     {% block dash_main %}{% endblock %}
 {% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src='{{ STATIC_URL }}horizon/js/loadbalancing.js' type='text/javascript' charset='utf-8'></script>
+{% endblock %}

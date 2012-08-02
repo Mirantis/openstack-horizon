@@ -1,0 +1,33 @@
+{% extends "horizon/common/_modal_form.html" %}
+{% load i18n %}
+
+{% block form_id %}{% endblock %}
+{#{% block form_action %}{% url horizon:nova:load_balancer:create %}{% endblock %}#}
+{% block form_action %}{{ action_url }}{% endblock %}
+
+{% block modal_id %}create_lb_modal{% endblock %}
+{% block modal-header %}{% trans "Create Load Balancer" %}{% endblock %}
+
+{% block modal-body %}
+<div class="left">
+    <fieldset>
+    {% include "horizon/common/_form_fields.html" with form=lb_form %}
+    <br>
+    <label>Nodes</label>
+    {{ node_formset.management_form }}
+    {% for node_form in node_formset %}
+        <hr>
+        {% include "horizon/common/_form_fields.html" with form=node_form %}
+    {% endfor %}
+    </fieldset>
+</div>
+<div class="right">
+    <h3>{% trans "Description" %}:</h3>
+    <p>{% trans "Load Balancers are an instance of load balancer appliance to distribute traffic between nodes." %}</p>
+</div>
+{% endblock %}
+
+{% block modal-footer %}
+  <input class="btn btn-primary pull-right" type="submit" value="{% trans "Create Load Balancer" %}" />
+  <a href="{% url horizon:nova:load_balancer:index %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
+{% endblock %}

@@ -82,7 +82,7 @@ class UpdateLoadBalancer(forms.SelfHandlingForm):
 
     def handle(self, request, data):
         try:
-            api.lb_update(request, self.kwargs['lb_id'],
+            api.lb_update(request, data['lb'],
                           algorithm=data['algorithm'],
                           port=data['port'])
             messages.success(request,

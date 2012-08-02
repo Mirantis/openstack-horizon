@@ -20,6 +20,8 @@
 
 from django.conf.urls.defaults import patterns, url
 
+from horizon.dashboards.nova.load_balancer.nodes.views import AddView
+
 from .views import UpdateView, DetailView
 
 
@@ -32,4 +34,5 @@ urlpatterns = patterns(
     url(INSTANCES % 'console', 'console', name='console'),
     url(INSTANCES % 'vnc', 'vnc', name='vnc'),
     url(INSTANCES % 'update', UpdateView.as_view(), name='update'),
+    url(INSTANCES % 'addtolb', AddView.as_view(), name='addtolb'),
 )

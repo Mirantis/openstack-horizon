@@ -20,9 +20,17 @@
 
 from django.conf.urls.defaults import *
 
-from .views import IndexView, CreateView, UpdateView, DetailView
+from .views import (IndexView, CreateView, UpdateView, DetailView,
+                    LoadBalancingView)
 from .nodes import urls as nodes_urls
 from .probes import urls as probes_urls
+
+import logging
+LOG = logging.getLogger(__name__)
+
+def test(request, *args, **kwargs):
+    LOG.debug("Request: %r" % request)
+    raise Exception
 
 
 lbs_urlpatterns = patterns('horizon.dashboards.nova.load_balancer.views',
@@ -35,5 +43,6 @@ lbs_urlpatterns = patterns('horizon.dashboards.nova.load_balancer.views',
 urlpatterns = patterns('horizon.dashboards.nova.load_balancer.views',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^create/$', CreateView.as_view(), name='create'),
+    url(r'^loadbalancing/$', LoadBalancingView.as_view(), name='loadbalancing'),
     url(r'^(?P<lb_id>[^/]+)/', include(lbs_urlpatterns)),
 )

@@ -21,8 +21,10 @@
 import logging
 import os
 
+from django import shortcuts
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
+from django.forms.formsets import formset_factory
 from django.contrib import messages
 from django.views import generic
 from django import http
@@ -35,9 +37,12 @@ from horizon import forms
 from .tables import LoadBalancersTable
 from .forms import CreateLoadBalancer, UpdateLoadBalancer
 from .nodes.tables import NodesTable
+from .nodes.forms import BaseNodeFormSet, CreateNode
+from .nodes.views import NodeModalFormMixin
 from .probes.tables import ProbesTable
 
 from balancerclient.common import exceptions as balancerclient_exceptions
+from novaclient import exceptions as novaclient_exceptions
 
 
 LOG = logging.getLogger(__name__)
@@ -74,9 +79,8 @@ class UpdateView(forms.ModalFormView):
             try:
                 self.object = api.lb_get(self.request, lb_id)
             except balancerclient_exceptions.ClientException, e:
-                LOG.exception('ClientException in get lb')
                 redirect = reverse("horizon:nova:load_balancer:index")
-                msg = _('Unable to retrieve load balancer details.')
+                msg = _('Unable to retrieve Load Balancer details.')
                 exceptions.handle(self.request, msg, redirect=redirect)
         return self.object
 
@@ -101,30 +105,28 @@ class DetailView(tables.MultiTableView):
         lb_id = self.kwargs['lb_id']
         try:
             return api.lb_get(self.request, lb_id)
-        except balancerclient_exceptions.ClientException, e:
-            LOG.exception('ClientException in get lb')
-            redirect = reverse('horion:nova:load_balancer:index')
-            exceptions.handle(self.request,
-                              _("Unable to retrieve details for load "
-                                "balancer \"%s\".") % lb_id,
-                              redirect=redirect)
+        except balancerclient_exceptions.ClientException:
+            redirect = reverse('horizon:nova:load_balancer:index')
+            msg = _("Unable to retrieve details for Load balancer \"%s\".") % \
+                  (lb_id,)
+            exceptions.handle(self.request, msg, redirect=redirect)
 
     def get_nodes_data(self):
         try:
             nodes = api.node_list(self.request, self.kwargs['lb_id'])
         except balancerclient_exceptions.ClientException, e:
-            LOG.exception('ClientException in nodes list')
             nodes = []
-            messages.error(self.request, _("Unable to fetch nodes: %s") % e)
+            msg = _("Unable to fetch nodes: %s") % (e,)
+            exceptions.handle(self.request, msg)
         return nodes
 
     def get_probes_data(self):
         try:
             probes = api.probe_list(self.request, self.kwargs['lb_id'])
         except balancerclient_exceptions.ClientException, e:
-            LOG.exception('ClientException in probes list')
             probes = []
-            messages.error(self.request, _("Unable to fetch probes: %s") % e)
+            msg = _("Unable to fetch probes: %s") % e
+            exceptions.handle(self.request, msg)
         return probes
 
 
@@ -225,3 +227,108 @@ class MultiTypeForm(generic.TemplateView):
 
     def handle(self, request, data):
         raise NotImplementedError
+
+
+class LoadBalancingView(NodeModalFormMixin, generic.TemplateView):
+    template_name = 'nova/load_balancer/loadbalancing.html'
+
+    def get_template_names(self):
+        if self.request.is_ajax():
+            if not hasattr(self, 'ajax_template_name'):
+                # Transform standard template name to ajax name (leading "_")
+                bits = list(os.path.split(self.template_name))
+                bits[1] = "".join(("_", bits[1]))
+                self.ajax_template_name = os.path.join(*bits)
+            template = self.ajax_template_name
+        else:
+            template = self.template_name
+        return template
+
+    def get_instances(self, ids):
+        return [self.get_instance(instance_id) for instance_id in ids]
+
+    def get_instance(self, instance_id):
+        try:
+            return api.server_get(self.request, instance_id)
+        except novaclient_exceptions.ClientException, e:
+            redirect = reverse("horizon:nova:instances_and_volumes:index")
+            msg = _('Unable to get instance "%s".') % instance_id
+            exceptions.handle(request, msg, redirect=redirect)
+
+    def get_nodes_initial(self, instances):
+        return [self.get_node_initial(instance) for instance in instances]
+
+    def get_node_initial(self, instance):
+        return {'instance': instance,
+                'instance_id': instance.id,
+                'name': getattr(instance, 'name', ''),
+                'weight': 10}
+
+    def create_lb(self, request, data):
+        try:
+            return api.lb_create(request, data['name'], data['algorithm'],
+                                 data['protocol'], port=data['port'])
+            messages.info(request,
+                          _('Created Load Balancer "%s"') % (data['name'],))
+        except balancerclient_exceptions.ClientException, e:
+            redirect = urlresolvers.reverse(
+                               "horizon:nova:instances_and_volumes")
+            exceptions.handle(request,
+                              _("Error Creating Load Balancer: %r") % (e,),
+                              redirect=redirect)
+
+    def create_node(self, request, data):
+        try:
+            # NOTE(akscram): hardcoded NOVA_INSTANCE for horizon.
+            api.node_create(request, data['lb'], data['name'], 'NOVA_INSTANCE',
+                            data['address'], data['port'], data['weight'],
+                            data['condition'],
+                            instance_id=data['instance_id'])
+            messages.info(request, _('Created node "%s"') % (data['name'],))
+        except balancerclient_exceptions.ClientException, e:
+            exceptions.handle(request, _("Error to create node: %r") % (e,))
+
+    def get(self, request, *args, **kwargs):
+        # NOTE(akscram): AJAX send IDs of checked instances.
+        instances = self.get_instances(request.GET.getlist('instances[]'))
+        if not instances:
+            pass
+        NodeFormSet = formset_factory(CreateNode, formset=BaseNodeFormSet,
+                                      extra=0)
+        if request.method == 'POST':
+            lb_form = CreateLoadBalancer(request.POST, request.FILES)
+            node_formset = NodeFormSet(request.POST, request.FILES,
+                               initial=self.get_nodes_initial(instances))
+            if lb_form.is_valid() and node_formset.is_valid():
+                LOG.debug("lb_form: %r" % (lb_form.cleaned_data,))
+                LOG.debug("node_formset: %r" % (node_formset.cleaned_data,))
+                lb = self.create_lb(request, lb_form.cleaned_data)
+                for node_data in node_formset.cleaned_data:
+                    node_data = node_data.copy()
+                    node_data['lb'] = lb
+                    self.create_node(request, node_data)
+            handled = shortcuts.redirect("horizon:nova:load_balancer:detail",
+                                         lb_id=lb.id)
+            if self.request.is_ajax():
+                # TODO(gabriel): This is not a long-term solution to how
+                # AJAX should be handled, but it's an expedient solution
+                # until the blueprint for AJAX handling is architected
+                # and implemented.
+                response = http.HttpResponse()
+                response['X-Horizon-Location'] = handled['location']
+                return response
+            return handled
+        else:
+            lb_form = CreateLoadBalancer()
+            node_formset = NodeFormSet(
+                               initial=self.get_nodes_initial(instances))
+        context = self.get_context_data(**kwargs)
+        context['lb_form'] = lb_form
+        context['node_formset'] = node_formset
+        context['action_url'] = request.get_full_path()
+        if self.request.is_ajax():
+            context['hide'] = True
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        return self.get(request, *args, **kwargs)
