@@ -99,21 +99,22 @@ def node_delete(request, lb_id, node_id):
     balancerclient(request).nodes.delete(lb_id, node_id)
 
 
-def node_create(request, lb_id, name, type, address, port, weight, status,
+def node_create(request, lb_id, name, type, address, port, weight, condition,
                 **extra):
     return balancerclient(request).nodes.create(lb_id, name, type, address,
-                                                port, weight, status, **extra)
+                                                port, weight, condition,
+                                                **extra)
 
 
 def node_update(request, lb_id, node_id, name=None, type=None, address=None,
-                port=None, weight=None, status=None, **extra):
+                port=None, weight=None, condition=None, **extra):
     return balancerclient(request).nodes.update(lb_id, node_id,
                                                 name=name,
                                                 type=type,
                                                 address=address,
                                                 port=port,
                                                 weight=weight,
-                                                status=status,
+                                                condition=condition,
                                                 **extra)
 
 
