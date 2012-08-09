@@ -307,17 +307,18 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView):
                     node_data = node_data.copy()
                     node_data['lb'] = lb
                     self.create_node(request, node_data)
-            handled = shortcuts.redirect("horizon:nova:load_balancer:detail",
-                                         lb_id=lb.id)
-            if self.request.is_ajax():
-                # TODO(gabriel): This is not a long-term solution to how
-                # AJAX should be handled, but it's an expedient solution
-                # until the blueprint for AJAX handling is architected
-                # and implemented.
-                response = http.HttpResponse()
-                response['X-Horizon-Location'] = handled['location']
-                return response
-            return handled
+                handled = shortcuts.redirect(
+                                  "horizon:nova:load_balancer:detail",
+                                  lb_id=lb.id)
+                if self.request.is_ajax():
+                    # TODO(gabriel): This is not a long-term solution to how
+                    # AJAX should be handled, but it's an expedient solution
+                    # until the blueprint for AJAX handling is architected
+                    # and implemented.
+                    response = http.HttpResponse()
+                    response['X-Horizon-Location'] = handled['location']
+                    return response
+                return handled
         else:
             lb_form = CreateLoadBalancer()
             node_formset = NodeFormSet(
