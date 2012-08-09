@@ -32,7 +32,8 @@ __all__ = ('lb_algorithms_get', 'lb_create', 'lb_delete', 'lb_get',
            'lb_get_for_vm', 'lb_list', 'lb_update', 'node_create',
            'node_delete', 'node_get', 'node_list', 'node_update',
            'probe_create', 'probe_delete', 'probe_get', 'probe_list',
-           'sticky_create', 'sticky_delete', 'sticky_get', 'sticky_list')
+           'sticky_create', 'sticky_delete', 'sticky_get', 'sticky_list',
+           'vip_create', 'vip_delete', 'vip_get', 'vip_list')
 
 
 LOG = logging.getLogger(__name__)
@@ -66,9 +67,15 @@ def lb_delete(request, lb_id):
     balancerclient(request).loadbalancers.delete(lb_id)
 
 
-def lb_create(request, name, algorithm, protocol, **extra):
-    return balancerclient(request).loadbalancers.create(name, algorithm,
-                                                        protocol, **extra)
+def lb_create(request, name, algorithm, protocol,
+              vip_name, vip_address, vip_mask, vip_port,
+              vip_type=None, vip_vlan=None,
+              **extra):
+    return balancerclient(request).loadbalancers.create(
+               name, algorithm, protocol,
+               vip_name, vip_address, vip_mask, vip_port,
+               vip_type=vip_type, vip_vlan=vip_vlan,
+               **extra)
 
 
 def lb_update(request, lb_id, name=None, algorithm=None, protocol=None,
@@ -154,3 +161,27 @@ def sticky_delete(request, lb_id, sticky_id):
 
 def sticky_create(request, lb_id, name, type, **extra):
     return balancerclient(request).stickies.create(lb_id, name, type, **extra)
+
+
+# Virtual IP
+
+
+def vip_get(request, lb_id, vip_id):
+    return balancerclient(request).vips.get(lb_id, vip_id)
+
+
+def vip_list(request, lb_id):
+    return balancerclient(request).vips.list(lb_id)
+
+
+def vip_delete(request, lb_id, vip_id):
+    balancerclient(request).vips.delete(lb_id, vip_id)
+
+
+def vip_create(request, lb_id, name, address, mask, port,
+               type=None, vlan=None,
+               **extra):
+    return balancerclient(request).vips.create(lb_id, name, address, mask,
+                                               port,
+                                               type=type, vlan=vlan,
+                                               **extra)
