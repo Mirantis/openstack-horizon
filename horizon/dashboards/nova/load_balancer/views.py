@@ -40,6 +40,7 @@ from .nodes.tables import NodesTable
 from .nodes.forms import BaseNodeFormSet, CreateNode
 from .nodes.views import NodeModalFormMixin
 from .probes.tables import ProbesTable
+from .vips.tables import VIPTable
 
 from balancerclient.common import exceptions as balancerclient_exceptions
 from novaclient import exceptions as novaclient_exceptions
@@ -67,6 +68,9 @@ class CreateView(forms.ModalFormView):
     form_class = CreateLoadBalancer
     template_name = 'nova/load_balancer/create.html'
 
+    def get_initial(self):
+        return {'vip_mask': '255.255.255.255'}
+
 
 class UpdateView(forms.ModalFormView):
     form_class = UpdateLoadBalancer
@@ -93,7 +97,7 @@ class UpdateView(forms.ModalFormView):
 
 
 class DetailView(tables.MultiTableView):
-    table_classes = (NodesTable, ProbesTable)
+    table_classes = (VIPTable, NodesTable, ProbesTable)
     template_name = 'nova/load_balancer/detail.html'
 
     def get_context_data(self, **kwargs):
@@ -128,6 +132,15 @@ class DetailView(tables.MultiTableView):
             msg = _("Unable to fetch probes: %s") % e
             exceptions.handle(self.request, msg)
         return probes
+
+    def get_vips_data(self):
+        try:
+            vips = api.vip_list(self.request, self.kwargs['lb_id'])
+        except balancerclient_exceptions.ClientException, e:
+            vips = []
+            msg = _("Unable to fetch Virtual IPs: %s") % e
+            exceptions.handle(self.request, msg)
+        return vips
 
 
 class MultiTypeForm(generic.TemplateView):
@@ -255,6 +268,9 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView):
             msg = _('Unable to get instance "%s".') % instance_id
             exceptions.handle(request, msg, redirect=redirect)
 
+    def get_initial(self):
+        return {'vip_mask': '255.255.255.255'}
+
     def get_nodes_initial(self, instances):
         return [self.get_node_initial(instance) for instance in instances]
 
@@ -266,8 +282,13 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView):
 
     def create_lb(self, request, data):
         try:
+            # NOTE(akscram): The Port is a load balancing port and
+            #                specified to LB and VIP.
             return api.lb_create(request, data['name'], data['algorithm'],
-                                 data['protocol'], port=data['port'])
+                                 data['protocol'], data['name'],
+                                 data['vip_address'], data['vip_mask'],
+                                 data['port'],
+                                 vip_vlan=data['vip_vlan'], port=data['port'])
             messages.info(request,
                           _('Created Load Balancer "%s"') % (data['name'],))
         except balancerclient_exceptions.ClientException, e:
@@ -296,7 +317,8 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView):
         NodeFormSet = formset_factory(CreateNode, formset=BaseNodeFormSet,
                                       extra=0)
         if request.method == 'POST':
-            lb_form = CreateLoadBalancer(request.POST, request.FILES)
+            lb_form = CreateLoadBalancer(request.POST, request.FILES,
+                                         initial=self.get_initial())
             node_formset = NodeFormSet(request.POST, request.FILES,
                                initial=self.get_nodes_initial(instances))
             if lb_form.is_valid() and node_formset.is_valid():
@@ -320,7 +342,7 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView):
                     return response
                 return handled
         else:
-            lb_form = CreateLoadBalancer()
+            lb_form = CreateLoadBalancer(initial=self.get_initial())
             node_formset = NodeFormSet(
                                initial=self.get_nodes_initial(instances))
         context = self.get_context_data(**kwargs)

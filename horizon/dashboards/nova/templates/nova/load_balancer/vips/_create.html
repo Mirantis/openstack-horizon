@@ -1,0 +1,25 @@
+{% extends "horizon/common/_modal_form.html" %}
+{% load i18n %}
+
+{% block form_id %}{% endblock %}
+{% block form_action %}{% url horizon:nova:load_balancer:vips:create params.lb_id %}{% endblock %}
+
+{% block modal_id %}create_vip_modal{% endblock %}
+{% block modal-header %}{% trans "Create Virtual IP" %}{% endblock %}
+
+{% block modal-body %}
+<div class="left">
+    <fieldset>
+    {% include "nova/load_balancer/_multi_type_form_fields.html" %}
+    </fieldset>
+</div>
+<div class="right">
+    <h3>{% trans "Description" %}:</h3>
+    <p>{% trans "A virtual IP is an Internet Protocol (IP) address configured on the load balancer for use by clients connecting to a service that is load balanced. Incoming connections and requests are distributed to back-end nodes based on the configuration of the load balancer." %}</p>
+</div>
+{% endblock %}
+
+{% block modal-footer %}
+  <input class="btn btn-primary pull-right" type="submit" value="{% trans "Create Virtual IP" %}" />
+  <a href="{% url horizon:nova:load_balancer:detail params.lb_id %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
+{% endblock %}

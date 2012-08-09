@@ -24,13 +24,7 @@ from .views import (IndexView, CreateView, UpdateView, DetailView,
                     LoadBalancingView)
 from .nodes import urls as nodes_urls
 from .probes import urls as probes_urls
-
-import logging
-LOG = logging.getLogger(__name__)
-
-def test(request, *args, **kwargs):
-    LOG.debug("Request: %r" % request)
-    raise Exception
+from .vips import urls as vips_urls
 
 
 lbs_urlpatterns = patterns('horizon.dashboards.nova.load_balancer.views',
@@ -38,6 +32,7 @@ lbs_urlpatterns = patterns('horizon.dashboards.nova.load_balancer.views',
     url(r'^update$', UpdateView.as_view(), name='update'),
     url(r'^nodes/', include(nodes_urls, namespace='nodes')),
     url(r'^probes/', include(probes_urls, namespace='probes')),
+    url(r'^vips/', include(vips_urls, namespace='vips')),
 )
 
 urlpatterns = patterns('horizon.dashboards.nova.load_balancer.views',

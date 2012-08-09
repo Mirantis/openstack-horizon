@@ -1,0 +1,69 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
+# Copyright 2012 United States Government as represented by the
+# Administrator of the National Aeronautics and Space Administration.
+# All Rights Reserved.
+#
+# Copyright 2012 OpenStack LLC
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+import logging
+
+from django.utils.translation import ugettext_lazy as _
+
+from horizon import api
+from horizon import tables
+
+from ..tables import SubLBLinkAction
+
+LOG = logging.getLogger(__name__)
+
+
+class CreateVIP(SubLBLinkAction):
+    name = 'create'
+    verbose_name = _('Create VIP')
+    url = 'horizon:nova:load_balancer:vips:create'
+    classes = ('ajax-modal', 'btn-create')
+
+
+class DeleteVIP(tables.DeleteAction):
+    data_type_singular = _('VIP')
+    data_type_plural = _('VIPs')
+
+    def delete(self, request, vip_id):
+        api.vip_delete(request, self.table.kwargs['lb_id'], vip_id)
+
+
+class VIPTable(tables.DataTable):
+    DEPLOYED_STATUS_CHOICES = (
+        ('true', True),
+        ('false', False),
+    )
+    id = tables.Column('id', verbose_name=_('id'), hidden=True)
+    name = tables.Column('name', verbose_name=_('Name'))
+    address = tables.Column('address', verbose_name=_('Address'))
+    mask = tables.Column('mask', verbose_name=_('Mask'))
+    port = tables.Column('port', verbose_name=_('Port'))
+    vlan = tables.Column('VLAN', verbose_name=_('VLAN'))
+    deployed = tables.Column('deployed',
+                             verbose_name=_('Deployed'),
+                             status=True,
+                             status_choices=DEPLOYED_STATUS_CHOICES)
+
+    class Meta:
+        name = 'vips'
+        verbose_name = _('Virtual IPs')
+        status_columns = ['deployed']
+        row_actions = (DeleteVIP,)
+        table_actions = (CreateVIP, DeleteVIP)

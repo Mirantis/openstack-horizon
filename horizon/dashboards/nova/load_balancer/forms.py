@@ -28,6 +28,8 @@ from horizon import forms
 from horizon import api
 from horizon import exceptions
 
+from .vips.forms import VIP_TYPE_CHOICES
+
 from balancerclient.common import exceptions as balancerclient_exceptions
 
 
@@ -51,11 +53,21 @@ class CreateLoadBalancer(forms.SelfHandlingForm):
                                  label=_("Protocol of load balancing."))
     port = forms.IntegerField(min_value=1, max_value=65536, initial=80,
                               label=_("Port of load balancing."))
+    vip_address = forms.IPAddressField(label=_('Virtual IP Address'))
+    vip_mask = forms.IPAddressField(label=_('Virtual IP Address Mask'))
+# NOTE(akcram): VIP type not yet supported in LBaaS.
+#    vip_type = forms.ChoiceField(choices=VIP_TYPE_CHOICES, required=False,
+#                                 label=_('Virtual IP Type'))
+    vip_vlan = forms.IntegerField(required=False, label=_('Virtual IP VLAN'))
 
     def handle(self, request, data):
         try:
+            # NOTE(akscram): The Port is a load balancing port and
+            #                specified to LB and VIP.
             api.lb_create(request, data['name'], data['algorithm'],
-                          data['protocol'], port=data['port'])
+                          data['protocol'], data['name'],
+                          data['vip_address'], data['vip_mask'], data['port'],
+                          vip_vlan=data['vip_vlan'], port=data['port'])
             message = "Creating load balancer \"%s\"" % data["name"]
             LOG.info(message)
             messages.info(request, message)
