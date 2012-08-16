@@ -99,7 +99,7 @@ def node_get(request, lb_id, node_id):
 
 
 def node_list(request, lb_id):
-    return balancerclient(request).nodes.nodes_for_lb(lb_id)
+    return balancerclient(request).nodes.list(lb_id)
 
 
 def node_delete(request, lb_id, node_id):
@@ -133,7 +133,7 @@ def probe_get(request, lb_id, probe_id):
 
 
 def probe_list(request, lb_id):
-    return balancerclient(request).probes.probes_for_lb(lb_id)
+    return balancerclient(request).probes.list(lb_id)
 
 
 def probe_delete(request, lb_id, probe_id):
@@ -152,7 +152,7 @@ def sticky_get(request, lb_id, sticky_id):
 
 
 def sticky_list(request, lb_id):
-    return balancerclient(request).stickies.stickies_for_lb(lb_id)
+    return balancerclient(request).stickies.list(lb_id)
 
 
 def sticky_delete(request, lb_id, sticky_id):
