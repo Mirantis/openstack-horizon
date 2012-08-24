@@ -22,6 +22,7 @@ import logging
 
 from django.utils.translation import ugettext_lazy as _
 from django.forms import widgets
+from django.core.exceptions import ValidationError
 
 from horizon import forms
 
@@ -29,6 +30,11 @@ from balancerclient.common import exceptions as balancerclient_exceptions
 
 
 LOG = logging.getLogger(__name__)
+
+
+def start_with_slash(s):
+    if not s.startswith('/'):
+        raise ValidationError(u'url must start with forward slash')
 
 
 class CreateProbe(forms.Form):
@@ -52,7 +58,8 @@ class CreateHTTPProbe(forms.Form):
         ('GET', 'GET'),
         ('HEAD', 'HEAD'),
     )
-    path = forms.URLField(max_length=255, label=_('Probe HTTP URL'))
+    path = forms.CharField(max_length=255, label=_('Probe HTTP URL'),
+                           validators=[start_with_slash])
     method = forms.ChoiceField(choices=METHOD_CHOICES,
                                label=_('Probe HTTP Method'))
     status = forms.IntegerField(label=_('Expected HTTP Status'))
