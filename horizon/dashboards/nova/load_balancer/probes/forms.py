@@ -34,7 +34,7 @@ LOG = logging.getLogger(__name__)
 
 def start_with_slash(s):
     if not s.startswith('/'):
-        raise ValidationError(u'url must start with forward slash')
+        raise ValidationError(_('url must start with forward slash'))
 
 
 class CreateProbe(forms.Form):
