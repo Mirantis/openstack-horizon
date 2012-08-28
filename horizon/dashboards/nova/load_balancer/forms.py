@@ -80,8 +80,7 @@ class UpdateLoadBalancer(forms.SelfHandlingForm):
     lb = forms.CharField(widget=forms.TextInput(
                                         attrs={'readonly': 'readonly'}),
                          label=_("Load Balancer"))
-    name = forms.CharField(widget=forms.TextInput(
-                                        attrs={'readonly': 'readonly'}))
+    name = forms.CharField(widget=forms.TextInput())
     algorithm = forms.ChoiceField(label=_("Node selection algorithm of load balancing."))
     protocol = forms.ChoiceField(label=_("Protocol of load balancing"))
     port = forms.IntegerField(min_value=1, max_value=65536, initial=80,
@@ -97,6 +96,7 @@ class UpdateLoadBalancer(forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
             api.lb_update(request, data['lb'],
+                          name=data['name'],
                           algorithm=data['algorithm'],
                           protocol=data['protocol'],
                           port=data['port'])
