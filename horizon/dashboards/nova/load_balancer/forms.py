@@ -86,9 +86,8 @@ class UpdateLoadBalancer(forms.SelfHandlingForm):
                                         attrs={'readonly': 'readonly'}))
     algorithm = forms.ChoiceField(choices=LB_ALGORITHMS,
                         label=_("Node selection algorithm of load balancing."))
-    protocol = forms.CharField(widget=forms.TextInput(
-                                        attrs={'readonly': 'readonly'}),
-                                 label=_("Protocol of load balancing."))
+    protocol = forms.CharField(required=True, initial='HTTP',
+                               label=_("Protocol of load balancing."))
     port = forms.IntegerField(min_value=1, max_value=65536, initial=80,
                               label=_("Port of load balancing."))
 
