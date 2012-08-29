@@ -28,7 +28,7 @@ from horizon import exceptions
 from horizon import tables
 from horizon import forms
 
-from .forms import AddNode, UpdateNode
+from .forms import AddNode, UpdateNode, NODE_NOVA_INSTANCE
 
 from balancerclient.common import exceptions as balancerclient_exceptions
 
@@ -57,6 +57,15 @@ class NodeModalFormMixin(object):
                 choices.append((address['addr'], item_label))
         return choices
 
+    def get_instance(self, instance_id):
+        try:
+            return api.server_get(self.request, instance_id)
+        except novaclient_exceptions.ClientException, e:
+            redirect = urlresolvers.reverse(
+                               "horizon:nova:instances_and_volumes:index")
+            msg = _('Unable to get instance "%s".') % instance_id
+            exceptions.handle(request, msg, redirect=redirect)
+
 
 class AddView(NodeModalFormMixin, forms.ModalFormView):
     form_class = AddNode
@@ -71,14 +80,7 @@ class AddView(NodeModalFormMixin, forms.ModalFormView):
 
     def get_object(self, *args, **kwargs):
         if not hasattr(self, "object"):
-            instance_id = self.kwargs['instance_id']
-            try:
-                self.object = api.server_get(self.request, instance_id)
-            except:
-                redirect = urlresolvers.reverse(
-                                "horizon:nova:instances_and_volumes:index")
-                msg = _('Unable to retrieve instance details.')
-                exceptions.handle(self.request, msg, redirect=redirect)
+            self.object = self.get_instance(self.kwargs['instance_id'])
         return self.object
 
     def get_initial(self):
@@ -87,10 +89,21 @@ class AddView(NodeModalFormMixin, forms.ModalFormView):
                 'weight': 10}
 
 
-class UpdateView(forms.ModalFormView):
+class UpdateView(NodeModalFormMixin, forms.ModalFormView):
     form_class = UpdateNode
     template_name = 'nova/load_balancer/nodes/update.html'
     context_object_name = 'node'
+
+    def get_form_kwargs(self):
+        kwargs = super(UpdateView, self).get_form_kwargs()
+        # FIXME(akscram): Support only ondes created in Horizon.
+        if self.object.type == NODE_NOVA_INSTANCE:
+            instance = self.get_instance(self.object.instance_id)
+            choices = self.get_node_address_choices(instance)
+        else:
+            choices = []
+        kwargs['address_choices'] = choices
+        return kwargs
 
     def get_object(self, *args, **kwargs):
         if not hasattr(self, 'object'):

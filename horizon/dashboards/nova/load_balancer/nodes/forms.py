@@ -40,6 +40,8 @@ CONDITION_CHOICES = (
     ('DISABLED', 'DISABLED'),
 )
 
+NODE_NOVA_INSTANCE = 'NOVA_INSTANCE'
+
 
 class BaseNodeFormSet(formsets.BaseFormSet):
     def get_node_address_choices(self, instance):
@@ -80,7 +82,8 @@ class AddNode(forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
             # NOTE(akscram): hardcoded NOVA_INSTANCE for horizon.
-            api.node_create(request, data['lb'], data['name'], 'NOVA_INSTANCE',
+            api.node_create(request, data['lb'], data['name'],
+                            NODE_NOVA_INSTANCE,
                             data['address'], data['port'], data['weight'],
                             data['condition'],
                             instance_id=data['instance_id'])
@@ -110,12 +113,17 @@ class UpdateNode(forms.SelfHandlingForm):
     node_id = forms.CharField(widget=forms.TextInput(
                                             attrs={'readonly': 'readonly'}))
     name = forms.CharField(max_length='255', label=_('Node Name'))
-    address = forms.IPAddressField(label=_('Node Address'))
+    address = forms.ChoiceField(label=_('Node Address'))
     port = forms.IntegerField(min_value=1, max_value=65536, initial=80,
                               label=_('Port of load balancing.'))
     weight = forms.IntegerField(label=_('Node Weight'))
     condition = forms.ChoiceField(choices=CONDITION_CHOICES,
                                   label=_('Node Condition'))
+
+    def __init__(self, *args, **kwargs):
+        address_choices = kwargs.pop('address_choices')
+        super(UpdateNode, self).__init__(*args, **kwargs)
+        self.fields['address'].choices = address_choices
 
     def handle(self, request, data):
         try:

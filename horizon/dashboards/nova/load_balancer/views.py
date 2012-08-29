@@ -259,14 +259,6 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView):
     def get_instances(self, ids):
         return [self.get_instance(instance_id) for instance_id in ids]
 
-    def get_instance(self, instance_id):
-        try:
-            return api.server_get(self.request, instance_id)
-        except novaclient_exceptions.ClientException, e:
-            redirect = reverse("horizon:nova:instances_and_volumes:index")
-            msg = _('Unable to get instance "%s".') % instance_id
-            exceptions.handle(request, msg, redirect=redirect)
-
     def get_initial(self):
         return {'vip_mask': '255.255.255.255'}
 
