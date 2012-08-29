@@ -49,6 +49,31 @@ from novaclient import exceptions as novaclient_exceptions
 LOG = logging.getLogger(__name__)
 
 
+class LBFormMixin(object):
+    client_error_redirect_url = None
+
+    def get_algorithms(self):
+        try:
+            return [(algo, algo) for algo in api.algorithms_get(self.request)]
+        except balancerclient_exceptions.ClientException, e:
+            LOG.exception("balancerclient.ClientException: %r" % (e,))
+            redirect = reverse(self.client_error_redirect_url)
+            exceptions.handle(self.request,
+                              _('Unable to retrieve list of algorithms'),
+                              redirect=redirect)
+
+    def get_protocols(self):
+        try:
+            return [(proto, proto) for proto in
+                    api.protocols_get(self.request)]
+        except balancerclient_exceptions.ClientException, e:
+            LOG.exception("balancerclient.ClientException: %r" % (e,))
+            redirect = reverse(self.client_error_redirect_url)
+            exceptions.handle(self.request,
+                              _('Unable to retrieve list of protocols'),
+                              redirect=redirect)
+
+
 class IndexView(tables.DataTableView):
     table_class = LoadBalancersTable
     template_name = 'nova/load_balancer/index.html'
@@ -63,18 +88,30 @@ class IndexView(tables.DataTableView):
         return lbs
 
 
-class CreateView(forms.ModalFormView):
+class CreateView(forms.ModalFormView, LBFormMixin):
     form_class = CreateLoadBalancer
     template_name = 'nova/load_balancer/create.html'
+
+    def get_form_kwargs(self):
+        kwargs = super(CreateView, self).get_form_kwargs()
+        kwargs['lb_algoritms'] = self.get_algorithms()
+        kwargs['lb_protocols'] = self.get_protocols()
+        return kwargs
 
     def get_initial(self):
         return {'vip_mask': '255.255.255.255'}
 
 
-class UpdateView(forms.ModalFormView):
+class UpdateView(forms.ModalFormView, LBFormMixin):
     form_class = UpdateLoadBalancer
     template_name = 'nova/load_balancer/update.html'
     context_object_name = 'lb'
+
+    def get_form_kwargs(self):
+        kwargs = super(UpdateView, self).get_form_kwargs()
+        kwargs['lb_algoritms'] = self.get_algorithms()
+        kwargs['lb_protocols'] = self.get_protocols()
+        return kwargs
 
     def get_object(self, *args, **kwargs):
         if not hasattr(self, 'object'):
@@ -241,7 +278,7 @@ class MultiTypeForm(generic.TemplateView):
         raise NotImplementedError
 
 
-class LoadBalancingView(NodeModalFormMixin, generic.TemplateView):
+class LoadBalancingView(NodeModalFormMixin, generic.TemplateView, LBFormMixin):
     template_name = 'nova/load_balancer/loadbalancing.html'
 
     def get_template_names(self):
@@ -300,6 +337,12 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView):
         except balancerclient_exceptions.ClientException, e:
             exceptions.handle(request, _("Error to create node: %r") % (e,))
 
+    def get_form_kwargs(self):
+        kwargs = super(CreateView, self).get_form_kwargs()
+        kwargs['lb_algoritms'] = self.get_algorithms()
+        kwargs['lb_protocols'] = self.get_protocols()
+        return kwargs
+
     def get(self, request, *args, **kwargs):
         # NOTE(akscram): AJAX send IDs of checked instances.
         instances = self.get_instances(request.GET.getlist('instances[]'))
@@ -332,6 +375,8 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView):
                 return handled
         else:
             lb_form = CreateLoadBalancer(initial=self.get_initial())
+            lb_form.fields['algorithm'].choices = self.get_algorithms()
+            lb_form.fields['protocol'].choices = self.get_protocols()
             node_formset = NodeFormSet(
                                initial=self.get_nodes_initial(instances))
         context = self.get_context_data(**kwargs)

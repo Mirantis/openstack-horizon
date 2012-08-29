@@ -35,22 +35,11 @@ from balancerclient.common import exceptions as balancerclient_exceptions
 
 LOG = logging.getLogger(__name__)
 
-LB_ALGORITHMS = (
-    ('ROUND_ROBIN', 'ROUND_ROBIN'),
-    ('LEAST_CONNECTIONS', 'LEAST_CONNECTIONS'),
-)
-
-LB_PROTOCOLS = (
-    ('HTTP', 'HTTP'),
-)
-
 
 class CreateLoadBalancer(forms.SelfHandlingForm):
     name = forms.CharField(max_length="255", label=_("Load Balancer Name"))
-    algorithm = forms.ChoiceField(choices=LB_ALGORITHMS,
-                        label=_("Node selection algorithm of load balancing."))
-    protocol = forms.ChoiceField(choices=LB_PROTOCOLS,
-                                 label=_("Protocol of load balancing."))
+    algorithm = forms.ChoiceField(label=_("Node selection algorithm of load balancing."))
+    protocol = forms.ChoiceField(label=_("Protocol of load balancing."))
     port = forms.IntegerField(min_value=1, max_value=65536, initial=80,
                               label=_("Port of load balancing."))
     vip_address = forms.IPAddressField(label=_('Virtual IP Address'))
@@ -59,6 +48,15 @@ class CreateLoadBalancer(forms.SelfHandlingForm):
 #    vip_type = forms.ChoiceField(choices=VIP_TYPE_CHOICES, required=False,
 #                                 label=_('Virtual IP Type'))
     vip_vlan = forms.IntegerField(required=False, label=_('Virtual IP VLAN'))
+
+    def __init__(self, *args, **kwargs):
+        algos = kwargs.pop('lb_algoritms', None)
+        protos = kwargs.pop('lb_protocols', None)
+        super(CreateLoadBalancer, self).__init__(*args, **kwargs)
+        if not algos:
+            protos = algos = (('', ''),)
+        self.fields['algorithm'].choices = algos
+        self.fields['protocol'].choices = protos
 
     def handle(self, request, data):
         try:
@@ -84,12 +82,17 @@ class UpdateLoadBalancer(forms.SelfHandlingForm):
                          label=_("Load Balancer"))
     name = forms.CharField(widget=forms.TextInput(
                                         attrs={'readonly': 'readonly'}))
-    algorithm = forms.ChoiceField(choices=LB_ALGORITHMS,
-                        label=_("Node selection algorithm of load balancing."))
-    protocol = forms.CharField(required=True, initial='HTTP',
-                               label=_("Protocol of load balancing"))
+    algorithm = forms.ChoiceField(label=_("Node selection algorithm of load balancing."))
+    protocol = forms.ChoiceField(label=_("Protocol of load balancing"))
     port = forms.IntegerField(min_value=1, max_value=65536, initial=80,
                               label=_("Port of load balancing."))
+
+    def __init__(self, *args, **kwargs):
+        algos = kwargs.pop('lb_algoritms')
+        protos = kwargs.pop('lb_protocols')
+        super(UpdateLoadBalancer, self).__init__(*args, **kwargs)
+        self.fields['algorithm'].choices = algos
+        self.fields['protocol'].choices = protos
 
     def handle(self, request, data):
         try:
