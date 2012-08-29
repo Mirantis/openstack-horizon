@@ -25,8 +25,10 @@ from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import api
+from horizon import tabs
 
 from .forms import CreateProbe, CreateICMPProbe, CreateHTTPProbe
+from .tabs import ProbeDetailTabs
 from ..views import MultiTypeForm
 
 from balancerclient.common import exceptions as balancerclient_exceptions
@@ -56,3 +58,34 @@ class CreateView(MultiTypeForm):
                            _("Error Creating probe: %s") % e.message)
         return shortcuts.redirect('horizon:nova:load_balancer:detail',
                                   lb_id=self.kwargs['lb_id'])
+
+
+class DetailView(tabs.TabView):
+    tab_group_class = ProbeDetailTabs
+    template_name = 'nova/load_balancer/probes/detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context["probe"] = self.get_data()
+        return context
+
+    def get_data(self):
+        if not hasattr(self, "_probe"):
+            lb_id = self.kwargs['lb_id']
+            probe_id = self.kwargs['probe_id']
+            try:
+                probe = api.probe_get(self.request, lb_id, probe_id)
+            except:
+                redirect = urlresolvers.reverse(
+                                   'horizon:nova:load_balancer:detail',
+                                   args=(lb_id,))
+                exceptions.handle(self.request,
+                                  _('Unable to retrieve details for '
+                                    'Probe "%s".') % (probe_id,),
+                                    redirect=redirect)
+            self._probe = probe
+        return self._probe
+
+    def get_tabs(self, request, *args, **kwargs):
+        probe = self.get_data()
+        return self.tab_group_class(request, probe=probe, **kwargs)

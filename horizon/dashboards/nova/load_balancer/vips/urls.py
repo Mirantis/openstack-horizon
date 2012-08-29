@@ -20,8 +20,10 @@
 
 from django.conf.urls.defaults import *
 
-from .views import CreateView
+from .views import CreateView, DetailView
+
 
 urlpatterns = patterns('horizon.dashboards.nova.load_balancer.vips.views',
     url(r'^create$', CreateView.as_view(), name='create'),
+    url(r'^(?P<vip_id>[^/]+)/detail$', DetailView.as_view(), name='detail'),
 )

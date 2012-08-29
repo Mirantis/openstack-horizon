@@ -20,6 +20,7 @@
 
 import logging
 
+from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import api
@@ -46,6 +47,12 @@ class DeleteProbe(tables.DeleteAction):
 
 
 class ProbesTable(tables.DataTable):
+    def link_callback(self, datum):
+        lb_id = self.kwargs['lb_id']
+        obj_id = self.get_object_id(datum)
+        return urlresolvers.reverse('horizon:nova:load_balancer:probes:detail',
+                                    args=(lb_id, obj_id))
+
     DEPLOYED_STATUS_CHOICES = (
         ('true', True),
         ('false', False),
@@ -57,6 +64,12 @@ class ProbesTable(tables.DataTable):
                              verbose_name=_('Deployed'),
                              status=True,
                              status_choices=DEPLOYED_STATUS_CHOICES)
+
+    def __init__(self, *args, **kwargs):
+        super(ProbesTable, self).__init__(*args, **kwargs)
+        # NOTE(akscram): Set callable link to reverse URL with two
+        #                arguments.
+        self.columns['name'].link = self.link_callback
 
     class Meta:
         name = 'probes'

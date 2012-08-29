@@ -1,0 +1,30 @@
+{% load i18n sizeformat %}
+
+<h3>{% trans "Virtual IP Overview" %}</h3>
+
+<div class="status row-fluid">
+  <h4>{% trans "Info" %}</h4>
+  <hr class="header_rule">
+  <ul>
+    <li><strong>{% trans "ID" %}:</strong>&nbsp;{{ vip.id }}</li>
+  </ul>
+</div>
+
+<div class="specs row-fluid">
+  <h4>{% trans "Parameters" %}</h4>
+  <hr class="header_rule">
+  <ul>
+    <li><strong>{% trans "Address" %}:</strong>&nbsp;{{ vip.address }}</li>
+    <li><strong>{% trans "Mask" %}:</strong>&nbsp;{{ vip.mask }}</li>
+    <li><strong>{% trans "Port" %}:</strong>&nbsp;{{ vip.port }}</li>
+    <li><strong>{% trans "VLAN" %}:</strong>&nbsp;{{ vip.VLAN }}</li>
+  </ul>
+</div>
+
+<div class="status row-fluid">
+  <h4>{% trans "Status" %}</h4>
+  <hr class="header_rule">
+  <ul>
+    <li><strong>{% trans "Deployed" %}:</strong>&nbsp;{{ vip.deployed|title }}</li>
+  </ul>
+</div>

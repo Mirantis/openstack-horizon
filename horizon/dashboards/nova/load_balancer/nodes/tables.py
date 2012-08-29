@@ -48,6 +48,12 @@ class DeleteNode(tables.DeleteAction):
 
 
 class NodesTable(tables.DataTable):
+    def link_callback(self, datum):
+        lb_id = self.kwargs['lb_id']
+        obj_id = self.get_object_id(datum)
+        return urlresolvers.reverse('horizon:nova:load_balancer:nodes:detail',
+                                    args=(lb_id, obj_id))
+
     STATUS_CHOICES = (
         ('inservice', True),
         ('', None),
@@ -64,6 +70,12 @@ class NodesTable(tables.DataTable):
                            status_choices=STATUS_CHOICES)
     condition = tables.Column('condition', verbose_name=_('Condition'),
                               status=True)
+
+    def __init__(self, *args, **kwargs):
+        super(NodesTable, self).__init__(*args, **kwargs)
+        # NOTE(akscram): Set callable link to reverse URL with two
+        #                arguments.
+        self.columns['name'].link = self.link_callback
 
     class Meta:
         name = 'nodes'

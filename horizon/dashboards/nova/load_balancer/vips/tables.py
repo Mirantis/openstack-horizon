@@ -21,6 +21,7 @@
 import logging
 
 from django.utils.translation import ugettext_lazy as _
+from django.core import urlresolvers
 
 from horizon import api
 from horizon import tables
@@ -46,12 +47,17 @@ class DeleteVIP(tables.DeleteAction):
 
 
 class VIPTable(tables.DataTable):
+    def link_callback(self, datum):
+        lb_id = self.kwargs['lb_id']
+        obj_id = self.get_object_id(datum)
+        return urlresolvers.reverse('horizon:nova:load_balancer:vips:detail',
+                                    args=(lb_id, obj_id))
+
     DEPLOYED_STATUS_CHOICES = (
         ('true', True),
         ('false', False),
     )
     id = tables.Column('id', verbose_name=_('id'), hidden=True)
-    name = tables.Column('name', verbose_name=_('Name'))
     address = tables.Column('address', verbose_name=_('Address'))
     mask = tables.Column('mask', verbose_name=_('Mask'))
     port = tables.Column('port', verbose_name=_('Port'))
@@ -60,6 +66,12 @@ class VIPTable(tables.DataTable):
                              verbose_name=_('Deployed'),
                              status=True,
                              status_choices=DEPLOYED_STATUS_CHOICES)
+
+    def __init__(self, *args, **kwargs):
+        super(VIPTable, self).__init__(*args, **kwargs)
+        # NOTE(akscram): Set callable link to reverse URL with two
+        #                arguments.
+        self.columns['address'].link = self.link_callback
 
     class Meta:
         name = 'vips'

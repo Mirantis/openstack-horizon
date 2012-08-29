@@ -1,0 +1,46 @@
+{% load i18n sizeformat %}
+
+<h3>{% trans "Probe Overview" %}</h3>
+
+<div class="status row-fluid">
+  <h4>{% trans "Info" %}</h4>
+  <hr class="header_rule">
+  <ul>
+    <li><strong>{% trans "ID" %}:</strong>&nbsp;{{ probe.id }}</li>
+  </ul>
+</div>
+
+<div class="specs row-fluid">
+  <h4>{% trans "Parameters" %}</h4>
+  <hr class="header_rule">
+  <ul>
+    <li><strong>{% trans "Name" %}:</strong>&nbsp;{{ probe.name }}</li>
+    <li><strong>{% trans "Type" %}:</strong>&nbsp;{{ probe.type }}</li>
+    <li><strong>{% trans "Interval" %}:</strong>&nbsp;{{ probe.interval }}</li>
+  </ul>
+</div>
+
+<div class="specs row-fluid">
+  <h4>{% trans "Extra parameters" %}</h4>
+  <hr class="header_rule">
+  <ul>
+{% if probe.type == "ICMP" %}
+    <li><strong>{% trans "Delay" %}:</strong>&nbsp;{{ probe.delay }}</li>
+    <li><strong>{% trans "Attempts" %}:</strong>&nbsp;{{ probe.attempts }}</li>
+    <li><strong>{% trans "Timeout" %}:</strong>&nbsp;{{ probe.timeout }}</li>
+{% elif probe.type == "HTTP" %}
+    <li><strong>{% trans "Path" %}:</strong>&nbsp;{{ probe.path }}</li>
+    <li><strong>{% trans "Method" %}:</strong>&nbsp;{{ probe.method }}</li>
+    <li><strong>{% trans "Status" %}:</strong>&nbsp;{{ probe.status }}</li>
+{% endif %}
+  </ul>
+</div>
+
+
+<div class="status row-fluid">
+  <h4>{% trans "Status" %}</h4>
+  <hr class="header_rule">
+  <ul>
+    <li><strong>{% trans "Deployd" %}:</strong>&nbsp;{{ probe.deployed }}</li>
+  </ul>
+</div>

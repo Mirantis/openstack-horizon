@@ -1,0 +1,31 @@
+{% load i18n sizeformat %}
+
+<h3>{% trans "Node Overview" %}</h3>
+
+<div class="status row-fluid">
+  <h4>{% trans "Info" %}</h4>
+  <hr class="header_rule">
+  <ul>
+    <li><strong>{% trans "ID" %}:</strong>&nbsp;{{ node.id }}</li>
+  </ul>
+</div>
+
+<div class="specs row-fluid">
+  <h4>{% trans "Parameters" %}</h4>
+  <hr class="header_rule">
+  <ul>
+    <li><strong>{% trans "Name" %}:</strong>&nbsp;{{ node.name }}</li>
+    <li><strong>{% trans "Address" %}:</strong>&nbsp;{{ node.address }}</li>
+    <li><strong>{% trans "Port" %}:</strong>&nbsp;{{ node.port }}</li>
+    <li><strong>{% trans "Weight" %}:</strong>&nbsp;{{ node.weight }}</li>
+  </ul>
+</div>
+
+<div class="status row-fluid">
+  <h4>{% trans "Status" %}</h4>
+  <hr class="header_rule">
+  <ul>
+    <li><strong>{% trans "Status" %}:</strong>&nbsp;{{ node.status|title }}</li>
+    <li><strong>{% trans "Condition" %}:</strong>&nbsp;{{ node.condition|title }}</li>
+  </ul>
+</div>

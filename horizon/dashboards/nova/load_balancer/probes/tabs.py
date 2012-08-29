@@ -1,10 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2012 United States Government as represented by the
-# Administrator of the National Aeronautics and Space Administration.
-# All Rights Reserved.
-#
-# Copyright 2012 OpenStack LLC
+# Copyright 2012 Nebula, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -18,11 +14,20 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import *
+from django.utils.translation import ugettext_lazy as _
 
-from .views import UpdateView, DetailView
+from horizon import tabs
 
-urlpatterns = patterns('horizon.dashboards.nova.load_balancer.nodes.views',
-    url(r'^(?P<node_id>[^/]+)/update$', UpdateView.as_view(), name='update'),
-    url(r'^(?P<node_id>[^/]+)/detail$', DetailView.as_view(), name='detail'),
-)
+
+class OverviewTab(tabs.Tab):
+    name = _("Overview")
+    slug = "overview"
+    template_name = ("nova/load_balancer/probes/_detail_overview.html")
+
+    def get_context_data(self, request):
+        return {"probe": self.tab_group.kwargs['probe']}
+
+
+class ProbeDetailTabs(tabs.TabGroup):
+    slug = "probes_details"
+    tabs = (OverviewTab,)

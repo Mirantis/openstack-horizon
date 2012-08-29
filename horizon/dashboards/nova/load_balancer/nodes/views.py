@@ -26,9 +26,11 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import api
 from horizon import exceptions
 from horizon import tables
+from horizon import tabs
 from horizon import forms
 
 from .forms import AddNode, UpdateNode, NODE_NOVA_INSTANCE
+from .tabs import NodeDetailTabs
 
 from balancerclient.common import exceptions as balancerclient_exceptions
 
@@ -128,3 +130,34 @@ class UpdateView(NodeModalFormMixin, forms.ModalFormView):
                 'port': self.object.port,
                 'weight': self.object.weight,
                 'condition': self.object.condition}
+
+
+class DetailView(tabs.TabView):
+    tab_group_class = NodeDetailTabs
+    template_name = 'nova/load_balancer/nodes/detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context["node"] = self.get_data()
+        return context
+
+    def get_data(self):
+        if not hasattr(self, "_node"):
+            lb_id = self.kwargs['lb_id']
+            node_id = self.kwargs['node_id']
+            try:
+                node = api.node_get(self.request, lb_id, node_id)
+            except:
+                redirect = urlresolvers.reverse(
+                                   'horizon:nova:load_balancer:detail',
+                                   args=(lb_id,))
+                exceptions.handle(self.request,
+                                  _('Unable to retrieve details for '
+                                    'Node "%s".') % (node_id,),
+                                    redirect=redirect)
+            self._node = node
+        return self._node
+
+    def get_tabs(self, request, *args, **kwargs):
+        node = self.get_data()
+        return self.tab_group_class(request, node=node, **kwargs)
