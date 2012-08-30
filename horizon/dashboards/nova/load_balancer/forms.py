@@ -98,6 +98,7 @@ class UpdateLoadBalancer(forms.SelfHandlingForm):
         try:
             api.lb_update(request, data['lb'],
                           algorithm=data['algorithm'],
+                          protocol=data['protocol'],
                           port=data['port'])
             messages.success(request,
                              _("Load Balancer \"%s\" updated.") % data['name'])
