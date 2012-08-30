@@ -1,0 +1,8 @@
+{% extends 'nova/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Add Sticky to Load Balancing" %}{% endblock %}
+
+{% block dash_main %}
+  {% include 'nova/load_balancer/devices/_addsticky.html' %}
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "horizon/common/_modal_form.html" %}
+{% load i18n %}
+
+{% block form_id %}add_sticky{% endblock %}
+{% block form_action %}{% url horizon:nova:load_balancer:devices:addsticky balancer.id  %}{% endblock %}
+
+{% block modal-header %}Add Stiky to Load Balancing{% endblock %}
+
+{% block modal-body %}
+<div class="left">
+    <fieldset>
+    {% include "horizon/common/_form_fields.html" %}
+    </fieldset>
+</div>
+{% endblock %}
+
+{% block modal-footer %}
+  <input class="btn btn-primary pull-right" type="submit" value="{% trans "Add" %}" />
+  <a href="{% url horizon:nova:load_balancer:index %}" class="btn secondary cancel close">{% trans "Cancel" %} </a>
+{% endblock %}
+

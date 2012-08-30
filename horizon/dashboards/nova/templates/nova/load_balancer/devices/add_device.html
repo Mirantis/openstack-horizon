@@ -1,0 +1,26 @@
+{% extends 'nova/base.html' %}
+{% load i18n %}
+{% block head %}<SCRIPT LANGUAGE="JavaScript">
+<--
+function update_fields(frm){
+
+   for (i = 0; i < frm.probes.length; i++)
+      if (frm.probes[i].checked)&&(frm.probes[i].name=="HTTP"){
+         frm.url.style.display=block
+         break
+      } 
+
+}
+
+//NOTE THE onClick="" empty event handlers in the checkbox and radio input fields below
+//are there to fix a bug in Netscape 2.0X. Placing an onClick handler in imput fields fixes
+//a bug where input objects inside tables are reflected more than once.
+
+//-->
+</SCRIPT>
+ {% endblock %}
+{% block title %}{% trans "Create Load Balance" %}{% endblock %}
+
+{% block dash_main %}
+  {% include 'nova/load_balancer/devices/_add_device.html' %}
+{% endblock %}

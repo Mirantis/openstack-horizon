@@ -1,0 +1,13 @@
+{% extends 'nova/base.html' %}
+{% load i18n %}
+{% block title %}Load Balancer{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Load Balancer") %}
+{% endblock page_header %}
+
+{% block dash_main %}
+  <div id="load_balancers">
+      {{ balancers_table.render }}
+  </div>
+{% endblock %}

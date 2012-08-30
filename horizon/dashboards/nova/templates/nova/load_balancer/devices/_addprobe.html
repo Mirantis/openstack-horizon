@@ -1,0 +1,163 @@
+{% extends "horizon/common/_modal_form.html" %}
+{% load i18n %}
+
+{% block form_id %}add_probe{% endblock %}
+{% block form_action %}{% url horizon:nova:load_balancer:devices:addprobe balancer.id  %}{% endblock %}
+
+{% block modal-header %}Add Probe to Load Balancing{% endblock %}
+
+{% block modal-body %}
+<div class="left">
+    <fieldset>
+	{% for hidden in form.hidden_fields %}
+	  {{ hidden }}
+	{% endfor %}
+	{% if form.non_field_errors %}
+	  <div class="alert alert-message error">
+	    {{ form.non_field_errors }}
+	  </div>
+	{% endif %}
+
+  <div class="control-group form-field clearfix{% if form.instance_name.errors %} error{% endif %}">
+    {{ form.instance_name.label_tag }}
+    {% if form.instance_name.errors %}
+      {% for error in form.instance_name.errors %}
+        <span class="help-inline">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
+    <span class="help-block">{{ form.instance_name.help_text }}</span>
+    <div class="input">
+      {{ form.instance_name }}
+    </div>
+  </div>
+
+  <div class="control-group form-field clearfix{% if form.probe_list.errors %} error{% endif %}">
+    {{ form.probe_list.label_tag }}
+    {% if form.probe_list.errors %}
+      {% for error in form.probe_list.errors %}
+        <span class="help-inline">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
+    <span class="help-block">{{ form.probe_list.help_text }}</span>
+    <div class="input">
+      {{ form.probe_list }}
+    </div>
+  </div>
+
+  <div class="control-group form-field clearfix{% if form.probeInterval.errors %} error{% endif %}">
+    {{ form.probeInterval.label_tag }}
+    {% if form.probeInterval.errors %}
+      {% for error in form.probeInterval.errors %}
+        <span class="help-inline">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
+    <span class="help-block">{{ form.probeInterval.help_text }}</span>
+    <div class="input">
+      {{ form.probeInterval }}
+    </div>
+  </div>    
+    
+
+
+  <div class="control-group form-field clearfix{% if form.passDetectInterval.errors %} error{% endif %}">
+    {{ form.passDetectInterval.label_tag }}
+    {% if form.passDetectInterval.errors %}
+      {% for error in form.passDetectInterval.errors %}
+        <span class="help-inline">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
+    <span class="help-block">{{ form.passDetectInterval.help_text }}</span>
+    <div class="input">
+      {{ form.passDetectInterval }}
+    </div>
+  </div>    
+
+  <div class="control-group form-field clearfix{% if form.failDetect.errors %} error{% endif %}">
+    {{ form.failDetect.label_tag }}
+    {% if form.failDetect.errors %}
+      {% for error in form.failDetect.errors %}
+        <span class="help-inline">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
+    <span class="help-block">{{ form.failDetect.help_text }}</span>
+    <div class="input">
+      {{ form.failDetect }}
+    </div>
+  </div>    
+
+<div id="httpGroup" style="display: none">
+  <div class="control-group form-field clearfix{% if form.requestMethodType.errors %} error{% endif %}" id="http1">
+    {{ form.requestMethodType.label_tag }}
+    {% if form.requestMethodType.errors %}
+      {% for error in form.requestMethodType.errors %}
+        <span class="help-inline">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
+    <span class="help-block">{{ form.requestMethodType.help_text }}</span>
+    <div class="input">
+      {{ form.requestMethodType }}
+    </div>
+  </div>    
+
+  <div class="control-group form-field clearfix{% if form.requestHTTPurl.errors %} error{% endif %}" id="http2">
+    {{ form.requestHTTPurl.label_tag }}
+    {% if form.requestHTTPurl.errors %}
+      {% for error in form.requestHTTPurl.errors %}
+        <span class="help-inline">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
+    <span class="help-block">{{ form.requestHTTPurl.help_text }}</span>
+    <div class="input">
+      {{ form.requestHTTPurl }}
+    </div>
+  </div>    
+
+ <div class="control-group form-field clearfix{% if form.appendPortHostTag.errors %} error{% endif %}" id="http3">
+    {{ form.appendPortHostTag.label_tag }}
+    {% if form.appendPortHostTag.errors %}
+      {% for error in form.appendPortHostTag.errors %}
+        <span class="help-inline">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
+    <span class="help-block">{{ form.appendPortHostTag.help_text }}</span>
+    <div class="input">
+      {{ form.appendPortHostTag }}
+    </div>
+  </div>    
+
+ <div class="control-group form-field clearfix{% if form.minExpectStatus.errors %} error{% endif %}"  id="http4">
+    {{ form.minExpectStatus.label_tag }}
+    {% if form.minExpectStatus.errors %}
+      {% for error in form.minExpectStatus.errors %}
+        <span class="help-inline">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
+    <span class="help-block">{{ form.minExpectStatus.help_text }}</span>
+    <div class="input">
+      {{ form.minExpectStatus }}
+    </div>
+  </div>    
+
+<div class="control-group form-field clearfix{% if form.maxExpectStatus.errors %} error{% endif %}" id="http5">
+    {{ form.maxExpectStatus.label_tag }}
+    {% if form.maxExpectStatus.errors %}
+      {% for error in form.maxExpectStatus.errors %}
+        <span class="help-inline">{{ error }}</span>
+      {% endfor %}
+    {% endif %}
+    <span class="help-block">{{ form.maxExpectStatus.help_text }}</span>
+    <div class="input">
+      {{ form.maxExpectStatus }}
+    </div>
+  </div>    
+
+  </div>
+</fieldset>
+</div>
+{% endblock %}
+
+{% block modal-footer %}
+  <input class="btn btn-primary pull-right" type="submit" value="{% trans "Add" %}" />
+  <a href="{% url horizon:nova:load_balancer:index %}" class="btn secondary cancel close">{% trans "Cancel" %} </a>
+{% endblock %}
+

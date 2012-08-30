@@ -1,0 +1,27 @@
+{% extends 'nova/base.html' %}
+{% load i18n %}
+
+<script>
+function f()
+{
+   var type = document.GetElementById("type");
+   if (type == "HTTP" || type == "HTTPS") {
+      var parameter = document.GetElementById("httpGroup");
+      parameter.style.display = parameter.style.display == 'none' ? '' : 'none';
+      
+      
+   }
+   else
+   {
+      var parameter = document.GetElementById("httpGroup");
+      parameter.style.display = 'none';
+      
+   }
+}
+</script>
+
+{% block title %}{% trans "Add Probe to Load Balancing" %}{% endblock %}
+
+{% block dash_main %}
+  {% include 'nova/load_balancer/devices/_addprobe.html' %}
+{% endblock %}
