@@ -73,14 +73,9 @@ def lb_delete(request, lb_id):
     balancerclient(request).loadbalancers.delete(lb_id)
 
 
-def lb_create(request, name, algorithm, protocol,
-              vip_name, vip_address, vip_mask, vip_port,
-              vip_type=None, vip_vlan=None,
-              **extra):
+def lb_create(request, name, algorithm, protocol, **extra):
     return balancerclient(request).loadbalancers.create(
                name, algorithm, protocol,
-               vip_name, vip_address, vip_mask, vip_port,
-               vip_type=vip_type, vip_vlan=vip_vlan,
                **extra)
 
 

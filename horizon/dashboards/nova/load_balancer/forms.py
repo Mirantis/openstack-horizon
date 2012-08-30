@@ -62,19 +62,28 @@ class CreateLoadBalancer(forms.SelfHandlingForm):
 
     def handle(self, request, data):
         try:
-            # NOTE(akscram): The Port is a load balancing port and
-            #                specified to LB and VIP.
-            api.lb_create(request, data['name'], data['algorithm'],
-                          data['protocol'], data['name'],
-                          data['vip_address'], data['vip_mask'], data['port'],
-                          vip_vlan=data['vip_vlan'], port=data['port'])
-            message = "Creating load balancer \"%s\"" % data["name"]
-            LOG.info(message)
-            messages.info(request, message)
+            lb = api.lb_create(request, data['name'], data['algorithm'],
+                          data['protocol'])
+            messages.success(request, ("Created load balancer \"%s\"" %
+                                       data["name"]))
         except balancerclient_exceptions.ClientException, e:
             LOG.exception("ClientException in CreateLoadBalancer")
             messages.error(request,
                            _("Error Creating Load Balancer: %s") % e.message)
+        else:
+            if data['vip_address']:
+                try:
+                    # NOTE(akscram): Virtual IP created with empty name.
+                    api.vip_create(request, lb.id, '', data['vip_address'],
+                                   data['vip_mask'], data['port'],
+                                   vlan=data['vip_vlan'])
+                    messages.success(request, ("Created Virtual IP \"%s\"" %
+                                               data["vip_address"]))
+                except balancerclient_exceptions.ClientException, e:
+                    LOG.exception("ClientException in CreateLoadBalancer")
+                    messages.error(request,
+                                   _("Error Creating Virtual IP: %s") % \
+                                   e.message)
         return shortcuts.redirect("horizon:nova:load_balancer:index")
 
 
