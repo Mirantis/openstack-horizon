@@ -43,7 +43,7 @@ class CreateProbe(forms.Form):
         ('HTTP', 'HTTP'),
     )
     name = forms.CharField(max_length='255', label=_('Probe Name'))
-    type = forms.ChoiceField(choices=TYPE_CHOICES, label=_('Proe Type'))
+    type = forms.ChoiceField(choices=TYPE_CHOICES, label=_('Probe Type'))
     interval = forms.IntegerField(label=_('Probe Interval'))
 
 
