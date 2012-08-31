@@ -366,8 +366,7 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView, LBFormMixin):
         instances = self.get_instances(request.GET.getlist('instances[]'))
         if not instances:
             messages.error(request, _('Select nodes to load balancing.'))
-            return shortcuts.redirect(reverse(
-                                       "horizon:nova:instances_and_volumes:index"))
+            return http.HttpResponse(status=401)
         NodeFormSet = formset_factory(CreateNode, formset=BaseNodeFormSet,
                                       extra=0)
         if request.method == 'POST':
