@@ -315,19 +315,34 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView, LBFormMixin):
         try:
             # NOTE(akscram): The Port is a load balancing port and
             #                specified to LB and VIP.
-            return api.lb_create(request, data['name'], data['algorithm'],
-                                 data['protocol'], data['name'],
-                                 data['vip_address'], data['vip_mask'],
-                                 data['port'],
-                                 vip_vlan=data['vip_vlan'], port=data['port'])
-            messages.info(request,
-                          _('Created Load Balancer "%s"') % (data['name'],))
+            lb = api.lb_create(request, data['name'], data['algorithm'],
+                               data['protocol'])
+            messages.success(request, (_('Created Load Balancer "%s"') %
+                                       (data['name'],)))
         except balancerclient_exceptions.ClientException, e:
             redirect = urlresolvers.reverse(
                                "horizon:nova:instances_and_volumes")
             exceptions.handle(request,
                               _("Error Creating Load Balancer: %r") % (e,),
                               redirect=redirect)
+        else:
+            if data['vip_address']:
+                try:
+                    # NOTE(akscram): Virtual IP created with empty name.
+                    api.vip_create(request, lb.id, '', data['vip_address'],
+                                   data['vip_mask'], data['port'],
+                                   vlan=data['vip_vlan'])
+                    messages.success(request, ("Created Virtual IP \"%s\"" %
+                                               (data["vip_address"],)))
+                except balancerclient_exceptions.ClientException, e:
+                    LOG.exception("ClientException in CreateLoadBalancer")
+                    messages.error(request,
+                                   _("Error Creating Virtual IP: %s") % \
+                                   e.message)
+                finally:
+                    return lb
+            else:
+                return lb
 
     def create_node(self, request, data):
         try:
@@ -356,6 +371,8 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView, LBFormMixin):
         if request.method == 'POST':
             lb_form = CreateLoadBalancer(request.POST, request.FILES,
                                          initial=self.get_initial())
+            lb_form.fields['algorithm'].choices = self.get_algorithms()
+            lb_form.fields['protocol'].choices = self.get_protocols()
             node_formset = NodeFormSet(request.POST, request.FILES,
                                initial=self.get_nodes_initial(instances))
             if lb_form.is_valid() and node_formset.is_valid():
