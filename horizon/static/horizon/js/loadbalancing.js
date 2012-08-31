@@ -26,7 +26,6 @@ horizon.addInitFunction(function() {
 
 $(function(){
     $('#instances :checkbox').change(function(){
-        console.log($('#instances :checked').length);
         if ($('#instances :checked').length > 0){
             $('a[id*="loadbalancing"]').removeClass('disabled');}
         else{
