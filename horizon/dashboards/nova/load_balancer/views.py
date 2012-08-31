@@ -365,7 +365,8 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView, LBFormMixin):
         # NOTE(akscram): AJAX send IDs of checked instances.
         instances = self.get_instances(request.GET.getlist('instances[]'))
         if not instances:
-            pass
+            return shortcuts.redirect(reverse(
+                                       "horizon:nova:instances_and_volumes"))
         NodeFormSet = formset_factory(CreateNode, formset=BaseNodeFormSet,
                                       extra=0)
         if request.method == 'POST':
