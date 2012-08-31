@@ -37,7 +37,7 @@ class ObjectStorePanels(horizon.PanelGroup):
 class LoadBalancerPanels(horizon.PanelGroup):
     slug = "load_balancer"
     name = _("Load Balancing")
-    pabels = ('load_balancer',)
+    panels = ('load_balancer',)
 
 
 class Nova(horizon.Dashboard):

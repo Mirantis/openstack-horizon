@@ -54,7 +54,6 @@ class IndexView(tables.DataTableView):
     template_name = 'nova/load_balancer/index.html'
 
     def get_data(self):
-        LOG.debug("Retrieve loadbalancers list %r" % self.request)
         try:
             lbs = api.lb_list(self.request)
         except:
@@ -322,8 +321,6 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView):
             node_formset = NodeFormSet(request.POST, request.FILES,
                                initial=self.get_nodes_initial(instances))
             if lb_form.is_valid() and node_formset.is_valid():
-                LOG.debug("lb_form: %r" % (lb_form.cleaned_data,))
-                LOG.debug("node_formset: %r" % (node_formset.cleaned_data,))
                 lb = self.create_lb(request, lb_form.cleaned_data)
                 for node_data in node_formset.cleaned_data:
                     node_data = node_data.copy()

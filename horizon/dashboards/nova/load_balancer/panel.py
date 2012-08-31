@@ -28,6 +28,7 @@ from horizon.dashboards.nova import dashboard
 class LoadBalancers(horizon.Panel):
     name = _("Load Balancers")
     slug = 'load_balancer'
+    services = ('loadbalancer',)
 
 
 dashboard.Nova.register(LoadBalancers)
