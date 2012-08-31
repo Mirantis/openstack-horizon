@@ -320,7 +320,7 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView, LBFormMixin):
             messages.success(request, (_('Created Load Balancer "%s"') %
                                        (data['name'],)))
         except balancerclient_exceptions.ClientException, e:
-            redirect = urlresolvers.reverse(
+            redirect = reverse(
                                "horizon:nova:instances_and_volumes")
             exceptions.handle(request,
                               _("Error Creating Load Balancer: %r") % (e,),
@@ -367,7 +367,7 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView, LBFormMixin):
         if not instances:
             messages.error(request, _('Select nodes to load balancing.'))
             return shortcuts.redirect(reverse(
-                                       "horizon:nova:instances_and_volumes"))
+                                       "horizon:nova:instances_and_volumes:index"))
         NodeFormSet = formset_factory(CreateNode, formset=BaseNodeFormSet,
                                       extra=0)
         if request.method == 'POST':
