@@ -42,8 +42,10 @@ class CreateLoadBalancer(forms.SelfHandlingForm):
     protocol = forms.ChoiceField(label=_("Protocol of load balancing."))
     port = forms.IntegerField(min_value=1, max_value=65536, initial=80,
                               label=_("Port of load balancing."))
-    vip_address = forms.IPAddressField(label=_('Virtual IP Address'))
-    vip_mask = forms.IPAddressField(label=_('Virtual IP Address Mask'))
+    vip_address = forms.IPAddressField(required=False,
+                                       label=_('Virtual IP Address'))
+    vip_mask = forms.IPAddressField(required=False,
+                                    label=_('Virtual IP Address Mask'))
 # NOTE(akcram): VIP type not yet supported in LBaaS.
 #    vip_type = forms.ChoiceField(choices=VIP_TYPE_CHOICES, required=False,
 #                                 label=_('Virtual IP Type'))
