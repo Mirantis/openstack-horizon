@@ -7,6 +7,10 @@
 {% endblock page_header %}
 
 {% block dash_main %}
+  <div id="lb">
+      {{ lb_table.render }}
+  </div>
+
   <div id="nodes">
       {{ nodes_table.render }}
   </div>

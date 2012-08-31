@@ -61,9 +61,9 @@ class EditLoadBalancer(tables.LinkAction):
 class LoadBalancersTable(tables.DataTable):
     STATUS_CHOICES = (
         ("active", True),
-        ('build',  None),
-        ('',  None),
-        ('error',  False),
+        ('build', None),
+        ('', None),
+        ('error', False),
     )
     id = tables.Column("id", verbose_name=_('id'), hidden=True)
     name = tables.Column("name", verbose_name=_('Name'),
@@ -80,3 +80,25 @@ class LoadBalancersTable(tables.DataTable):
         status_columns = ["status"]
         row_actions = (EditLoadBalancer, DeleteLoadBalancer)
         table_actions = (CreateLoadBalancer, DeleteLoadBalancer)
+
+
+class LBTable(tables.DataTable):
+    STATUS_CHOICES = (
+        ("active", True),
+        ('build', None),
+        ('', None),
+        ('error', False),
+    )
+    id = tables.Column("id", verbose_name=_('id'), hidden=True)
+    name = tables.Column("name", verbose_name=_('Name'))
+    algorithm = tables.Column("algorithm", verbose_name=_("Algorithm"))
+    protocol = tables.Column("protocol", verbose_name=_("Protocol"))
+    port = tables.Column("port", verbose_name=_("Port"))
+    status = tables.Column("status",
+                           verbose_name=_("Status"),
+                           status=True,
+                           status_choices=STATUS_CHOICES)
+
+    class Meta:
+        name = "lb"
+        verbose_name = _("Load Balancer")

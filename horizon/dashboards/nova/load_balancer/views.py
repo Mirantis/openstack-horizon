@@ -34,7 +34,7 @@ from horizon import exceptions
 from horizon import tables
 from horizon import forms
 
-from .tables import LoadBalancersTable
+from .tables import LoadBalancersTable, LBTable
 from .forms import CreateLoadBalancer, UpdateLoadBalancer
 from .nodes.tables import NodesTable
 from .nodes.forms import BaseNodeFormSet, CreateNode
@@ -133,7 +133,7 @@ class UpdateView(forms.ModalFormView, LBFormMixin):
 
 
 class DetailView(tables.MultiTableView):
-    table_classes = (VIPTable, NodesTable, ProbesTable)
+    table_classes = (VIPTable, NodesTable, ProbesTable, LBTable)
     template_name = 'nova/load_balancer/detail.html'
 
     def get_context_data(self, **kwargs):
@@ -150,6 +150,9 @@ class DetailView(tables.MultiTableView):
             msg = _("Unable to retrieve details for Load balancer \"%s\".") % \
                   (lb_id,)
             exceptions.handle(self.request, msg, redirect=redirect)
+
+    def get_lb_data(self):
+        return [self.get_lb()]
 
     def get_nodes_data(self):
         try:
