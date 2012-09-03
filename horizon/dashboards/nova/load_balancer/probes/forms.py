@@ -44,13 +44,17 @@ class CreateProbe(forms.Form):
     )
     name = forms.CharField(max_length='255', label=_('Probe Name'))
     type = forms.ChoiceField(choices=TYPE_CHOICES, label=_('Probe Type'))
-    interval = forms.IntegerField(label=_('Probe Interval'))
+    interval = forms.IntegerField(min_value=1, max_value=10000,
+                                  label=_('Probe Interval'))
 
 
 class CreateICMPProbe(forms.Form):
-    delay = forms.IntegerField(label=_('Probe delay'))
-    attempts = forms.IntegerField(label=_('Attempts before deactivation'))
-    timeout = forms.IntegerField(label=_('Timeout'))
+    delay = forms.IntegerField(min_value=1, max_value=10000,
+                               label=_('Probe delay'))
+    attempts = forms.IntegerField(min_value=1, max_value=10000,
+                                  label=_('Attempts before deactivation'))
+    timeout = forms.IntegerField(min_value=1, max_value=10000,
+                                 label=_('Timeout'))
 
 
 class CreateHTTPProbe(forms.Form):
@@ -62,4 +66,5 @@ class CreateHTTPProbe(forms.Form):
                            validators=[start_with_slash])
     method = forms.ChoiceField(choices=METHOD_CHOICES,
                                label=_('Probe HTTP Method'))
-    status = forms.IntegerField(label=_('Expected HTTP Status'))
+    status = forms.IntegerField(min_value=100, max_value=600,
+                                label=_('Expected HTTP Status'))

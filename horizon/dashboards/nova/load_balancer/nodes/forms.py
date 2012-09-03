@@ -103,7 +103,8 @@ class CreateNode(forms.Form):
     address = forms.CharField()
     port = forms.IntegerField(min_value=1, max_value=65536, initial=80,
                               label=_('Port of load balancing.'))
-    weight = forms.IntegerField(label=_('Node Weight'))
+    weight = forms.IntegerField(min_value=1, max_value=100000,
+                                label=_('Node Weight'))
     condition = forms.ChoiceField(choices=CONDITION_CHOICES,
                                   label=_('Node Condition'))
 
@@ -116,7 +117,8 @@ class UpdateNode(forms.SelfHandlingForm):
     address = forms.ChoiceField(label=_('Node Address'))
     port = forms.IntegerField(min_value=1, max_value=65536, initial=80,
                               label=_('Port of load balancing.'))
-    weight = forms.IntegerField(label=_('Node Weight'))
+    weight = forms.IntegerField(min_value=1, max_value=100000,
+                                label=_('Node Weight'))
     condition = forms.ChoiceField(choices=CONDITION_CHOICES,
                                   label=_('Node Condition'))
 
