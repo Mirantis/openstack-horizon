@@ -350,7 +350,7 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView, LBFormMixin):
                             data['address'], data['port'], data['weight'],
                             data['condition'],
                             instance_id=data['instance_id'])
-            messages.info(request, _('Created node "%s"') % (data['name'],))
+            messages.success(request, _('Created node "%s"') % (data['name'],))
         except balancerclient_exceptions.ClientException, e:
             exceptions.handle(request, _("Error to create node: %r") % (e,))
 

@@ -88,7 +88,7 @@ class AddNode(forms.SelfHandlingForm):
                             data['condition'],
                             instance_id=data['instance_id'])
             msg = "Creating node \"%s\"" % data['name']
-            messages.info(request, msg)
+            messages.success(request, msg)
         except balancerclient_exceptions.ClientException, e:
             exceptions.handle(request,
                               _("Error to create node: %r") % (e.message,))
