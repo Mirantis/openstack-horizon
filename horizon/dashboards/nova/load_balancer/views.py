@@ -320,8 +320,7 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView, LBFormMixin):
             messages.success(request, (_('Created Load Balancer "%s"') %
                                        (data['name'],)))
         except balancerclient_exceptions.ClientException, e:
-            redirect = reverse(
-                               "horizon:nova:instances_and_volumes")
+            redirect = reverse("horizon:nova:instances_and_volumes:index")
             exceptions.handle(request,
                               _("Error Creating Load Balancer: %r") % (e,),
                               redirect=redirect)
