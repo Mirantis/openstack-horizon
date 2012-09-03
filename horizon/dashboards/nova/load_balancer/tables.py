@@ -93,7 +93,6 @@ class LBTable(tables.DataTable):
     name = tables.Column("name", verbose_name=_('Name'))
     algorithm = tables.Column("algorithm", verbose_name=_("Algorithm"))
     protocol = tables.Column("protocol", verbose_name=_("Protocol"))
-    port = tables.Column("port", verbose_name=_("Port"))
     status = tables.Column("status",
                            verbose_name=_("Status"),
                            status=True,
