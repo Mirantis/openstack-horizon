@@ -23,3 +23,15 @@ horizon.addInitFunction(function() {
       evt.preventDefault();
     });
 });
+
+$(function(){
+    $('#instances :checkbox').change(function(){
+        setTimeout(function(){
+        if ($('#instances :checked').length > 0){
+            $('a[id*="loadbalancing"]').removeClass('disabled');}
+        else{
+            $('a[id*="loadbalancing"]').addClass('disabled');
+        }}, 50)
+    
+    })
+})

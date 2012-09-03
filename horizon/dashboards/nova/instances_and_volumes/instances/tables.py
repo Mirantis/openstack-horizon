@@ -177,7 +177,7 @@ class LoadBalancing(tables.LinkAction):
     verbose_name = _("Load Balancing")
     verbose_name_plural = verbose_name
     url = "horizon:nova:load_balancer:loadbalancing"
-    classes = ("ajax-modal-loadbalancing", "btn-camera",)
+    classes = ("ajax-modal-loadbalancing", "btn-camera", "disabled")
 
 
 class ConsoleLink(tables.LinkAction):

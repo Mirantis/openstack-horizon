@@ -320,8 +320,7 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView, LBFormMixin):
             messages.success(request, (_('Created Load Balancer "%s"') %
                                        (data['name'],)))
         except balancerclient_exceptions.ClientException, e:
-            redirect = urlresolvers.reverse(
-                               "horizon:nova:instances_and_volumes")
+            redirect = reverse("horizon:nova:instances_and_volumes:index")
             exceptions.handle(request,
                               _("Error Creating Load Balancer: %r") % (e,),
                               redirect=redirect)
@@ -365,7 +364,8 @@ class LoadBalancingView(NodeModalFormMixin, generic.TemplateView, LBFormMixin):
         # NOTE(akscram): AJAX send IDs of checked instances.
         instances = self.get_instances(request.GET.getlist('instances[]'))
         if not instances:
-            pass
+            messages.error(request, _('Select nodes to load balancing.'))
+            return http.HttpResponse(status=401)
         NodeFormSet = formset_factory(CreateNode, formset=BaseNodeFormSet,
                                       extra=0)
         if request.method == 'POST':
