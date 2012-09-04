@@ -49,7 +49,8 @@ class CreateLoadBalancer(forms.SelfHandlingForm):
 # NOTE(akcram): VIP type not yet supported in LBaaS.
 #    vip_type = forms.ChoiceField(choices=VIP_TYPE_CHOICES, required=False,
 #                                 label=_('Virtual IP Type'))
-    vip_vlan = forms.IntegerField(required=False, label=_('Virtual IP VLAN'))
+    vip_vlan = forms.IntegerField(min_value=1, max_value=4096,
+                                  required=False, label=_('Virtual IP VLAN'))
 
     def __init__(self, *args, **kwargs):
         algos = kwargs.pop('lb_algoritms', None)
