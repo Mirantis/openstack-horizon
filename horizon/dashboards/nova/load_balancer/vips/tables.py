@@ -58,6 +58,7 @@ class VIPTable(tables.DataTable):
         ('false', False),
     )
     id = tables.Column('id', verbose_name=_('id'), hidden=True)
+    name = tables.Column('name', verbose_name=_('Name'))
     address = tables.Column('address', verbose_name=_('Address'))
     mask = tables.Column('mask', verbose_name=_('Mask'))
     port = tables.Column('port', verbose_name=_('Port'))
@@ -71,7 +72,7 @@ class VIPTable(tables.DataTable):
         super(VIPTable, self).__init__(*args, **kwargs)
         # NOTE(akscram): Set callable link to reverse URL with two
         #                arguments.
-        self.columns['address'].link = self.link_callback
+        self.columns['name'].link = self.link_callback
 
     class Meta:
         name = 'vips'
