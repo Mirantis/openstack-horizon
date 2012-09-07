@@ -44,11 +44,13 @@ class CreateVIP(forms.SelfHandlingForm):
     name = forms.CharField(max_length="255", label=_("Virtual IP Name"))
     address = forms.IPAddressField(label=_('Virtual IP Address'))
     mask = forms.IPAddressField(label=_('Virtual IP Address Mask'))
-    port = forms.IntegerField(label=_('Virtual IP Port'))
+    port = forms.IntegerField(min_value=1, max_value=65536,
+                              label=_('Virtual IP Port'))
 # NOTE(akscram): The Type of VIP not yet supported.
 #    type = forms.ChoiceField(choices=VIP_TYPE_CHOICES, required=False,
 #                             label=_('Virtual IP Type'))
-    vlan = forms.IntegerField(required=False, label=_('Virtual IP VLAN'))
+    vlan = forms.IntegerField(min_value=1, max_value=4096,
+                              required=False, label=_('Virtual IP VLAN'))
 
     def __init__(self, *args, **kwargs):
         self.lb_id = kwargs.pop('lb_id')
