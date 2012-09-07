@@ -60,7 +60,7 @@ class CreateVIP(forms.SelfHandlingForm):
                            data['address'], data['mask'], data['port'],
                            vlan=data['vlan'])
             msg = "Creating Virtual IP \"%s\"" % data['name']
-            messages.info(request, msg)
+            messages.success(request, msg)
         except balancerclient_exceptions.ClientException, e:
             exceptions.handle(request, _("Error to create Virtual IP: %r") %
                                        (e.message,))

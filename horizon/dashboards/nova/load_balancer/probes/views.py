@@ -51,7 +51,7 @@ class CreateView(MultiTypeForm):
                              probe_type, **data)
             message = "Creating probe \"%s\"" % (probe_name,)
             LOG.info(message)
-            messages.info(request, message)
+            messages.success(request, message)
         except balancerclient_exceptions.ClientException, e:
             LOG.exception('ClientException in CreateProbe')
             messages.error(request,
