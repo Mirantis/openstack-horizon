@@ -39,23 +39,22 @@ __all__ = ('algorithms_get', 'lb_create', 'lb_delete', 'lb_get',
 LOG = logging.getLogger(__name__)
 
 
-def balancerclient(request):
-    o = urlparse.urlparse(base.url_for(request, 'loadbalancer'))
-    url = "://".join((o.scheme, o.netloc))
-    LOG.debug('balancerclient connection created using token "%s" and url "%s"'
-              % (request.user.token, url))
-    return balancer_client.Client(endpoint=url, token=request.user.token)
+def balancerclient(request, admin=False):
+    endpoint = base.url_for(request, 'loadbalancer', admin=admin)
+    LOG.debug('balancerclient connection created using token %r and url %r',
+              request.user.token, endpoint)
+    return balancer_client.Client(endpoint=endpoint, token=request.user.token)
 
 
 # Device
 
 
 def algorithms_get(request):
-    return balancerclient(request).devices.list_algoritms()
+    return balancerclient(request, admin=True).devices.list_algoritms()
 
 
 def protocols_get(request):
-    return balancerclient(request).devices.list_protocols()
+    return balancerclient(request, admin=True).devices.list_protocols()
 
 
 # LoadBalancer
