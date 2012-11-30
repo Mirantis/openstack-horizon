@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Advanced Services" %}{% endblock %}
+
+{% block page_header %}
+    {% include "horizon/common/_page_header.html" with title=_("Advanced Services") %}
+{% endblock page_header %}
+
+{% block main %}
+    {{ table.render }}
+{% endblock %}

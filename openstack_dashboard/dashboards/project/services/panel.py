@@ -1,6 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2012 Nebula, Inc.
+# Copyright 2012 NEC Corporation
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -18,31 +18,12 @@ from django.utils.translation import ugettext_lazy as _
 
 import horizon
 
-
-class BasePanels(horizon.PanelGroup):
-    slug = "compute"
-    name = _("Manage Compute")
-    panels = ('overview',
-              'instances',
-              'volumes',
-              'images_and_snapshots',
-              'access_and_security',
-              'networks',
-              'services')
+from openstack_dashboard.dashboards.project import dashboard
 
 
-class ObjectStorePanels(horizon.PanelGroup):
-    slug = "object_store"
-    name = _("Object Store")
-    panels = ('containers',)
+class AdvancedServices(horizon.Panel):
+    name = _("Advanced Services")
+    slug = 'services'
+    permissions = ('openstack.services.network',)
 
-
-class Project(horizon.Dashboard):
-    name = _("Project")
-    slug = "project"
-    panels = (BasePanels, ObjectStorePanels)
-    default_panel = 'overview'
-    supports_tenants = True
-
-
-horizon.register(Project)
+dashboard.Project.register(AdvancedServices)
