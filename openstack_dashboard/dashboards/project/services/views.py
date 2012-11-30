@@ -15,7 +15,7 @@
 #    under the License.
 
 """
-Views for managing Quantum Networks.
+Views for managing Quantum Services.
 """
 import logging
 
@@ -29,6 +29,7 @@ from horizon import workflows
 
 from openstack_dashboard import api
 from .tables import AdvancedServicesTable
+from .vips.tables import VipsTable
 from .workflows import CreateService
 
 LOG = logging.getLogger(__name__)
@@ -51,88 +52,77 @@ class IndexView(tables.DataTableView):
         return services
 
 
-class CreateView(workflows.WorkflowView):
-    workflow_class = CreateService
-    template_name = 'project/services/create.html'
+#class CreateView(workflows.WorkflowView):
+#    workflow_class = CreateService
+#    template_name = 'project/services/create.html'
+#
+#    def get_initial(self):
+#        pass
 
-    def get_initial(self):
-        pass
 
-
-class UpdateView(forms.ModalFormView):
-#    form_class = UpdateNetwork
-    template_name = 'project/services/update.html'
-    context_object_name = 'service'
-    success_url = reverse_lazy("horizon:project:services:index")
-
-    def get_context_data(self, **kwargs):
-        context = super(UpdateView, self).get_context_data(**kwargs)
-        context["network_id"] = self.kwargs['network_id']
-        return context
-
-    def _get_object(self, *args, **kwargs):
-        if not hasattr(self, "_object"):
-            network_id = self.kwargs['network_id']
-            try:
-                self._object = api.quantum.network_get(self.request,
-                                                       network_id)
-            except:
-                redirect = self.success_url
-                msg = _('Unable to retrieve network details.')
-                exceptions.handle(self.request, msg, redirect=redirect)
-        return self._object
-
-    def get_initial(self):
-        network = self._get_object()
-        return {'network_id': network['id'],
-                'tenant_id': network['tenant_id'],
-                'name': network['name']}
+#class UpdateView(forms.ModalFormView):
+##    form_class = UpdateService
+#    template_name = 'project/services/update.html'
+#    context_object_name = 'service'
+#    success_url = reverse_lazy("horizon:project:services:index")
+#
+#    def get_context_data(self, **kwargs):
+#        context = super(UpdateView, self).get_context_data(**kwargs)
+#        context["service_id"] = self.kwargs['service_id']
+#        return context
+#
+#    def _get_object(self, *args, **kwargs):
+#        if not hasattr(self, "_object"):
+#            service_id = self.kwargs['service_id']
+#            try:
+#                self._object = api.quantum.service_get(self.request,
+#                                                       service_id)
+#            except:
+#                redirect = self.success_url
+#                msg = _('Unable to retrieve service details.')
+#                exceptions.handle(self.request, msg, redirect=redirect)
+#        return self._object
+#
+#    def get_initial(self):
+#        service = self._get_object()
+#        return {'service_id': service['id'],
+#                'tenant_id': service['tenant_id'],
+#                'name': service['name']}
 
 
 class DetailView(tables.MultiTableView):
-#    table_classes = (SubnetsTable, PortsTable)
+    table_classes = (VipsTable,)
     template_name = 'project/services/detail.html'
     failure_url = reverse_lazy('horizon:project:services:index')
 
-    def get_subnets_data(self):
+    def get_vips_data(self):
         try:
-            network = self._get_data()
-            subnets = api.quantum.subnet_list(self.request,
-                                              network_id=network.id)
+#            service = self._get_data()
+#            vips = api.quantum_services.vip_list(self.request,
+#                                              service_id=service.id)
+            vips = api.quantum_services.vip_list(self.request)
         except:
-            subnets = []
-            msg = _('Subnet list can not be retrieved.')
+            vips = []
+            msg = _('Vip list can not be retrieved.')
             exceptions.handle(self.request, msg)
-        for s in subnets:
+        for s in vips:
             s.set_id_as_name_if_empty()
-        return subnets
-
-    def get_ports_data(self):
-        try:
-            network_id = self.kwargs['network_id']
-            ports = api.quantum.port_list(self.request, network_id=network_id)
-        except:
-            ports = []
-            msg = _('Port list can not be retrieved.')
-            exceptions.handle(self.request, msg)
-        for p in ports:
-            p.set_id_as_name_if_empty()
-        return ports
+        return vips
 
     def _get_data(self):
-        if not hasattr(self, "_network"):
+        if not hasattr(self, "_service"):
             try:
-                network_id = self.kwargs['network_id']
-                network = api.quantum.network_get(self.request, network_id)
-                network.set_id_as_name_if_empty(length=0)
+                service_id = self.kwargs['service_id']
+                service = api.quantum_services.service_get(self.request, service_id)
+                service.set_id_as_name_if_empty(length=0)
             except:
-                msg = _('Unable to retrieve details for network "%s".') \
-                      % (network_id)
+                msg = _('Unable to retrieve details for service "%s".') \
+                      % (service_id)
                 exceptions.handle(self.request, msg, redirect=self.failure_url)
-            self._network = network
-        return self._network
+            self._service = service
+        return self._service
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)
-        context["network"] = self._get_data()
+        context["service"] = self._get_data()
         return context

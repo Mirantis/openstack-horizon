@@ -16,7 +16,7 @@
 
 from django.conf.urls.defaults import patterns, url, include
 
-from .views import IndexView, CreateView, DetailView, UpdateView
+from .views import IndexView, DetailView
 #from .subnets.views import CreateView as AddSubnetView
 #from .subnets.views import UpdateView as EditSubnetView
 #from .subnets import urls as subnet_urls
@@ -28,9 +28,9 @@ SERVICES = r'^(?P<service_id>[^/]+)/%s$'
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^create$', CreateView.as_view(), name='create'),
+#    url(r'^create$', CreateView.as_view(), name='create'),
     url(SERVICES % 'detail', DetailView.as_view(), name='detail'),
-    url(SERVICES % 'update', UpdateView.as_view(), name='update'),
+#    url(SERVICES % 'update', UpdateView.as_view(), name='update'),
 #    url(SERVICES % 'subnets/create', AddSubnetView.as_view(),
 #        name='addsubnet'),
 #    url(r'^(?P<network_id>[^/]+)/subnets/(?P<subnet_id>[^/]+)/update$',

@@ -44,3 +44,14 @@ def service_list(request, **params):
 #    services = quantumclient(request).list_networks(**params).get('services')
     services = [{'id': '1234567890', 'name': 'lbaas', 'tenant_id': '123'}]
     return [Service(n) for n in services]
+
+def service_get(request, service_id, **params):
+    return Service({'id': '1234567890', 'name': 'lbaas', 'tenant_id': '123'})
+
+class Vip(QuantumAPIDictWrapper):
+    _attrs = ['name', 'id', 'tenant_id', 'address']
+
+def vip_list(request, **params):
+    vips = [{'id': 'agsfas', 'name': 'vip #1', 'tenant_id': '123', 'address': '127.0.0.1'},
+            {'id': 'agsfaa', 'name': 'vip #2', 'tenant_id': '123', 'address': '127.0.0.2'}]
+    return [Vip(n) for n in vips]
