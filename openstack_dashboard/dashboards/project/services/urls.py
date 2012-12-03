@@ -19,7 +19,7 @@ from django.conf.urls.defaults import patterns, url, include
 from .views import IndexView, DetailView
 #from .subnets.views import CreateView as AddSubnetView
 #from .subnets.views import UpdateView as EditSubnetView
-#from .subnets import urls as subnet_urls
+from .vips import urls as vip_urls
 #from .ports import urls as port_urls
 
 
@@ -35,6 +35,6 @@ urlpatterns = patterns('',
 #        name='addsubnet'),
 #    url(r'^(?P<network_id>[^/]+)/subnets/(?P<subnet_id>[^/]+)/update$',
 #        EditSubnetView.as_view(), name='editsubnet'),
-#    url(r'^subnets/', include(subnet_urls, namespace='subnets')),
+    url(r'^vips/', include(vip_urls, namespace='subnets')),
 #    url(r'^ports/', include(port_urls, namespace='ports'))
     )

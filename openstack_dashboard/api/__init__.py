@@ -38,4 +38,4 @@ from openstack_dashboard.api.nova import *
 from openstack_dashboard.api.swift import *
 from openstack_dashboard.api.quantum import *
 from openstack_dashboard.api.cinder import *
-from openstack_dashboard.api.quantum_services import *
+from openstack_dashboard.api.quantum_lb import *

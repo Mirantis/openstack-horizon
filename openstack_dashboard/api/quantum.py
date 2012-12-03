@@ -80,6 +80,9 @@ class Port(QuantumAPIDictWrapper):
             'UP' if apiresource['admin_state_up'] else 'DOWN'
         super(Port, self).__init__(apiresource)
 
+class Service(QuantumAPIDictWrapper):
+    """Wrapper for quantum Networks"""
+    _attrs = ['name', 'id', 'tenant_id']
 
 IP_VERSION_DICT = {4: 'IPv4', 6: 'IPv6'}
 
@@ -259,3 +262,12 @@ def port_modify(request, port_id, **kwargs):
     body = {'port': kwargs}
     port = quantumclient(request).update_port(port_id, body=body).get('port')
     return Port(port)
+
+def service_list(request, **params):
+    LOG.debug("service_list(): params=%s" % (params))
+    #    services = quantumclient(request).list_networks(**params).get('services')
+    services = [{'id': '1234567890', 'name': 'lbaas', 'tenant_id': '123'}]
+    return [Service(n) for n in services]
+
+def service_get(request, service_id, **params):
+    return Service({'id': '1234567890', 'name': 'lbaas', 'tenant_id': '123'})

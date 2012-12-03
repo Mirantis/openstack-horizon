@@ -87,7 +87,7 @@ class VipsTable(tables.DataTable):
         if not hasattr(self, "_service"):
             try:
                 service_id = self.kwargs['service_id']
-                service = api.quantum_services.service_get(self.request, service_id)
+                service = api.quantum.service_get(self.request, service_id)
                 service.set_id_as_name_if_empty(length=0)
             except:
                 msg = _('Unable to retrieve details for service "%s".') \

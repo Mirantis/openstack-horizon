@@ -34,20 +34,6 @@ class QuantumAPIDictWrapper(APIDictWrapper):
     def items(self):
         return self._apidict.items()
 
-
-class Service(QuantumAPIDictWrapper):
-    """Wrapper for quantum Networks"""
-    _attrs = ['name', 'id', 'tenant_id']
-
-def service_list(request, **params):
-    LOG.debug("service_list(): params=%s" % (params))
-#    services = quantumclient(request).list_networks(**params).get('services')
-    services = [{'id': '1234567890', 'name': 'lbaas', 'tenant_id': '123'}]
-    return [Service(n) for n in services]
-
-def service_get(request, service_id, **params):
-    return Service({'id': '1234567890', 'name': 'lbaas', 'tenant_id': '123'})
-
 class Vip(QuantumAPIDictWrapper):
     _attrs = ['name', 'id', 'tenant_id', 'address']
 

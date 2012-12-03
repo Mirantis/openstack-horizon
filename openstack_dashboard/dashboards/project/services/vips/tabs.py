@@ -34,14 +34,14 @@ class OverviewTab(tabs.Tab):
     template_name = "project/services/vips/_detail_overview.html"
 
     def get_context_data(self, request):
-        subnet_id = self.tab_group.kwargs['subnet_id']
+        vip_id = self.tab_group.kwargs['subnet_id']
         try:
-            subnet = api.quantum.subnet_get(self.request, subnet_id)
+            vip = api.quantum.subnet_get(self.request, vip_id)
         except:
-            redirect = reverse('horizon:project:networks:index')
-            msg = _('Unable to retrieve subnet details.')
+            redirect = reverse('horizon:project:services:index')
+            msg = _('Unable to retrieve vip details.')
             exceptions.handle(request, msg, redirect=redirect)
-        return {'subnet': subnet}
+        return {'subnet': vip}
 
 
 class VipDetailTabs(tabs.TabGroup):

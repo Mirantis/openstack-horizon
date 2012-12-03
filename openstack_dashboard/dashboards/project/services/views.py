@@ -42,7 +42,7 @@ class IndexView(tables.DataTableView):
     def get_data(self):
         try:
             tenant_id = self.request.user.tenant_id
-            services = api.quantum_services.service_list(self.request)
+            services = api.quantum.service_list(self.request)
         except:
             services = []
             msg = _('Service list can not be retrieved.')
@@ -100,7 +100,7 @@ class DetailView(tables.MultiTableView):
 #            service = self._get_data()
 #            vips = api.quantum_services.vip_list(self.request,
 #                                              service_id=service.id)
-            vips = api.quantum_services.vip_list(self.request)
+            vips = api.quantum_lb.vip_list(self.request)
         except:
             vips = []
             msg = _('Vip list can not be retrieved.')
@@ -113,7 +113,7 @@ class DetailView(tables.MultiTableView):
         if not hasattr(self, "_service"):
             try:
                 service_id = self.kwargs['service_id']
-                service = api.quantum_services.service_get(self.request, service_id)
+                service = api.quantum.service_get(self.request, service_id)
                 service.set_id_as_name_if_empty(length=0)
             except:
                 msg = _('Unable to retrieve details for service "%s".') \
