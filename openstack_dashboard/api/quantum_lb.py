@@ -35,9 +35,20 @@ class QuantumAPIDictWrapper(APIDictWrapper):
         return self._apidict.items()
 
 class Vip(QuantumAPIDictWrapper):
-    _attrs = ['name', 'id', 'tenant_id', 'address']
+    _attrs = ['name', 'id', 'tenant_id', 'address', 'port']
 
 def vip_list(request, **params):
-    vips = [{'id': 'agsfas', 'name': 'vip #1', 'tenant_id': '123', 'address': '127.0.0.1'},
-            {'id': 'agsfaa', 'name': 'vip #2', 'tenant_id': '123', 'address': '127.0.0.2'}]
+    vips = []
+    for i in range(10):
+        vips.append({'id': 'agsfas%s' % i, 'name': 'vip #%s' % i, 'tenant_id': '123', 'address': '127.0.0.%s' % i, 'port': '100%s' % i})
     return [Vip(n) for n in vips]
+
+
+class Member(QuantumAPIDictWrapper):
+    _attrs = ['name', 'id', 'tenant_id', 'address', 'port']
+
+def member_list(request, **params):
+    members = []
+    for i in range(15):
+        members.append({'id': 'agsfas%s' % i, 'name': 'member #%s' % i, 'tenant_id': '123', 'address': '10.1.2.%s' % i, 'port': '30%s' % i})
+    return [Vip(n) for n in members]
