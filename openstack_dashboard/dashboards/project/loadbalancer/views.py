@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2012 NEC Corporation
+# Copyright 2012 OpenStack LLC.
+# All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -14,9 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""
-Views for Quantum Load Balancing service.
-"""
 import logging
 
 from horizon import tabs

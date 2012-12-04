@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2012 NEC Corporation
+# Copyright 2012 OpenStack LLC.
+# All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -14,97 +15,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""
-Views for managing Quantum Subnets.
-"""
 import logging
 
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
-from horizon import forms
 from horizon import tables
-from horizon import workflows
 
 from openstack_dashboard import api
-from .forms import CreateSubnet, UpdateSubnet
-from .tables import MembersTable
+from .members.tables import MembersTable
 
 
 LOG = logging.getLogger(__name__)
-
-
-#class CreateView(forms.ModalFormView):
-#    form_class = CreateSubnet
-#    template_name = 'project/networks/subnets/create.html'
-#    success_url = 'horizon:project:networks:detail'
-#
-#    def get_success_url(self):
-#        return reverse(self.success_url,
-#                       args=(self.kwargs['network_id'],))
-#
-#    def get_object(self):
-#        if not hasattr(self, "_object"):
-#            try:
-#                network_id = self.kwargs["network_id"]
-#                self._object = api.quantum.network_get(self.request,
-#                                                       network_id)
-#            except:
-#                redirect = reverse('horizon:project:networks:index')
-#                msg = _("Unable to retrieve network.")
-#                exceptions.handle(self.request, msg, redirect=redirect)
-#        return self._object
-#
-#    def get_context_data(self, **kwargs):
-#        context = super(CreateView, self).get_context_data(**kwargs)
-#        context['network'] = self.get_object()
-#        return context
-#
-#    def get_initial(self):
-#        network = self.get_object()
-#        return {"network_id": self.kwargs['network_id'],
-#                "network_name": network.name}
-#
-#
-#class UpdateView(forms.ModalFormView):
-#    form_class = UpdateSubnet
-#    template_name = 'project/networks/subnets/update.html'
-#    context_object_name = 'subnet'
-#    success_url = reverse_lazy('horizon:project:networks:detail')
-#
-#    def get_success_url(self):
-#        return reverse('horizon:project:networks:detail',
-#                       args=(self.kwargs['network_id'],))
-#
-#    def _get_object(self, *args, **kwargs):
-#        if not hasattr(self, "_object"):
-#            subnet_id = self.kwargs['subnet_id']
-#            try:
-#                self._object = api.quantum.subnet_get(self.request, subnet_id)
-#            except:
-#                redirect = reverse("horizon:project:networks:index")
-#                msg = _('Unable to retrieve subnet details')
-#                exceptions.handle(self.request, msg, redirect=redirect)
-#        return self._object
-#
-#    def get_context_data(self, **kwargs):
-#        context = super(UpdateView, self).get_context_data(**kwargs)
-#        subnet = self._get_object()
-#        context['subnet_id'] = subnet.id
-#        context['network_id'] = subnet.network_id
-#        context['cidr'] = subnet.cidr
-#        context['ip_version'] = subnet.ipver_str
-#        return context
-#
-#    def get_initial(self):
-#        subnet = self._get_object()
-#        return {'network_id': self.kwargs['network_id'],
-#                'subnet_id': subnet['id'],
-#                'cidr': subnet['cidr'],
-#                'ip_version': subnet['ip_version'],
-#                'name': subnet['name'],
-#                'gateway_ip': subnet['gateway_ip']}
 
 
 class DetailView(tables.MultiTableView):
@@ -125,17 +48,17 @@ class DetailView(tables.MultiTableView):
         return members
 
     def _get_data(self):
-#        if not hasattr(self, "_network"):
-#            try:
-#                network_id = self.kwargs['network_id']
-#                network = api.quantum.network_get(self.request, network_id)
-#                network.set_id_as_name_if_empty(length=0)
-#            except:
-#                msg = _('Unable to retrieve details for network "%s".')\
-#                      % (network_id)
-#                exceptions.handle(self.request, msg, redirect=self.failure_url)
-#            self._network = network
-        return api.quantum_lb.vip_list(self.request)[0]
+        if not hasattr(self, "_vip"):
+            try:
+                vip_id = self.kwargs['vip_id']
+                vip = api.quantum_lb.vip_get(self.request, vip_id)
+                vip.set_id_as_name_if_empty(length=0)
+            except:
+                msg = _('Unable to retrieve details for vip "%s".')\
+                      % (vip_id)
+                exceptions.handle(self.request, msg, redirect=self.failure_url)
+            self._network = vip
+        return vip
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)

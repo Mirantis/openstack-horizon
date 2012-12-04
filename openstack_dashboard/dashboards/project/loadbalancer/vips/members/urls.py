@@ -1,7 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2012 OpenStack LLC.
-# All Rights Reserved.
+# Copyright 2012 NEC Corporation
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -15,14 +14,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import patterns, url, include
+from django.conf.urls import patterns, url
+from openstack_dashboard.dashboards.project.loadbalancer.vips.members.views \
+import CreateView
 
-from .views import IndexView
-from .vips import urls as vip_urls
-#from .members import urls as member_urls
+#from .views import DetailView
+from .views import CreateView as AddMemberView
 
-urlpatterns = patterns('',
-    url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^vips/', include(vip_urls, namespace='vips')),
-#    url(r'^members/', include(member_urls, namespace='members')),
-    )
+MEMBERS = r'^(?P<member_id>[^/]+)/%s$'
+VIEW_MOD = 'openstack_dashboard.dashboards.project.loadbalancer.vips.members.views'
+
+
+urlpatterns = patterns(VIEW_MOD,
+#    url(MEMBERS % 'detail', DetailView.as_view(), name='detail'),
+    url(r'^create', AddMemberView.as_view(), name='create'),
+    url(MEMBERS % 'update', AddMemberView.as_view(), name='update'),
+)

@@ -14,9 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
+from .members.views import CreateView as AddMemberView
 
 from .views import DetailView
+from .members import urls as member_urls
 
 
 VIPS = r'^(?P<vip_id>[^/]+)/%s$'
@@ -24,5 +26,7 @@ VIEW_MOD = 'openstack_dashboard.dashboards.project.loadbalancer.vips.views'
 
 
 urlpatterns = patterns(VIEW_MOD,
-    url(VIPS % 'detail', DetailView.as_view(), name='detail')
+    url(VIPS % 'detail', DetailView.as_view(), name='detail'),
+    url(VIPS % 'members/', include(member_urls, namespace='members')),
+    url(VIPS % 'members/create', AddMemberView.as_view(), name='create_member'),
 )
