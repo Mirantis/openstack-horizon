@@ -43,6 +43,9 @@ def vip_list(request, **params):
         vips.append({'id': 'agsfas%s' % i, 'name': 'vip #%s' % i, 'tenant_id': '123', 'address': '127.0.0.%s' % i, 'port': '100%s' % i})
     return [Vip(n) for n in vips]
 
+def vip_delete(request, vip_id):
+    pass
+
 
 class Member(QuantumAPIDictWrapper):
     _attrs = ['name', 'id', 'tenant_id', 'address', 'port']

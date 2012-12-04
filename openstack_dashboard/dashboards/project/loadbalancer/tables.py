@@ -16,11 +16,29 @@
 import logging
 
 from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
 
+from horizon import exceptions
 from horizon import tables
+
+from openstack_dashboard import api
 
 
 LOG = logging.getLogger(__name__)
+
+class DeleteVip(tables.DeleteAction):
+    data_type_singular = _("Vip")
+    data_type_plural = _("Vips")
+
+    def delete(self, request, vip_id):
+        try:
+            api.quantum_lb.vip_delete(request, vip_id)
+            LOG.debug('Deleted network %s successfully' % vip_id)
+        except:
+            msg = _('Failed to delete network %s') % vip_id
+            LOG.info(msg)
+            redirect = reverse("horizon:project:loadbalancer:index")
+            exceptions.handle(request, msg, redirect=redirect)
 
 
 class VipsTable(tables.DataTable):
@@ -32,6 +50,8 @@ class VipsTable(tables.DataTable):
     class Meta:
         name = "vips"
         verbose_name = _("Vips")
+        table_actions = (DeleteVip, )
+        row_actions = (DeleteVip, )
 
 
 class MembersTable(tables.DataTable):
@@ -43,6 +63,3 @@ class MembersTable(tables.DataTable):
     class Meta:
         name = "members"
         verbose_name = _("Members")
-
-#        table_actions = (CreateSubnet, DeleteSubnet)
-#        row_actions = (UpdateSubnet, DeleteSubnet)
