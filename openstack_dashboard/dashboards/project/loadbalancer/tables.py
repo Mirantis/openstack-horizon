@@ -56,8 +56,8 @@ class VipsTable(tables.DataTable):
 
 class MembersTable(tables.DataTable):
     name = tables.Column("name", verbose_name=_("Name"),
-                         link='horizon:project:loadbalancer:vips:detail')
-    address = tables.Column("address", verbose_name=_("VIP Address"))
+                         link='horizon:project:loadbalancer:members:detail')
+    address = tables.Column("address", verbose_name=_("Member Address"))
     port = tables.Column("port", verbose_name=_("TCP Port"))
 
     class Meta:

@@ -22,13 +22,14 @@ import logging
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.translation import ugettext_lazy as _
 
-from horizon import forms
 from horizon import exceptions
-from horizon import tabs
+from horizon import forms
+from horizon import tables
+from horizon import workflows
 
 from openstack_dashboard import api
 from .forms import CreateSubnet, UpdateSubnet
-from .tabs import VipDetailTabs
+from .tables import MembersTable
 
 
 LOG = logging.getLogger(__name__)
@@ -106,6 +107,37 @@ LOG = logging.getLogger(__name__)
 #                'gateway_ip': subnet['gateway_ip']}
 
 
-class DetailView(tabs.TabView):
-    tab_group_class = VipDetailTabs
-    template_name = 'project/services/vips/detail.html'
+class DetailView(tables.MultiTableView):
+    table_classes = (MembersTable, )
+    template_name = 'project/loadbalancer/vips/detail.html'
+    failure_url = reverse_lazy('horizon:project:loadbalancer:index')
+
+    def get_members_data(self):
+        try:
+            tenant_id = self.request.user.tenant_id
+            members = api.quantum_lb.member_list(self.request)
+        except:
+            members = []
+            msg = _('Member list can not be retrieved.')
+            exceptions.handle(self.request, msg)
+        for n in members:
+            n.set_id_as_name_if_empty()
+        return members
+
+    def _get_data(self):
+#        if not hasattr(self, "_network"):
+#            try:
+#                network_id = self.kwargs['network_id']
+#                network = api.quantum.network_get(self.request, network_id)
+#                network.set_id_as_name_if_empty(length=0)
+#            except:
+#                msg = _('Unable to retrieve details for network "%s".')\
+#                      % (network_id)
+#                exceptions.handle(self.request, msg, redirect=self.failure_url)
+#            self._network = network
+        return api.quantum_lb.vip_list(self.request)[0]
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context["vip"] = self._get_data()
+        return context

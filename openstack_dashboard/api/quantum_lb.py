@@ -55,3 +55,6 @@ def member_list(request, **params):
     for i in range(15):
         members.append({'id': 'agsfas%s' % i, 'name': 'member #%s' % i, 'tenant_id': '123', 'address': '10.1.2.%s' % i, 'port': '30%s' % i})
     return [Vip(n) for n in members]
+
+def member_delete(request, member_id):
+    pass

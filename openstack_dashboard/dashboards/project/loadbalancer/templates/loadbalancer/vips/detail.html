@@ -7,9 +7,22 @@
 {% endblock page_header %}
 
 {% block main %}
-<div id="row-fluid">
-  <div class="span12">
-    {{ tab_group.render }}
-  </div>
-</div>
+    <h3>{% trans "Vip Overview" %}</h3>
+
+    <div class="info detail">
+        <dl>
+            <dt>{% trans "Name" %}</dt>
+            <dd>{{ vip.name|default:"None" }}</dd>
+            <dt>{% trans "ID" %}</dt>
+            <dd>{{ vip.id|default:"None" }}</dd>
+            <dt>{% trans "Project ID" %}</dt>
+            <dd>{{ vip.tenant_id|default:"-" }}</dd>
+        </dl>
+    </div>
+
+    <hr>
+    <div id="members">
+        {{ members_table.render }}
+    </div>
+
 {% endblock %}
