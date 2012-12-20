@@ -27,7 +27,7 @@ class QuotaUsage(dict):
 
     def add_quota(self, quota):
         """ Adds an internal tracking reference for the given quota. """
-        if quota.limit is None:
+        if quota.limit is None or quota.limit == -1:
             # Handle "unlimited" quotas.
             self.usages[quota.name]['quota'] = float("inf")
             self.usages[quota.name]['available'] = float("inf")
@@ -111,5 +111,10 @@ def tenant_quota_usages(request):
     for flavor in [flavors[instance.flavor['id']] for instance in instances]:
         usages.tally('cores', getattr(flavor, 'vcpus', None))
         usages.tally('ram', getattr(flavor, 'ram', None))
+
+    # Initialise the tally if no instances have been launched yet
+    if len(instances) == 0:
+        usages.tally('cores', 0)
+        usages.tally('ram', 0)
 
     return usages

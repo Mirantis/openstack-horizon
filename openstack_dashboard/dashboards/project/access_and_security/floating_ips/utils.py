@@ -1,7 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright (c) 2012 OpenStack, LLC.
-# All Rights Reserved.
+# Copyright 2012 NEC Corporation All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -15,19 +14,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from os import path
-
-from django.conf import settings
-
-from openstack_dashboard.test import helpers as test
+import uuid
 
 
-class ErrorPageTests(test.TestCase):
-    """ Tests for error pages """
-    urls = 'openstack_dashboard.test.error_pages_urls'
+def get_int_or_uuid(value):
+    """Check if a value is valid as UUID or an integer.
 
-    def test_500_error(self):
-        TEMPLATE_DIRS = (path.join(settings.ROOT_PATH, 'templates'),)
-        with self.settings(TEMPLATE_DIRS=TEMPLATE_DIRS):
-            response = self.client.get('/500/')
-            self.assertTrue('Server error' in response.content)
+    This method is mainly used to convert floating IP id to the
+    appropriate type. For floating IP id, integer is used in Nova's
+    original implementation, but UUID is used in Quantum based one.
+    """
+    try:
+        uuid.UUID(value)
+        return value
+    except (ValueError, AttributeError):
+        return int(value)

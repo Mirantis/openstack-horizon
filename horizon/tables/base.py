@@ -160,6 +160,13 @@ class Column(html.HTMLElement):
         this column will be truncated and an ellipsis will be appended to the
         truncated data.
         Defaults to ``None``.
+
+    .. attribute:: link_classes
+
+        An iterable of CSS classes which will be added when the column's text
+        is displayed as a link.
+        Example: ``classes=('link-foo', 'link-bar')``.
+        Defaults to ``None``.
     """
     summation_methods = {
         "sum": sum,
@@ -191,7 +198,7 @@ class Column(html.HTMLElement):
                  link=None, allowed_data_types=[], hidden=False, attrs=None,
                  status=False, status_choices=None, display_choices=None,
                  empty_value=None, filters=None, classes=None, summation=None,
-                 auto=None, truncate=None):
+                 auto=None, truncate=None, link_classes=None):
         self.classes = list(classes or getattr(self, "classes", []))
         super(Column, self).__init__()
         self.attrs.update(attrs or {})
@@ -219,6 +226,7 @@ class Column(html.HTMLElement):
         self.empty_value = empty_value or '-'
         self.filters = filters or []
         self.truncate = truncate
+        self.link_classes = link_classes or []
 
         if status_choices:
             self.status_choices = status_choices
@@ -551,8 +559,10 @@ class Cell(html.HTMLElement):
             exc_info = sys.exc_info()
             raise template.TemplateSyntaxError, exc_info[1], exc_info[2]
         if self.url:
+            link_classes = ' '.join(self.column.link_classes)
             # Escape the data inside while allowing our HTML to render
-            data = mark_safe('<a href="%s">%s</a>' % (self.url, escape(data)))
+            data = mark_safe('<a href="%s" class="%s">%s</a>' %
+                             (self.url, link_classes, escape(data)))
         return data
 
     @property
@@ -708,6 +718,11 @@ class DataTableOptions(object):
 
         Boolean to control whether or not to show the table's footer.
         Default: ``True``.
+
+    .. attribute:: permissions
+
+        A list of permission names which this table requires in order to be
+        displayed. Defaults to an empty list (``[]``).
     """
     def __init__(self, options):
         self.name = getattr(options, 'name', self.__class__.__name__)
@@ -726,6 +741,7 @@ class DataTableOptions(object):
         self.no_data_message = getattr(options,
                                        "no_data_message",
                                        _("No items to display."))
+        self.permissions = getattr(options, 'permissions', [])
 
         # Set self.filter if we have any FilterActions
         filter_actions = [action for action in self.table_actions if
@@ -885,6 +901,7 @@ class DataTable(object):
         self._no_data_message = self._meta.no_data_message
         self.breadcrumb = None
         self.current_item_id = None
+        self.permissions = self._meta.permissions
 
         # Create a new set
         columns = []

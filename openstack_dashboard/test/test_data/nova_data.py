@@ -13,6 +13,7 @@
 #    under the License.
 
 import json
+import uuid
 
 from novaclient.v1_1 import (flavors, keypairs, servers, volumes,
                              volume_types, quotas,
@@ -143,6 +144,7 @@ def data(TEST):
     TEST.quotas = TestDataContainer()
     TEST.quota_usages = TestDataContainer()
     TEST.floating_ips = TestDataContainer()
+    TEST.floating_ips_uuid = TestDataContainer()
     TEST.usages = TestDataContainer()
     TEST.certs = TestDataContainer()
     TEST.volume_snapshots = TestDataContainer()
@@ -196,18 +198,22 @@ def data(TEST):
 
     # Flavors
     flavor_1 = flavors.Flavor(flavors.FlavorManager(None),
-                              {'id': "1",
+                              {'id': "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
                                'name': 'm1.tiny',
                                'vcpus': 1,
                                'disk': 0,
                                'ram': 512,
+                               'swap': 0,
+                               'extra_specs': {},
                                'OS-FLV-EXT-DATA:ephemeral': 0})
     flavor_2 = flavors.Flavor(flavors.FlavorManager(None),
-                              {'id': "2",
+                              {'id': "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                                'name': 'm1.massive',
                                'vcpus': 1000,
                                'disk': 1024,
                                'ram': 10000,
+                               'swap': 0,
+                               'extra_specs': {'Trusted': True, 'foo': 'bar'},
                                'OS-FLV-EXT-DATA:ephemeral': 2048})
     TEST.flavors.add(flavor_1, flavor_2)
 
@@ -334,6 +340,19 @@ def data(TEST):
                                      'instance_id': None,
                                      'ip': '58.58.58.58'})
     TEST.floating_ips.add(fip_1, fip_2)
+
+    # Floating IP with UUID id (for Floating IP with Quantum)
+    fip_3 = floating_ips.FloatingIP(floating_ips.FloatingIPManager(None),
+                                    {'id': str(uuid.uuid4()),
+                                     'fixed_ip': '10.0.0.4',
+                                     'instance_id': server_1.id,
+                                     'ip': '58.58.58.58'})
+    fip_4 = floating_ips.FloatingIP(floating_ips.FloatingIPManager(None),
+                                    {'id': str(uuid.uuid4()),
+                                     'fixed_ip': None,
+                                     'instance_id': None,
+                                     'ip': '58.58.58.58'})
+    TEST.floating_ips_uuid.add(fip_3, fip_4)
 
     # Usage
     usage_vals = {"tenant_id": TEST.tenant.id,
