@@ -10,6 +10,8 @@ from openstack_dashboard.api.base import APIDictWrapper, url_for
 
 LOG = logging.getLogger(__name__)
 
+NUMEROS = 'uno due tre quattro cinque sei otto nove dieci undici dodici'.split()
+
 def quantumclient(request):
     LOG.debug('quantumclient connection created using token "%s" and url "%s"'
               % (request.user.token.id, url_for(request, 'network')))
@@ -39,13 +41,13 @@ class Vip(QuantumAPIDictWrapper):
 
 def vip_list(request, **params):
     vips = []
-    for i in range(10):
-        vips.append({'id': 'agsfas%s' % i, 'name': 'vip #%s' % i, 'tenant_id': '123', 'address': '127.0.0.%s' % i, 'port': '100%s' % i})
+    for i in range(7):
+        vips.append({'id': 'abcd-efgh-ijkl-000%s' % i, 'name': 'Vip "%s"' % NUMEROS[i], 'tenant_id': 'demo', 'address': '127.0.0.%s' % i, 'port': '800%s' % i})
     return [Vip(n) for n in vips]
 
 def vip_get(request, vip_id):
-    i = vip_id
-    return Vip({'id': 'agsfas%s' % i, 'name': 'vip #%s' % i, 'tenant_id': '123', 'address': '127.0.0.%s' % i, 'port': '100%s' % i})
+    i = vip_id[-1]
+    return Vip({'id': 'abcd-efgh-ijkl-000%s' % i, 'name': 'Vip "%s"' % NUMEROS[int(i)], 'tenant_id': 'demo', 'address': '127.0.0.%s' % i, 'port': '100%s' % i})
 
 def vip_delete(request, vip_id):
     pass
@@ -56,13 +58,13 @@ class Member(QuantumAPIDictWrapper):
 
 def member_list(request, **params):
     members = []
-    for i in range(15):
-        members.append({'id': 'agsfas%s' % i, 'name': 'member #%s' % i, 'tenant_id': '123', 'address': '10.1.2.%s' % i, 'port': '30%s' % i})
-    return [Vip(n) for n in members]
+    for i in range(11):
+        members.append({'id': 'abcd-efgh-ijkl-000%s' % i, 'name': 'Member "%s"' % NUMEROS[i], 'tenant_id': 'demo', 'address': '10.1.2.%s' % i, 'port': '808%s' % i})
+    return [Member(n) for n in members]
 
 def member_get(request, member_id):
-    i = member_id
-    return Member(({'id': 'agsfas%s' % i, 'name': 'member #%s' % i, 'tenant_id': '123', 'address': '10.1.2.%s' % i, 'port': '30%s' % i}))
+    i = member_id[-1]
+    return Member(({'id': 'abcd-efgh-ijkl-000%s' % i, 'name': 'Member "%s"' % NUMEROS[int(i)], 'tenant_id': 'demo', 'address': '10.1.2.%s' % i, 'port': '808%s' % i}))
 
 def member_create(request, network_id, cidr, ip_version, **kwargs):
     """

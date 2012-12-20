@@ -62,7 +62,26 @@ class MembersTab(tabs.TableTab):
         return members
 
 
+class HealthMonitorsTab(tabs.TableTab):
+    table_classes = (MembersTable,)
+    name = _("HealthMonitors")
+    slug = "healthmonitors"
+    template_name = "horizon/common/_detail_table.html"
+
+    def get_members_data(self):
+        try:
+            tenant_id = self.request.user.tenant_id
+            members = api.quantum_lb.member_list(self.request)
+        except:
+            members = []
+            msg = _('Member list can not be retrieved.')
+            exceptions.handle(self.request, msg)
+        for n in members:
+            n.set_id_as_name_if_empty()
+        return members
+
+
 class LoadBalancerTabs(tabs.TabGroup):
     slug = "loadbalancer"
-    tabs = (VipsTab, MembersTab, )
+    tabs = (VipsTab, MembersTab, HealthMonitorsTab, )
     sticky = True
