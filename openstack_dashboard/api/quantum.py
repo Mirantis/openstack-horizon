@@ -98,7 +98,8 @@ def quantumclient(request):
     LOG.debug('user_id=%(user)s, tenant_id=%(tenant)s' %
               {'user': request.user.id, 'tenant': request.user.tenant_id})
     c = quantum_client.Client(token=request.user.token.id,
-                              endpoint_url=url_for(request, 'network'))
+#                              endpoint_url=url_for(request, 'network'))
+                              endpoint_url='http://localhost:9696/')
     return c
 
 

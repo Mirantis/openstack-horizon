@@ -19,14 +19,15 @@ from openstack_dashboard.dashboards.project.loadbalancer.vips.members.views \
 import CreateView
 
 #from .views import DetailView
-from .views import CreateView as AddMemberView
+from .views import CreateView
+from .views import UpdateView
 
 MEMBERS = r'^(?P<member_id>[^/]+)/%s$'
-VIEW_MOD = 'openstack_dashboard.dashboards.project.loadbalancer.vips.members.views'
+VIEW_MOD = 'openstack_dashboard.dashboards.project.loadbalancer.vips.members'
 
 
-urlpatterns = patterns(VIEW_MOD,
+urlpatterns = patterns('',
 #    url(MEMBERS % 'detail', DetailView.as_view(), name='detail'),
-    url(r'^create', AddMemberView.as_view(), name='create'),
-    url(MEMBERS % 'update', AddMemberView.as_view(), name='update'),
+    url(r'^create', CreateView.as_view(), name='create'),
+    url(MEMBERS % 'update', UpdateView.as_view(), name='update'),
 )

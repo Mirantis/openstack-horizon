@@ -60,5 +60,25 @@ def member_list(request, **params):
         members.append({'id': 'agsfas%s' % i, 'name': 'member #%s' % i, 'tenant_id': '123', 'address': '10.1.2.%s' % i, 'port': '30%s' % i})
     return [Vip(n) for n in members]
 
+def member_get(request, member_id):
+    i = member_id
+    return Member(({'id': 'agsfas%s' % i, 'name': 'member #%s' % i, 'tenant_id': '123', 'address': '10.1.2.%s' % i, 'port': '30%s' % i}))
+
+def member_create(request, network_id, cidr, ip_version, **kwargs):
+    """
+    Create a member for a specified vip
+    :param request: request context
+    :param network_id: network id a subnet is created on
+    :param cidr: subnet IP address range
+    :param ip_version: IP version (4 or 6)
+    :param gateway_ip: (optional) IP address of gateway
+    :param tenant_id: (optional) tenant id of the subnet created
+    :param name: (optional) name of the subnet created
+    :returns: Subnet object
+    """
+    body = {'id': 'new'}
+    body.update(kwargs)
+    return Member(body)
+
 def member_delete(request, member_id):
     pass

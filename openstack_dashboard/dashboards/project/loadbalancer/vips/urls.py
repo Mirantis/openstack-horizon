@@ -25,8 +25,8 @@ VIPS = r'^(?P<vip_id>[^/]+)/%s$'
 VIEW_MOD = 'openstack_dashboard.dashboards.project.loadbalancer.vips.views'
 
 
-urlpatterns = patterns(VIEW_MOD,
+urlpatterns = patterns('',
     url(VIPS % 'detail', DetailView.as_view(), name='detail'),
     url(VIPS % 'members/', include(member_urls, namespace='members')),
-    url(VIPS % 'members/create', AddMemberView.as_view(), name='create_member'),
+    url(VIPS % 'members/create', AddMemberView.as_view(), name='addmember'),
 )

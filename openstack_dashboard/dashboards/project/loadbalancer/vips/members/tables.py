@@ -48,7 +48,7 @@ class DeleteMember(tables.DeleteAction):
 class CreateMember(tables.LinkAction):
     name = "create"
     verbose_name = _("Create Member")
-    url = "horizon:project:loadbalancer:vips:members:create"
+    url = "horizon:project:loadbalancer:vips:addmember"
     classes = ("ajax-modal", "btn-create")
 
     def get_link_url(self, datum=None):
@@ -62,8 +62,14 @@ class UpdateMember(tables.LinkAction):
     url = "horizon:project:loadbalancer:vips:members:update"
     classes = ("ajax-modal", "btn-edit")
 
-    def get_link_url(self, datum=None):
+    def get_link_url(self, member):
+        print self.url
+        print self.table
+        print member
+
         vip_id = self.table.kwargs['vip_id']
+#        member_id = self.table.kwargs['member_id']
+
 #        member_id = self.table.kwargs['member_id']
         return reverse(self.url, args=(vip_id,))
 #        return reverse(self.url, args=(vip_id, member_id))
@@ -77,6 +83,5 @@ class MembersTable(tables.DataTable):
     class Meta:
         name = "members"
         verbose_name = _("Members")
-
         table_actions = (CreateMember, DeleteMember)
-        row_actions = (DeleteMember, )
+        row_actions = ( DeleteMember, )
