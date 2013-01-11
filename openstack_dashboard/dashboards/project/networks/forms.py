@@ -39,12 +39,15 @@ class UpdateNetwork(forms.SelfHandlingForm):
     network_id = forms.CharField(label=_("ID"),
                                  widget=forms.TextInput(
                                      attrs={'readonly': 'readonly'}))
+    admin_state = forms.BooleanField(label=_("Admin State"), required=False)
     failure_url = 'horizon:project:networks:index'
 
     def handle(self, request, data):
         try:
+            params = {'admin_state_up': data['admin_state'],
+                      'name': data['name']}
             network = api.quantum.network_modify(request, data['network_id'],
-                                                 name=data['name'])
+                                                 **params)
             msg = _('Network %s was successfully updated.') % data['name']
             LOG.debug(msg)
             messages.success(request, msg)

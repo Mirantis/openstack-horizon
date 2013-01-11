@@ -14,7 +14,7 @@
 
 import copy
 
-from openstack_dashboard.api.quantum import Network, Subnet, Port
+from openstack_dashboard.api.quantum import Network, Subnet, Port, Router
 
 from .utils import TestDataContainer
 
@@ -24,11 +24,13 @@ def data(TEST):
     TEST.networks = TestDataContainer()
     TEST.subnets = TestDataContainer()
     TEST.ports = TestDataContainer()
+    TEST.routers = TestDataContainer()
 
     # data return by quantumclient
     TEST.api_networks = TestDataContainer()
     TEST.api_subnets = TestDataContainer()
     TEST.api_ports = TestDataContainer()
+    TEST.api_routers = TestDataContainer()
 
     # 1st network
     network_dict = {'admin_state_up': True,
@@ -37,9 +39,12 @@ def data(TEST):
                     'status': 'ACTIVE',
                     'subnets': ['e8abc972-eb0c-41f1-9edd-4bc6e3bcd8c9'],
                     'tenant_id': '1',
+                    'router:external': False,
                     'shared': False}
     subnet_dict = {'allocation_pools': [{'end': '10.0.0.254',
                                          'start': '10.0.0.2'}],
+                   'dns_nameservers': [],
+                   'host_routes': [],
                    'cidr': '10.0.0.0/24',
                    'enable_dhcp': True,
                    'gateway_ip': '10.0.0.1',
@@ -50,6 +55,7 @@ def data(TEST):
                    'tenant_id': network_dict['tenant_id']}
     port_dict = {'admin_state_up': True,
                  'device_id': 'af75c8e5-a1cc-4567-8d04-44fcd6922890',
+                 'device_owner': 'network:dhcp',
                  'fixed_ips': [{'ip_address': '10.0.0.3',
                                 'subnet_id': subnet_dict['id']}],
                  'id': '3ec7f3db-cb2f-4a34-ab6b-69a64d3f008c',
@@ -58,7 +64,6 @@ def data(TEST):
                  'network_id': network_dict['id'],
                  'status': 'ACTIVE',
                  'tenant_id': network_dict['tenant_id']}
-
     TEST.api_networks.add(network_dict)
     TEST.api_subnets.add(subnet_dict)
     TEST.api_ports.add(port_dict)
@@ -77,9 +82,15 @@ def data(TEST):
                     'status': 'ACTIVE',
                     'subnets': ['3f7c5d79-ee55-47b0-9213-8e669fb03009'],
                     'tenant_id': '2',
+                    'router:external': True,
                     'shared': True}
     subnet_dict = {'allocation_pools': [{'end': '172.16.88.254',
-                                          'start': '172.16.88.2'}],
+                                         'start': '172.16.88.2'}],
+                   'dns_nameservers': ['10.56.1.20', '10.56.1.21'],
+                   'host_routes': [{'destination': '192.168.20.0/24',
+                                    'nexthop': '172.16.88.253'},
+                                   {'destination': '192.168.21.0/24',
+                                    'nexthop': '172.16.88.252'}],
                    'cidr': '172.16.88.0/24',
                    'enable_dhcp': True,
                    'gateway_ip': '172.16.88.1',
@@ -90,6 +101,7 @@ def data(TEST):
                    'tenant_id': network_dict['tenant_id']}
     port_dict = {'admin_state_up': True,
                  'device_id': '40e536b1-b9fd-4eb7-82d6-84db5d65a2ac',
+                 'device_owner': 'compute:nova',
                  'fixed_ips': [{'ip_address': '172.16.88.3',
                                 'subnet_id': subnet_dict['id']}],
                  'id': '7e6ce62c-7ea2-44f8-b6b4-769af90a8406',
@@ -98,7 +110,6 @@ def data(TEST):
                  'network_id': network_dict['id'],
                  'status': 'ACTIVE',
                  'tenant_id': network_dict['tenant_id']}
-
     TEST.api_networks.add(network_dict)
     TEST.api_subnets.add(subnet_dict)
     TEST.api_ports.add(port_dict)
@@ -109,3 +120,29 @@ def data(TEST):
     TEST.networks.add(Network(network))
     TEST.subnets.add(subnet)
     TEST.ports.add(Port(port_dict))
+
+    # Set up router data
+    port_dict = {'admin_state_up': True,
+                 'device_id': '7180cede-bcd8-4334-b19f-f7ef2f331f53',
+                 'device_owner': 'network:router_gateway',
+                 'fixed_ips': [{'ip_address': '10.0.0.3',
+                                'subnet_id': subnet_dict['id']}],
+                 'id': '3ec7f3db-cb2f-4a34-ab6b-69a64d3f008c',
+                 'mac_address': 'fa:16:3e:9c:d5:7e',
+                 'name': '',
+                 'network_id': network_dict['id'],
+                 'status': 'ACTIVE',
+                 'tenant_id': '1'}
+    TEST.api_ports.add(port_dict)
+    TEST.ports.add(Port(port_dict))
+
+    router_dict = {'id': '279989f7-54bb-41d9-ba42-0d61f12fda61',
+                   'name': 'router1',
+                   'tenant_id': '1'}
+    TEST.api_routers.add(router_dict)
+    TEST.routers.add(Router(router_dict))
+    router_dict = {'id': '279989f7-54bb-41d9-ba42-0d61f12fda61',
+                   'name': 'router1',
+                   'tenant_id': '1'}
+    TEST.api_routers.add(router_dict)
+    TEST.routers.add(Router(router_dict))

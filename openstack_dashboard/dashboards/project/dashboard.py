@@ -28,6 +28,7 @@ class BasePanels(horizon.PanelGroup):
               'images_and_snapshots',
               'access_and_security',
               'networks',
+              'routers',
               'services',
               'loadbalancer')
 
