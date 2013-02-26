@@ -18,32 +18,12 @@ from django.utils.translation import ugettext_lazy as _
 
 import horizon
 
-
-class BasePanels(horizon.PanelGroup):
-    slug = "compute"
-    name = _("Manage Compute")
-    panels = ('overview',
-              'instances',
-              'volumes',
-              'images_and_snapshots',
-              'access_and_security',
-              'networks',
-              'routers',
-              'hadoop')
+from openstack_dashboard.dashboards.project import dashboard
 
 
-class ObjectStorePanels(horizon.PanelGroup):
-    slug = "object_store"
-    name = _("Object Store")
-    panels = ('containers',)
+class ElasticHadoop(horizon.Panel):
+    name = _("Elastic Hadoop")
+    slug = 'hadoop'
 
 
-class Project(horizon.Dashboard):
-    name = _("Project")
-    slug = "project"
-    panels = (BasePanels, ObjectStorePanels)
-    default_panel = 'overview'
-    supports_tenants = True
-
-
-horizon.register(Project)
+dashboard.Project.register(ElasticHadoop)
