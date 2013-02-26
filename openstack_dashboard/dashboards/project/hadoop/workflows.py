@@ -79,12 +79,12 @@ class NameAction(workflows.Action):
         help_text_template = ("project/hadoop/_cluster_general_help.html")
 
     def populate_base_image_choices(self, request, context):
-        images = []
-        images.append(("m1.small", "m1.small"))
-        images.append(("m1.medium", "m1.medium"))
-        images.append(("m1.large", "m1.large"))
-        images.append(("m1.xlarge", "m1.xlarge"))
-        return images
+        public = {"is_public": True,
+                  "status": "active"}
+
+        public_images, _more = glance.image_list_detailed(request)
+
+        return [(image.id, image.name) for image in public_images]
 
 class NameStep(workflows.Step):
     action_class = NameAction
@@ -164,8 +164,10 @@ class FillPropertiesAction(workflows.Action):
         help_text_template = ("project/hadoop/_template_general_help.html")
 
     def populate_flavor_id_choices(self, request, context):
-        flavors_list = [("id_small", "m1.small"), ("id_medium", "m1.medium"), ("id_large", "m1.large"), ("id_xlarge", "m1.xlarge")]
-        return flavors_list
+        flavors = api.nova.flavor_list(request)
+        flavor_list = [(flavor.name, flavor.name)
+                       for flavor in flavors]
+        return flavor_list
 
 class FillProperties(workflows.Step):
     contributes = ("name", "flavor_id")

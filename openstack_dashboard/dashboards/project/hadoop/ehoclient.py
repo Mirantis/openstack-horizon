@@ -1,11 +1,13 @@
 import json
 import requests
 from clusters import Cluster
+from openstack_dashboard import api
+from openstack_dashboard.api import glance, nova
 from templates import Template
 
-EHO_IP = "http://172.18.78.99:8080/v0.1"
+EHO_IP = "http://127.0.0.1:8080/v0.1"
 
-def list_clusters():
+def list_clusters(request):
     resp = requests.get(EHO_IP + "/clusters")
     if (resp.status_code == 200):
         clusters_arr = resp.json["clusters"]
@@ -14,10 +16,11 @@ def list_clusters():
             id = cl["id"]
             name = cl["name"]
             base_image_id = cl["base_image_id"]
+            base_image_name = glance.image_get(request, base_image_id).name
             node_templates = cl["node_templates"]
             status = cl["status"]
             nodes = cl["nodes"]
-            cluster = Cluster(id, name, format_templates(node_templates), base_image_id, "active", len(nodes))
+            cluster = Cluster(id, name, format_templates(node_templates), base_image_name, status, len(nodes))
             clusters.append(cluster)
         return clusters
 
@@ -90,18 +93,19 @@ def get_cluster(cluster_id):
     return cluster
 
 class ClusterNode:
-    def __init__(self, id, template_name):
+    def __init__(self, id, vm, template_name):
         self.id = id
-        self.vm_id = id
+        self.vm = vm
         self.template_name = template_name
 
 
-def get_cluster_nodes(cluster_id):
+def get_cluster_nodes(cluster_id, request):
     resp = requests.get(EHO_IP + "/clusters/" + cluster_id)
     nodes = resp.json["nodes"]
     nodes_with_id = []
     for node in nodes:
-        nodes_with_id.append(ClusterNode(node["vm_id"], node["node_template"]["name"]))
+        vm = api.nova.server_get(request, node["vm_id"])
+        nodes_with_id.append(ClusterNode(vm.id, "%s (%s)" % (vm.name, ", ".join([elem['addr'].__str__() for elem in vm.addresses['supernetwork']])), node["node_template"]["name"]))
     return nodes_with_id
 
 

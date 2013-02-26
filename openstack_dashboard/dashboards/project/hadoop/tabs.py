@@ -17,7 +17,7 @@ class DetailTab(tabs.Tab):
         return {"cluster": cluster}
 
 class ClusterNodesTable(tables.DataTable):
-    vm_id = tables.Column("vm_id", verbose_name= _("VM id"))
+    vm = tables.Column("vm", verbose_name= _("VM info"))
     template_name = tables.Column("template_name", _("Node template name"))
 
     class Meta:
@@ -32,7 +32,7 @@ class NodesTab(tabs.TableTab):
     template_name = ("project/hadoop/_nodes_overview.html")
 
     def get_cluster_nodes_data(self):
-        nodes = get_cluster_nodes(self.tab_group.kwargs['cluster_id'])
+        nodes = get_cluster_nodes(self.tab_group.kwargs['cluster_id'], self.request)
         return nodes
 
 

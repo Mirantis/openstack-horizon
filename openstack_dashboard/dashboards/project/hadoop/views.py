@@ -78,7 +78,7 @@ class IndexView(tables.MultiTableView):
             #c11 = Cluster(123, "Cluster1", "JT+NN, TT, DN", "m1.xlarge", "active", 10)
             #c12 = Cluster(456, "Cluster2", "JT, NN", "m1.xlarge", "shutoff", 15)
             #clusters = [c11, c12]
-            clusters = list_clusters()
+            clusters = list_clusters(self.request)
             #get from client
         except:
             clusters = []
