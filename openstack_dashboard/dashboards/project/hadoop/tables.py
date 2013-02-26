@@ -195,8 +195,4 @@ class NodeTemplatesTable(tables.DataTable):
         table_actions = (CreateNodeTemplate, DeleteTemplate)
         row_actions = (EditTemplate, DeleteTemplate)
 
-class ClusterNodesTable(tables.DataTable):
-    name = tables.Column("name", verbose_name= _("Name"))
-    class Meta:
-        name = "cluster_nodes_table"
-        verbose_name = _("Cluster Nodes")
+

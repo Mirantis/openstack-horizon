@@ -89,5 +89,20 @@ def get_cluster(cluster_id):
     cluster = resp.json
     return cluster
 
+class ClusterNode:
+    def __init__(self, id, template_name):
+        self.id = id
+        self.vm_id = id
+        self.template_name = template_name
+
+
+def get_cluster_nodes(cluster_id):
+    resp = requests.get(EHO_IP + "/clusters/" + cluster_id)
+    nodes = resp.json["nodes"]
+    nodes_with_id = []
+    for node in nodes:
+        nodes_with_id.append(ClusterNode(node["vm_id"], node["node_template"]["name"]))
+    return nodes_with_id
+
 
 
