@@ -160,7 +160,7 @@ class InstancesTable(tables.DataTable):
         ("error", False),
     )
     name = tables.Column("name",
-                         link=("horizon:project:hadoop:detail"),
+                         link=("horizon:project:hadoop:cluster_details"),
                          verbose_name=_("Cluster Name"))
 
     node_template = tables.Column(render_templates, verbose_name=_("Node Templates"))
@@ -183,7 +183,9 @@ class InstancesTable(tables.DataTable):
 
 
 class NodeTemplatesTable(tables.DataTable):
-    name = tables.Column("name", verbose_name=_("Node template name"))
+    name = tables.Column("name",
+        verbose_name=_("Node template name"),
+        link=("horizon:project:hadoop:node_template_details"))
     node_type = tables.Column("node_type", verbose_name=_("Node Type"))
     flavor_name = tables.Column("flavor_name", verbose_name=_("Flavor name"))
 

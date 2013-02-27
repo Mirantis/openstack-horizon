@@ -42,7 +42,7 @@ from .tables import NodeTemplatesTable
 from .workflows import CreateCluster, CreateNodeTemplate
 from .clusters import Cluster
 from .templates import Template, getImages, addImage
-from .tabs import ClusterDetailTabs
+from .tabs import ClusterDetailTabs, NodeTemplateDetailsTabs
 from .clusters import getClusters, find_cluster
 
 from ehoclient import list_clusters, list_templates
@@ -155,18 +155,6 @@ class CreateClusterView(workflows.WorkflowView):
         initial['user_id'] = self.request.user.id
         return initial
 
-class DetailView(tabs.TabView):
-    tab_group_class = ClusterDetailTabs
-    template_name = 'project/hadoop/detail.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(DetailView, self).get_context_data(**kwargs)
-        return context
-
-    def get_data(self):
-        pass
-
-
 class CreateNodeTemplateView(workflows.WorkflowView):
     workflow_class = CreateNodeTemplate
     template_name = "project/hadoop/create_node_template.html"
@@ -176,3 +164,23 @@ class CreateNodeTemplateView(workflows.WorkflowView):
         initial['project_id'] = self.request.user.tenant_id
         initial['user_id'] = self.request.user.id
         return initial
+
+class ClusterDetailView(tabs.TabView):
+    tab_group_class = ClusterDetailTabs
+    template_name = 'project/hadoop/cluster_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ClusterDetailView, self).get_context_data(**kwargs)
+        return context
+
+    def get_data(self):
+        pass
+
+
+class NodeTemplateDetailView(tabs.TabView):
+    tab_group_class = NodeTemplateDetailsTabs
+    template_name = 'project/hadoop/node_template_details.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(NodeTemplateDetailView, self).get_context_data(**kwargs)
+        return context

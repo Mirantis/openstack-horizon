@@ -1,16 +1,16 @@
 {% load i18n sizeformat %}
 
-<h3>{% trans "Instance Overview" %}</h3>
+<h3>{% trans "Node Template Overview" %}</h3>
 
 <div class="status row-fluid detail">
     <h4>{% trans "Info" %}</h4>
     <hr class="header_rule">
     <dl>
         <dt>{% trans "Name" %}</dt>
-        <dd>{{ cluster.name}}</dd>
+        <dd>{{ node_template.name}}</dd>
         <dt>{% trans "ID" %}</dt>
-        <dd>{{ cluster.id }}</dd>
-        <dt>{% trans "Status" %}</dt>
-        <dd>{{ cluster.status }}</dd>
+        <dd>{{ node_template.id }}</dd>
+        <dt>{% trans "Flavor" %}</dt>
+        <dd>{{ node_template.flavor_id }}</dd>
     </dl>
 </div>

@@ -64,7 +64,7 @@ class UpdateRow(tables.Row):
 
 
 class SnapshotVolumeNameColumn(tables.Column):
-    def get_raw_data(self, snapshot):
+    def get_data(self, snapshot):
         request = self.table.request
         volume_name = api.cinder.volume_get(request,
                                             snapshot.volume_id).display_name

@@ -92,11 +92,17 @@ def get_cluster(cluster_id):
     cluster = resp.json
     return cluster
 
+def get_node_template(node_template_id):
+    resp = requests.get(EHO_IP + "/node-templates/" + node_template_id)
+    node_template = resp.json
+    return node_template
+
 class ClusterNode:
-    def __init__(self, id, vm, template_name):
+    def __init__(self, id, vm, template_name, template_id):
         self.id = id
         self.vm = vm
         self.template_name = template_name
+        self.template_id = template_id
 
 
 def get_cluster_nodes(cluster_id, request):
@@ -105,7 +111,7 @@ def get_cluster_nodes(cluster_id, request):
     nodes_with_id = []
     for node in nodes:
         vm = api.nova.server_get(request, node["vm_id"])
-        nodes_with_id.append(ClusterNode(vm.id, "%s (%s)" % (vm.name, ", ".join([elem['addr'].__str__() for elem in vm.addresses['supernetwork']])), node["node_template"]["name"]))
+        nodes_with_id.append(ClusterNode(vm.id, "%s (%s)" % (vm.name, ", ".join([elem['addr'].__str__() for elem in vm.addresses['supernetwork']])), node["node_template"]["name"], node["node_template"]["id"]))
     return nodes_with_id
 
 

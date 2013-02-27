@@ -1,0 +1,18 @@
+{% load i18n sizeformat %}
+
+<h3>{% trans "Cluster Overview" %}</h3>
+
+<div class="status row-fluid detail">
+    <h4>{% trans "Info" %}</h4>
+    <hr class="header_rule">
+    <dl>
+        <dt>{% trans "Name" %}</dt>
+        <dd>{{ cluster.name}}</dd>
+        <dt>{% trans "ID" %}</dt>
+        <dd>{{ cluster.id }}</dd>
+        <dt>{% trans "Status" %}</dt>
+        <dd>{{ cluster.status }}</dd>
+        <dt>{% trans "Base image"%}</dt>
+        <dd><a href="/project/images_and_snapshots/{{ cluster.base_image_id }}">{{ base_image_name }}</a></dd>
+    </dl>
+</div>
