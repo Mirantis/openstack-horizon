@@ -91,40 +91,40 @@ class NameStep(workflows.Step):
     contributes = ("name", "base_image")
 
 class NodesAction(workflows.Action):
-    primary_node_template = forms.ChoiceField(
-        label = mark_safe("<h3>Primary node template</h3><br/><h4>Node Template name</h4>"),
+    master_node_template = forms.ChoiceField(
+        label = mark_safe("<h3>Master Node Template</h3><br/><h4>Node Template name</h4>"),
         required = True
     )
 
-    secondary_node_template = forms.ChoiceField(
-        label = mark_safe("<h3>Secondary node template</h3><br/><h4>Node Template name</h4>"),
+    worker_node_template = forms.ChoiceField(
+        label = mark_safe("<h3>Worker Node Template</h3><br/><h4>Node Template name</h4>"),
         required = True
     )
 
-    secondary_node_template_count = forms.IntegerField(
-        label =  _("count"),
+    worker_node_template_count = forms.IntegerField(
+        label =  _("Nodes number"),
         initial = 1,
         required = True)
 
-    def populate_primary_node_template_choices(self, request, context):
+    def populate_master_node_template_choices(self, request, context):
         templates = list_templates()
         primary_templates = ((t.name, t.name) for t in templates if ("jt" in t.name or "nn" in t.name))
         return primary_templates
 
-    def populate_secondary_node_template_choices(self, request, context):
+    def populate_worker_node_template_choices(self, request, context):
         templates = list_templates()
         secondary_templates = ((t.name, t.name) for t in templates if ("tt" in t.name or "dn" in t.name))
         return secondary_templates
 
     class Meta:
-        name = _("Template images")
+        name = _("Node Templates")
         help_text_template = ("project/hadoop/_cluster_templates_help.html")
 
 
 
 class NodesStep(workflows.Step):
     action_class = NodesAction
-    contributes = ("primary_node_template", "secondary_node_template", "secondary_node_template_count")
+    contributes = ("master_node_template", "worker_node_template", "worker_node_template_count")
 
 
 class CreateCluster(workflows.Workflow):
@@ -139,9 +139,9 @@ class CreateCluster(workflows.Workflow):
             return create_cluster(
                 context["base_image"],
                 context["name"],
-                context["primary_node_template"],
-                context["secondary_node_template"],
-                context["secondary_node_template_count"]
+                context["master_node_template"],
+                context["worker_node_template"],
+                context["worker_node_template_count"]
             )
         except:
             exceptions.handle(request)
