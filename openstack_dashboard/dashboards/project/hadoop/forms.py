@@ -34,16 +34,12 @@ LOG = logging.getLogger(__name__)
 
 
 class UpdateInstance(forms.SelfHandlingForm):
-    tenant_id = forms.CharField(widget=forms.HiddenInput)
-    instance = forms.CharField(widget=forms.HiddenInput)
-    name = forms.CharField(required=True)
 
     def handle(self, request, data):
-        return api.nova.server_get()
+        pass
 
 
 class UpdateTemplate(forms.SelfHandlingForm):
-    name = forms.CharField(required=True)
 
     def handle(self, request, data):
         pass

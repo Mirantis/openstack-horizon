@@ -68,7 +68,7 @@ class SelectProjectUser(workflows.Step):
 
 
 class NameAction(workflows.Action):
-    name = forms.CharField(widget=forms.Textarea,
+    name = forms.CharField(
         label=_("Cluster name"),
         required=True,
         help_text=_("This name would be used further"))
@@ -102,7 +102,6 @@ class NodesAction(workflows.Action):
     )
 
     secondary_node_template_count = forms.IntegerField(
-        widget=forms.Textarea,
         label =  _("count"),
         initial = 1,
         required = True)
@@ -151,7 +150,7 @@ class CreateCluster(workflows.Workflow):
 
 
 class FillPropertiesAction(workflows.Action):
-    name = forms.CharField(widget=forms.Textarea,
+    name = forms.CharField(
         label=_("Node Template Name"),
         required=True,
         help_text=_("This name should be unique"))
@@ -181,19 +180,19 @@ class FillProcessPropertiesAction(workflows.Action):
     node_type = forms.ChoiceField(label = _("Nodes type"), required = True, choices = NODE_TYPE_CHOICES)
 
 
-    jt_heap_size = forms.CharField(widget=forms.Textarea,
+    jt_heap_size = forms.CharField(
         label= mark_safe("Job tracker<br>heap size"),
         required=False)
 
-    nn_heap_size = forms.CharField(widget=forms.Textarea,
+    nn_heap_size = forms.CharField(
         label= mark_safe("Name node<br>heap size"),
         required=False)
 
-    tt_heap_size = forms.CharField(widget=forms.Textarea,
+    tt_heap_size = forms.CharField(
         label= mark_safe("Task tracker<br>heap size"),
         required=False)
 
-    dn_heap_size = forms.CharField(widget=forms.Textarea,
+    dn_heap_size = forms.CharField(
         label= mark_safe("Data node<br>heap size"),
         required=False)
 

@@ -121,7 +121,7 @@ class EditClusterView(forms.ModalFormView):
 class EditTemplateView(forms.ModalFormView):
     form_class = UpdateTemplate
     context_object_name = "template"
-    template_name = 'project/hadoop/update_image.html'
+    template_name = 'project/hadoop/update_template.html'
     success_url = reverse_lazy("horizon:project:hadoop:index")
 
     def get_context_data(self, **kwargs):
