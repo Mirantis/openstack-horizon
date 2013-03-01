@@ -120,7 +120,7 @@ def get_cluster_nodes(cluster_id, request):
     nodes_with_id = []
     for node in nodes:
         vm = api.nova.server_get(request, node["vm_id"])
-        nodes_with_id.append(ClusterNode(vm.id, "%s (%s)" % (vm.name, ", ".join([elem['addr'].__str__() for elem in vm.addresses['supernetwork']])), node["node_template"]["name"], node["node_template"]["id"]))
+        nodes_with_id.append(ClusterNode(vm.id, "%s (%s)" % (vm.name, ", ".join([elem['addr'].__str__() for elem in vm.addresses['novanetwork']])), node["node_template"]["name"], node["node_template"]["id"]))
     return nodes_with_id
 
 
