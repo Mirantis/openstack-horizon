@@ -14,5 +14,12 @@
         <dd>{{ cluster.status }}</dd>
         <dt>{% trans "Base image"%}</dt>
         <dd><a href="/project/images_and_snapshots/{{ cluster.base_image_id }}">{{ base_image_name }}</a></dd>
+        <dt>{% trans "Service URLs" %}</dt>
+        <dd>
+            <ul>{% for name, url in cluster.service_urls.items %}
+                <li>{{ name }}:&nbsp <a href="{{ url }}">{{ url }}</a></li>
+                {% endfor %}
+            </ul>
+        </dd>
     </dl>
 </div>
