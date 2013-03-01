@@ -5,7 +5,7 @@ from openstack_dashboard import api
 from openstack_dashboard.api import glance, nova
 from templates import Template
 
-EHO_IP = "http://127.0.0.1:8080/v0.1"
+EHO_IP = "http://127.0.0.1:8080/v0.2"
 
 def list_clusters(request):
     resp = requests.get(EHO_IP + "/clusters")
