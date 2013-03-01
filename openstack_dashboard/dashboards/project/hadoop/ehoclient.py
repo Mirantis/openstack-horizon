@@ -37,7 +37,7 @@ def format_templates(templ_dict):
 def list_templates():
     resp = requests.get(EHO_IP + "/node-templates")
     if (resp.status_code == 200):
-        templates_arr = resp.json["templates"]
+        templates_arr = resp.json["node_templates"]
         templates = []
         for template in templates_arr:
             id = template["id"]
@@ -56,9 +56,18 @@ def create_cluster(base_image_id, name, primary_node_template, secondary_node_te
     post_data["base_image_id"] = base_image_id
     post_data["name"] = name
     post_data["tenant_id"] = "tenant-1"
-    post_data["templates"] = {primary_node_template: 1, secondary_node_template: secondary_node_template_count}
+    post_data["node_templates"] = {primary_node_template: 1, secondary_node_template: secondary_node_template_count}
     resp = requests.post(EHO_IP + "/clusters", data=json.dumps(post_data))
-    return resp.status_code == 200
+    return resp.status_code == 202
+
+def create_cluster_NEW(base_image_id, name, templates):
+    post_data = {}
+    post_data["base_image_id"] = base_image_id
+    post_data["name"] = name
+    post_data["tenant_id"] = "tenant-1"
+    post_data["node_templates"] = templates
+    resp = requests.post(EHO_IP + "/clusters", data=json.dumps(post_data))
+    return resp.status_code == 202
 
 def create_node_template(name, node_type, flavor_id, job_tracker_opts, name_node_opts, task_tracker_opts, data_node_opts):
     post_data = {}
@@ -76,7 +85,7 @@ def create_node_template(name, node_type, flavor_id, job_tracker_opts, name_node
         post_data["data_node"] = data_node_opts
     resp = requests.post(EHO_IP + "/node-templates", json.dumps(post_data))
 
-    return resp.status_code == 200
+    return resp.status_code == 202
 
 
 def terminate_cluster(cluster_id):
