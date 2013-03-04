@@ -35,7 +35,7 @@ from openstack_dashboard.api import glance
 from openstack_dashboard.usage import quotas
 
 from .templates import addImage
-from  ehoclient import list_templates, create_cluster, create_node_template
+from  ehoclient import list_templates, create_cluster, create_node_template, create_cluster_NEW
 
 LOG = logging.getLogger(__name__)
 
@@ -90,41 +90,123 @@ class NameStep(workflows.Step):
     action_class = NameAction
     contributes = ("name", "base_image")
 
+#class NodesAction(workflows.Action):
+#    master_node_template = forms.ChoiceField(
+#        label = mark_safe("<h3>Master Node Template</h3><br/><h4>Node Template name</h4>"),
+#        required = True
+#    )
+#
+#    worker_node_template = forms.ChoiceField(
+#        label = mark_safe("<h3>Worker Node Template</h3><br/><h4>Node Template name</h4>"),
+#        required = True
+#    )
+#
+#    worker_node_template_count = forms.IntegerField(
+#        label =  _("Nodes number"),
+#        initial = 1,
+#        required = True)
+#
+#    def populate_master_node_template_choices(self, request, context):
+#        templates = list_templates()
+#        primary_templates = ((t.name, t.name) for t in templates if ("jt" in t.name or "nn" in t.name))
+#        return primary_templates
+#
+#    def populate_worker_node_template_choices(self, request, context):
+#        templates = list_templates()
+#        secondary_templates = ((t.name, t.name) for t in templates if ("tt" in t.name or "dn" in t.name))
+#        return secondary_templates
+#
+#    class Meta:
+#        name = _("Node Templates")
+#        help_text_template = ("project/hadoop/_cluster_templates_help.html")
+
+def _prepare_templates():
+    templates = list_templates()
+    prepared_templates = ((t.name, t.name) for t in templates)
+    return prepared_templates
+
+
 class NodesAction(workflows.Action):
-    master_node_template = forms.ChoiceField(
-        label = mark_safe("<h3>Master Node Template</h3><br/><h4>Node Template name</h4>"),
-        required = True
+
+    template_0 = forms.ChoiceField(
+        label = _("Node template"),
+        required = False,
+        choices = _prepare_templates()
+    )
+    count_0 = forms.IntegerField(
+        label = _("Nodes number"),
+        required = False,
+        initial = 0
+    )
+    template_1 = forms.ChoiceField(
+        label = _("Node template"),
+        required = False,
+        choices = _prepare_templates()
+    )
+    count_1 = forms.IntegerField(
+        label = _("Nodes number"),
+        required = False,
+        initial = 0
+    )
+    template_2 = forms.ChoiceField(
+        label = _("Node template"),
+        required = False,
+        choices = _prepare_templates()
+    )
+    count_2 = forms.IntegerField(
+        label = _("Nodes number"),
+        required = False,
+        initial = 0
+    )
+    template_3 = forms.ChoiceField(
+        label = _("Node template"),
+        required = False,
+        choices = _prepare_templates()
+    )
+    count_3 = forms.IntegerField(
+        label = _("Nodes number"),
+        required = False,
+        initial = 0
+    )
+    template_4 = forms.ChoiceField(
+        label = _("Node template"),
+        required = False,
+        choices = _prepare_templates()
+    )
+    count_4 = forms.IntegerField(
+        label = _("Nodes number"),
+        required = False,
+        initial = 0
     )
 
-    worker_node_template = forms.ChoiceField(
-        label = mark_safe("<h3>Worker Node Template</h3><br/><h4>Node Template name</h4>"),
-        required = True
-    )
 
-    worker_node_template_count = forms.IntegerField(
-        label =  _("Nodes number"),
-        initial = 1,
-        required = True)
 
-    def populate_master_node_template_choices(self, request, context):
-        templates = list_templates()
-        primary_templates = ((t.name, t.name) for t in templates if ("jt" in t.name or "nn" in t.name))
-        return primary_templates
-
-    def populate_worker_node_template_choices(self, request, context):
-        templates = list_templates()
-        secondary_templates = ((t.name, t.name) for t in templates if ("tt" in t.name or "dn" in t.name))
-        return secondary_templates
 
     class Meta:
         name = _("Node Templates")
         help_text_template = ("project/hadoop/_cluster_templates_help.html")
 
 
-
 class NodesStep(workflows.Step):
     action_class = NodesAction
-    contributes = ("master_node_template", "worker_node_template", "worker_node_template_count")
+    contributes = ("templates",)
+
+    def contribute(self, data, context):
+        context["templates"] = {}
+
+        if (data.get('count_0') > 0):
+            context["templates"][data.get('template_0')] = data.get("count_0")
+        if (data.get('count_1') > 0):
+            context["templates"][data.get('template_1')] = data.get("count_1")
+        if (data.get('count_2') > 0):
+            context["templates"][data.get('template_2')] = data.get("count_2")
+        if (data.get('count_3') > 0):
+            context["templates"][data.get('template_3')] = data.get("count_3")
+        if (data.get('count_4') > 0):
+            context["templates"][data.get('template_4')] = data.get("count_4")
+        
+        return context
+#    contributes = ("master_node_template", "worker_node_template", "worker_node_template_count")
 
 
 class CreateCluster(workflows.Workflow):
@@ -136,12 +218,10 @@ class CreateCluster(workflows.Workflow):
 
     def handle(self, request, context):
         try:
-            return create_cluster(
+            return create_cluster_NEW (
                 context["base_image"],
                 context["name"],
-                context["master_node_template"],
-                context["worker_node_template"],
-                context["worker_node_template_count"]
+                context["templates"],
             )
         except:
             exceptions.handle(request)
@@ -206,7 +286,6 @@ class FillProcessPropertiesAction(workflows.Action):
 class FillProcessProperties(workflows.Step):
     contributes = ("node_type", "jt_heap_size", "nn_heap_size", "dn_heap_size", "tt_heap_size")
     action_class =  FillProcessPropertiesAction
-
 
 
 class CreateNodeTemplate(workflows.Workflow):
