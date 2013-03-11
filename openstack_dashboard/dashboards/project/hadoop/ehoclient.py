@@ -7,8 +7,8 @@ from templates import Template
 
 EHO_IP = "http://127.0.0.1:8080/v0.2"
 
-def list_clusters(request):
-    resp = requests.get(EHO_IP + "/clusters")
+def list_clusters(tenant_id, request, token):
+    resp = requests.get(EHO_IP + "/" + tenant_id + "/clusters", headers={"x-auth-token": token})
     if (resp.status_code == 200):
         clusters_arr = resp.json["clusters"]
         clusters = []
@@ -34,8 +34,8 @@ def format_templates(templ_dict):
     return formatted
 
 
-def list_templates():
-    resp = requests.get(EHO_IP + "/node-templates")
+def list_templates(tenant_id, token):
+    resp = requests.get(EHO_IP + "/" + tenant_id + "/node-templates", headers={"x-auth-token": token, "Content-Type" : "application/json"})
     if (resp.status_code == 200):
         templates_arr = resp.json["node_templates"]
         templates = []
@@ -51,59 +51,59 @@ def list_templates():
         return []
 
 
-def create_cluster(base_image_id, name, primary_node_template, secondary_node_template, secondary_node_template_count):
-    post_data = {}
-    post_data["base_image_id"] = base_image_id
-    post_data["name"] = name
-    post_data["tenant_id"] = "tenant-1"
-    post_data["node_templates"] = {primary_node_template: 1, secondary_node_template: secondary_node_template_count}
-    resp = requests.post(EHO_IP + "/clusters", data=json.dumps(post_data))
+def create_cluster(base_image_id, name, tenant_id, primary_node_template, secondary_node_template, secondary_node_template_count, token):
+    post_data = {"cluster": {}}
+    cluster_data = post_data["cluster"]
+    cluster_data["base_image_id"] = base_image_id
+    cluster_data["name"] = name
+    cluster_data["node_templates"] = {primary_node_template: 1, secondary_node_template: secondary_node_template_count}
+    resp = requests.post(EHO_IP + "/" + tenant_id + "/clusters.json", data=json.dumps(post_data), headers={"x-auth-token": token, "Content-Type" : "application/json"})
     return resp.status_code == 202
 
-def create_cluster_NEW(base_image_id, name, templates):
-    post_data = {}
-    post_data["base_image_id"] = base_image_id
-    post_data["name"] = name
-    post_data["tenant_id"] = "tenant-1"
-    post_data["node_templates"] = templates
-    resp = requests.post(EHO_IP + "/clusters", data=json.dumps(post_data))
+def create_cluster_NEW(base_image_id, name, tenant_id, templates, token):
+    post_data = {"cluster": {}}
+    cluster_data = post_data["cluster"]
+    cluster_data["base_image_id"] = base_image_id
+    cluster_data["name"] = name
+    cluster_data["node_templates"] = templates
+    resp = requests.post(EHO_IP + "/" + tenant_id + "/clusters.json", data=json.dumps(post_data), headers={"x-auth-token": token, "Content-Type" : "application/json"})
     return resp.status_code == 202
 
-def create_node_template(name, node_type, flavor_id, job_tracker_opts, name_node_opts, task_tracker_opts, data_node_opts):
-    post_data = {}
-    post_data["name"] = name
-    post_data["node_type"] = node_type
-    post_data["flavor_id"] = flavor_id
-    post_data["tenant_id"] = "tenant-1"
+def create_node_template(name, tenant_id, node_type, flavor_id, job_tracker_opts, name_node_opts, task_tracker_opts, data_node_opts, token):
+    post_data = {"node_template": {}}
+    template_data = post_data["node_template"]
+    template_data["name"] = name
+    template_data["node_type"] = node_type
+    template_data["flavor_id"] = flavor_id
     if "jt" in str(node_type).lower():
-        post_data["job_tracker"] = job_tracker_opts
+        template_data["job_tracker"] = job_tracker_opts
     if "nn" in str(node_type).lower():
-        post_data["name_node"] = name_node_opts
+        template_data["name_node"] = name_node_opts
     if "tt" in str(node_type).lower():
-        post_data["task_tracker"] = task_tracker_opts
+        template_data["task_tracker"] = task_tracker_opts
     if "dn" in str(node_type).lower():
-        post_data["data_node"] = data_node_opts
-    resp = requests.post(EHO_IP + "/node-templates", json.dumps(post_data))
+        template_data["data_node"] = data_node_opts
+    resp = requests.post(EHO_IP + "/" + tenant_id + "/node-templates.json", json.dumps(post_data), headers={"x-auth-token": token, "Content-Type" : "application/json"})
 
     return resp.status_code == 202
 
 
-def terminate_cluster(cluster_id):
-    resp = requests.delete(EHO_IP + "/clusters/" + cluster_id)
+def terminate_cluster(cluster_id, tenant_id, token):
+    resp = requests.delete(EHO_IP + "/" + tenant_id + "/clusters/" + cluster_id, headers={"x-auth-token": token})
     return resp.status_code == 204
 
-def delete_template(template_id):
-    resp = requests.delete(EHO_IP + "/node-templates/" + template_id)
+def delete_template(template_id, tenant_id, token):
+    resp = requests.delete(EHO_IP + "/" + tenant_id + "/node-templates/" + template_id, headers={"x-auth-token": token})
     return resp.status_code == 204
 
-def get_cluster(cluster_id):
-    resp = requests.get(EHO_IP + "/clusters/" + cluster_id)
-    cluster = resp.json
+def get_cluster(cluster_id, tenant_id, token):
+    resp = requests.get(EHO_IP + "/" + tenant_id + "/clusters/" + cluster_id, headers={"x-auth-token": token})
+    cluster = resp.json["cluster"]
     return cluster
 
-def get_node_template(node_template_id):
-    resp = requests.get(EHO_IP + "/node-templates/" + node_template_id)
-    node_template = resp.json
+def get_node_template(node_template_id, tenant_id, token):
+    resp = requests.get(EHO_IP + "/" + tenant_id + "/node-templates/" + node_template_id, headers={"x-auth-token": token})
+    node_template = resp.json["node_template"]
     return node_template
 
 class ClusterNode:
@@ -114,9 +114,9 @@ class ClusterNode:
         self.template_id = template_id
 
 
-def get_cluster_nodes(cluster_id, request):
-    resp = requests.get(EHO_IP + "/clusters/" + cluster_id)
-    nodes = resp.json["nodes"]
+def get_cluster_nodes(cluster_id, tenant_id, request, token):
+    resp = requests.get(EHO_IP + "/" + tenant_id + "/clusters/" + cluster_id, headers={"x-auth-token": token})
+    nodes = resp.json["cluster"]["nodes"]
     nodes_with_id = []
     for node in nodes:
         vm = api.nova.server_get(request, node["vm_id"])

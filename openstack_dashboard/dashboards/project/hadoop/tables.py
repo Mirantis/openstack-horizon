@@ -37,29 +37,9 @@ from .tabs import ClusterDetailTabs
 
 from ehoclient import terminate_cluster, delete_template
 
-from .templates import remove
 LOG = logging.getLogger(__name__)
 
 ACTIVE_STATES = ("ACTIVE",)
-
-class TerminateInstance(tables.BatchAction):
-    name = "terminate"
-    action_present = _("Terminate")
-    action_past = _("Scheduled termination of")
-    data_type_singular = _("Instance")
-    data_type_plural = _("Instances")
-    classes = ('btn-danger', 'btn-terminate')
-
-    def allowed(self, request, instance=None):
-        if instance:
-            # FIXME(gabriel): This is true in Essex, but in FOLSOM an instance
-            # can be terminated in any state. We should improve this error
-            # handling when LP bug 1037241 is implemented.
-            return instance.status not in ("PAUSED", "SUSPENDED")
-        return True
-
-    def action(self, request, obj_id):
-        pass
 
 class CreateNodeTemplate(tables.LinkAction):
     name = "create_node_template"
@@ -96,37 +76,8 @@ class DeleteTemplate(tables.BatchAction):
         return True
 
     def action(self, request, template_id):
-        delete_template(template_id)
+        delete_template(template_id, request.user.tenant_id, request.user.token.id)
 
-
-
-class EditCluster(tables.LinkAction):
-    name = "edit"
-    verbose_name = _("Edit Cluster")
-    url = "horizon:project:hadoop:update"
-    classes = ("ajax-modal", "btn-edit")
-
-    def allowed(self, request, cluster):
-        return True
-
-
-
-class TerminateCluster(tables.BatchAction):
-    name = "terminate"
-    verbose_name = _("Terminate Cluster")
-
-    classes = ("btn-terminate", "btn-danger")
-
-    action_present = _("Terminate")
-    action_past = _("Terminated")
-    data_type_singular = _("Cluster")
-    data_type_plural = _("Clusters")
-
-    def allowed(self, request, template):
-        return True
-
-    def action(self, request, cluster_id):
-        terminate_cluster(cluster_id)
 
 class CreateCluster(tables.LinkAction):
     name = "create_cluster"
@@ -143,40 +94,66 @@ class CreateCluster(tables.LinkAction):
     def allowed(self, request, datum):
         return True
 
-    def action(self, request, datum_id):
-        pass
+class EditCluster(tables.LinkAction):
+    name = "edit"
+    verbose_name = _("Edit Cluster")
+    url = "horizon:project:hadoop:edit_cluster"
+    classes = ("ajax-modal", "btn-edit")
+
+    def allowed(self, request, cluster):
+        return True
+
+class TerminateCluster(tables.BatchAction):
+    name = "terminate"
+    verbose_name = _("Terminate Cluster")
+
+    classes = ("btn-terminate", "btn-danger")
+
+    action_present = _("Terminate")
+    action_past = _("Terminated")
+    data_type_singular = _("Cluster")
+    data_type_plural = _("Clusters")
+
+    def allowed(self, request, template):
+        return True
+
+    def action(self, request, cluster_id):
+        terminate_cluster(cluster_id, request.user.tenant_id, request.user.token.id)
+
 
 def render_templates(instance):
     template_name = 'project/hadoop/_nodes_list.html'
     context = {"cluster": instance}
     return template.loader.render_to_string(template_name, context)
 
-class InstancesTable(tables.DataTable):
+class ClustersTable(tables.DataTable):
     STATUS_CHOICES = (
         ("active", True),
-        ("shutoff", True),
-        ("suspended", True),
-        ("paused", True),
-        ("error", False),
+        ("Starting", True),
+        ("Stopping", True),
     )
-    name = tables.Column("name",
-                         link=("horizon:project:hadoop:cluster_details"),
-                         verbose_name=_("Cluster Name"))
 
-    node_template = tables.Column(render_templates, verbose_name=_("Node Templates"))
-    base_image = tables.Column("base_image", verbose_name=_("Base Image"))
+    name = tables.Column("name",
+        link=("horizon:project:hadoop:cluster_details"),
+        verbose_name=_("Cluster Name"))
+
+    node_template = tables.Column(render_templates,
+        verbose_name=_("Node Templates"))
+
+    base_image = tables.Column("base_image",
+        verbose_name=_("Base Image"))
 
     status = tables.Column("status",
                            verbose_name=_("Status"),
                            status_choices=STATUS_CHOICES)
 
-    nodes_count = tables.Column("nodes_count", verbose_name=_("Nodes Count"))
+    nodes_count = tables.Column("nodes_count",
+        verbose_name=_("Nodes Count"))
 
     class Meta:
         name = "clusters"
         verbose_name = _("Hadoop Clusters")
         status_columns = ["status"]
-        #row_class = UpdateRow
         table_actions = (CreateCluster, TerminateCluster)
         row_actions = EditCluster, TerminateCluster
 
@@ -192,8 +169,6 @@ class NodeTemplatesTable(tables.DataTable):
     class Meta:
         name = "node_templates"
         verbose_name = _("Node Templates")
-        #status_columns = ["status", "task"]
-        #row_class = UpdateRow
         table_actions = (CreateNodeTemplate, DeleteTemplate)
         row_actions = (EditTemplate, DeleteTemplate)
 

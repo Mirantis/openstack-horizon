@@ -17,7 +17,7 @@ class DetailTab(tabs.Tab):
                      "_cluster_details_overview.html")
 
     def get_context_data(self, request):
-        cluster = get_cluster(self.tab_group.kwargs['cluster_id'])
+        cluster = get_cluster(self.tab_group.kwargs['cluster_id'], request.user.tenant_id, request.user.token.id)
         base_image_name = glance.image_get(request, cluster["base_image_id"]).name
         return {"cluster": cluster, "base_image_name": base_image_name}
 
@@ -48,7 +48,7 @@ class NodesTab(tabs.TableTab):
     template_name = ("project/hadoop/_nodes_overview.html")
 
     def get_cluster_nodes_data(self):
-        nodes = get_cluster_nodes(self.tab_group.kwargs['cluster_id'], self.request)
+        nodes = get_cluster_nodes(self.tab_group.kwargs['cluster_id'], self.request.user.tenant_id, self.request, self.request.user.token.id)
         return nodes
 
 
@@ -64,7 +64,7 @@ class NodeTemplateOverviewTab(tabs.Tab):
     template_name = ("project/hadoop/_node_template_details_overview.html")
 
     def get_context_data(self, request):
-        node_template = get_node_template(self.tab_group.kwargs['node_template_id'])
+        node_template = get_node_template(self.tab_group.kwargs['node_template_id'], self.request.user.tenant_id, self.request.user.token.id)
         return {"node_template": node_template}
 
 class NodeTemplateDetailsTabs(tabs.TabGroup):
