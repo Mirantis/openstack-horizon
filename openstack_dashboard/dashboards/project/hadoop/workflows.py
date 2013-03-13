@@ -35,7 +35,7 @@ from openstack_dashboard.api import glance
 from openstack_dashboard.usage import quotas
 
 
-from  ehoclient import list_templates, create_cluster, create_node_template, create_cluster_NEW
+from  ehoclient import list_templates, create_node_template, create_cluster_NEW
 
 LOG = logging.getLogger(__name__)
 
@@ -46,19 +46,15 @@ class SelectProjectUserAction(workflows.Action):
 
     def __init__(self, request, *args, **kwargs):
         super(SelectProjectUserAction, self).__init__(request, *args, **kwargs)
-        # Set our project choices
         projects = [(tenant.id, tenant.name)
                     for tenant in request.user.authorized_tenants]
         self.fields['project_id'].choices = projects
 
-        # Set our user options
         users = [(request.user.id, request.user.username)]
         self.fields['user_id'].choices = users
 
     class Meta:
         name = _("Project & User")
-        # Unusable permission so this is always hidden. However, we
-        # keep this step in the workflow for validation/verification purposes.
         permissions = ("!",)
 
 
@@ -87,84 +83,38 @@ class SetNameBaseImage(workflows.Step):
     action_class = SetNameBaseImageAction
     contributes = ("name", "base_image")
 
+def _get_templates(tenant, token):
+    templates = list_templates(tenant, token)
+    prepared_templates = ((t.name, t.name) for t in templates)
+    return prepared_templates
 
+
+#<div class="control-group form-field clearfix">
+#<label for="id_count_0">Nodes number</label>
+#
+#<span class="help-block" style="display: none;"></span>
+#<div class="input">
+#<input type="text" name="count_0" value="0" id="id_count_0" data-original-title=""><hr>
+#</div>
+#</div>
 class SelectNodeTemplatesAction(workflows.Action):
-    master_node_template = forms.ChoiceField(
-        label = mark_safe("<h3>Master Node Template</h3><br/><h4>Node Template name</h4>"),
+
+    def __init__(self, request, *args, **kwargs):
+        super(SelectNodeTemplatesAction, self).__init__(request, *args, **kwargs)
+        templates = list_templates(request.user.tenant_id, request.user.token.id)
+        prepared_templates = ((t.name, t.name) for t in templates)
+        self.fields['template_choices'].choices = prepared_templates
+
+
+
+    template_choices = forms.ChoiceField(
+        label = _("Node template"),
+        required = False
+    )
+
+    result_field = forms.CharField(
         required = True
     )
-
-    template_0 = forms.ChoiceField(
-        label = _("Node template"),
-        required = False
-    )
-    count_0 = forms.IntegerField(
-        label = _("Nodes number"),
-        required = False,
-        initial = 0
-    )
-    template_1 = forms.ChoiceField(
-        label = _("Node template"),
-        required = False
-    )
-    count_1 = forms.IntegerField(
-        label = _("Nodes number"),
-        required = False,
-        initial = 0
-    )
-    template_2 = forms.ChoiceField(
-        label = _("Node template"),
-        required = False
-    )
-    count_2 = forms.IntegerField(
-        label = _("Nodes number"),
-        required = False,
-        initial = 0
-    )
-    template_3 = forms.ChoiceField(
-        label = _("Node template"),
-        required = False
-    )
-    count_3 = forms.IntegerField(
-        label = _("Nodes number"),
-        required = False,
-        initial = 0
-    )
-    template_4 = forms.ChoiceField(
-        label = _("Node template"),
-        required = False
-    )
-    count_4 = forms.IntegerField(
-        label = _("Nodes number"),
-        required = False,
-        initial = 0
-    )
-
-    def populate_template_0_choices(self, request):
-        templates = list_templates(request.user.tenant_id, request.user.token.id)
-        prepared_templates = ((t.name, t.name) for t in templates)
-        return prepared_templates
-
-    def populate_template_1_choices(self, request):
-        templates = list_templates(request.user.tenant_id, request.user.token.id)
-        prepared_templates = ((t.name, t.name) for t in templates)
-        return prepared_templates
-
-    def populate_template_2_choices(self, request):
-        templates = list_templates(request.user.tenant_id, request.user.token.id)
-        prepared_templates = ((t.name, t.name) for t in templates)
-        return prepared_templates
-
-    def populate_template_3_choices(self, request):
-        templates = list_templates(request.user.tenant_id, request.user.token.id)
-        prepared_templates = ((t.name, t.name) for t in templates)
-        return prepared_templates
-
-    def populate_template_4_choices(self, request):
-        templates = list_templates(request.user.tenant_id, request.user.token.id)
-        prepared_templates = ((t.name, t.name) for t in templates)
-        return prepared_templates
-
 
     class Meta:
         name = _("Node Templates")
@@ -174,7 +124,12 @@ class SelectNodeTemplatesAction(workflows.Action):
 
 class SelectNodeTemplates(workflows.Step):
     action_class = SelectNodeTemplatesAction
-    contributes = ("master_node_template", "worker_node_template", "worker_node_template_count")
+    contributes = ("templates",)
+
+    def contribute(self, data, context):
+
+        context["templates"] = json.loads(data.get('result_field'))
+        return context
 
 
 class CreateCluster(workflows.Workflow):
