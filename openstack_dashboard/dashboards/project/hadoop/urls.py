@@ -34,6 +34,6 @@ urlpatterns = patterns(VIEW_MOD,
     url(r'^create_template$', CreateNodeTemplateView.as_view(), name='create_template'),
     url(r'^clusters/(?P<cluster_id>[^/]+)/$', ClusterDetailView.as_view(), name='cluster_details'),
     url(r'^node_templates/(?P<node_template_id>[^/]+)/$', NodeTemplateDetailView.as_view(), name='node_template_details'),
-    url(CLUSTERS % 'update', EditClusterView.as_view(), name='update'),
+    url(CLUSTERS % 'update', EditClusterView.as_view(), name='edit_cluster'),
     url(TEMPLATES % 'edit_template', EditTemplateView.as_view(), name='edit_template')
 )

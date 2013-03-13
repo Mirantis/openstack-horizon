@@ -34,7 +34,7 @@ from openstack_dashboard.api import cinder
 from openstack_dashboard.api import glance
 from openstack_dashboard.usage import quotas
 
-from .templates import addImage
+
 from  ehoclient import list_templates, create_cluster, create_node_template, create_cluster_NEW
 
 LOG = logging.getLogger(__name__)
@@ -67,71 +67,36 @@ class SelectProjectUser(workflows.Step):
     contributes = ("project_id", "user_id")
 
 
-class NameAction(workflows.Action):
+class SetNameBaseImageAction(workflows.Action):
     name = forms.CharField(
         label=_("Cluster name"),
-        required=True,
-        help_text=_("This name would be used further"))
-    base_image = forms.ChoiceField(label = _("Base image"),
+        required=True)
+    base_image = forms.ChoiceField(
+        label = _("Base image"),
         required = True)
+
+    def populate_base_image_choices(self, request, context):
+        public_images, _more = glance.image_list_detailed(request)
+        return [(image.id, image.name) for image in public_images]
+
     class Meta:
         name = _("Cluster name")
         help_text_template = ("project/hadoop/_cluster_general_help.html")
 
-    def populate_base_image_choices(self, request, context):
-        public = {"is_public": True,
-                  "status": "active"}
-
-        public_images, _more = glance.image_list_detailed(request)
-
-        return [(image.id, image.name) for image in public_images]
-
-class NameStep(workflows.Step):
-    action_class = NameAction
+class SetNameBaseImage(workflows.Step):
+    action_class = SetNameBaseImageAction
     contributes = ("name", "base_image")
 
-#class NodesAction(workflows.Action):
-#    master_node_template = forms.ChoiceField(
-#        label = mark_safe("<h3>Master Node Template</h3><br/><h4>Node Template name</h4>"),
-#        required = True
-#    )
-#
-#    worker_node_template = forms.ChoiceField(
-#        label = mark_safe("<h3>Worker Node Template</h3><br/><h4>Node Template name</h4>"),
-#        required = True
-#    )
-#
-#    worker_node_template_count = forms.IntegerField(
-#        label =  _("Nodes number"),
-#        initial = 1,
-#        required = True)
-#
-#    def populate_master_node_template_choices(self, request, context):
-#        templates = list_templates()
-#        primary_templates = ((t.name, t.name) for t in templates if ("jt" in t.name or "nn" in t.name))
-#        return primary_templates
-#
-#    def populate_worker_node_template_choices(self, request, context):
-#        templates = list_templates()
-#        secondary_templates = ((t.name, t.name) for t in templates if ("tt" in t.name or "dn" in t.name))
-#        return secondary_templates
-#
-#    class Meta:
-#        name = _("Node Templates")
-#        help_text_template = ("project/hadoop/_cluster_templates_help.html")
 
-def _prepare_templates():
-    templates = list_templates()
-    prepared_templates = ((t.name, t.name) for t in templates)
-    return prepared_templates
-
-
-class NodesAction(workflows.Action):
+class SelectNodeTemplatesAction(workflows.Action):
+    master_node_template = forms.ChoiceField(
+        label = mark_safe("<h3>Master Node Template</h3><br/><h4>Node Template name</h4>"),
+        required = True
+    )
 
     template_0 = forms.ChoiceField(
         label = _("Node template"),
-        required = False,
-        choices = _prepare_templates()
+        required = False
     )
     count_0 = forms.IntegerField(
         label = _("Nodes number"),
@@ -140,8 +105,7 @@ class NodesAction(workflows.Action):
     )
     template_1 = forms.ChoiceField(
         label = _("Node template"),
-        required = False,
-        choices = _prepare_templates()
+        required = False
     )
     count_1 = forms.IntegerField(
         label = _("Nodes number"),
@@ -150,8 +114,7 @@ class NodesAction(workflows.Action):
     )
     template_2 = forms.ChoiceField(
         label = _("Node template"),
-        required = False,
-        choices = _prepare_templates()
+        required = False
     )
     count_2 = forms.IntegerField(
         label = _("Nodes number"),
@@ -160,8 +123,7 @@ class NodesAction(workflows.Action):
     )
     template_3 = forms.ChoiceField(
         label = _("Node template"),
-        required = False,
-        choices = _prepare_templates()
+        required = False
     )
     count_3 = forms.IntegerField(
         label = _("Nodes number"),
@@ -170,8 +132,7 @@ class NodesAction(workflows.Action):
     )
     template_4 = forms.ChoiceField(
         label = _("Node template"),
-        required = False,
-        choices = _prepare_templates()
+        required = False
     )
     count_4 = forms.IntegerField(
         label = _("Nodes number"),
@@ -179,7 +140,30 @@ class NodesAction(workflows.Action):
         initial = 0
     )
 
+    def populate_template_0_choices(self, request):
+        templates = list_templates(request.user.tenant_id, request.user.token.id)
+        prepared_templates = ((t.name, t.name) for t in templates)
+        return prepared_templates
 
+    def populate_template_1_choices(self, request):
+        templates = list_templates(request.user.tenant_id, request.user.token.id)
+        prepared_templates = ((t.name, t.name) for t in templates)
+        return prepared_templates
+
+    def populate_template_2_choices(self, request):
+        templates = list_templates(request.user.tenant_id, request.user.token.id)
+        prepared_templates = ((t.name, t.name) for t in templates)
+        return prepared_templates
+
+    def populate_template_3_choices(self, request):
+        templates = list_templates(request.user.tenant_id, request.user.token.id)
+        prepared_templates = ((t.name, t.name) for t in templates)
+        return prepared_templates
+
+    def populate_template_4_choices(self, request):
+        templates = list_templates(request.user.tenant_id, request.user.token.id)
+        prepared_templates = ((t.name, t.name) for t in templates)
+        return prepared_templates
 
 
     class Meta:
@@ -187,26 +171,10 @@ class NodesAction(workflows.Action):
         help_text_template = ("project/hadoop/_cluster_templates_help.html")
 
 
-class NodesStep(workflows.Step):
-    action_class = NodesAction
-    contributes = ("templates",)
 
-    def contribute(self, data, context):
-        context["templates"] = {}
-
-        if (data.get('count_0') > 0):
-            context["templates"][data.get('template_0')] = data.get("count_0")
-        if (data.get('count_1') > 0):
-            context["templates"][data.get('template_1')] = data.get("count_1")
-        if (data.get('count_2') > 0):
-            context["templates"][data.get('template_2')] = data.get("count_2")
-        if (data.get('count_3') > 0):
-            context["templates"][data.get('template_3')] = data.get("count_3")
-        if (data.get('count_4') > 0):
-            context["templates"][data.get('template_4')] = data.get("count_4")
-        
-        return context
-#    contributes = ("master_node_template", "worker_node_template", "worker_node_template_count")
+class SelectNodeTemplates(workflows.Step):
+    action_class = SelectNodeTemplatesAction
+    contributes = ("master_node_template", "worker_node_template", "worker_node_template_count")
 
 
 class CreateCluster(workflows.Workflow):
@@ -214,28 +182,30 @@ class CreateCluster(workflows.Workflow):
     name = _("Create cluster")
     finalize_button_name = _("Create & Launch")
     success_url = "horizon:project:hadoop:index"
-    default_steps = (NameStep, NodesStep)
+    default_steps = (SetNameBaseImage, SelectNodeTemplates)
 
     def handle(self, request, context):
         try:
             return create_cluster_NEW (
                 context["base_image"],
                 context["name"],
+                request.user.tenant_id,
                 context["templates"],
+                request.user.token.id
             )
+
         except:
             exceptions.handle(request)
             return False
 
 
-
-class FillPropertiesAction(workflows.Action):
+class SetNameFlavorAction(workflows.Action):
     name = forms.CharField(
         label=_("Node Template Name"),
-        required=True,
-        help_text=_("This name should be unique"))
+        required=True)
 
-    flavor_id = forms.ChoiceField(label = _("Flavor"),
+    flavor_id = forms.ChoiceField(
+        label = _("Flavor"),
         required = True)
 
     class Meta:
@@ -248,17 +218,17 @@ class FillPropertiesAction(workflows.Action):
                        for flavor in flavors]
         return flavor_list
 
-class FillProperties(workflows.Step):
+class SetNameFlavor(workflows.Step):
+    action_class = SetNameFlavorAction
     contributes = ("name", "flavor_id")
-    action_class = FillPropertiesAction
-
-
-
 
 class FillProcessPropertiesAction(workflows.Action):
     NODE_TYPE_CHOICES = (("JT+NN", "JT+NN"), ("NN", "NN"), ("JT", "JT"), ("TT+DN", "TT+DN"))
-    node_type = forms.ChoiceField(label = _("Nodes type"), required = True, choices = NODE_TYPE_CHOICES)
 
+    node_type = forms.ChoiceField(
+        label = _("Nodes type"),
+        required = True,
+        choices = NODE_TYPE_CHOICES)
 
     jt_heap_size = forms.CharField(
         label= mark_safe("Job tracker<br>heap size"),
@@ -276,16 +246,14 @@ class FillProcessPropertiesAction(workflows.Action):
         label= mark_safe("Data node<br>heap size"),
         required=False)
 
-
     class Meta:
         name = _("Node types")
         help_text_template = ("project/hadoop/_process_properties_help.html")
 
 
-
 class FillProcessProperties(workflows.Step):
-    contributes = ("node_type", "jt_heap_size", "nn_heap_size", "dn_heap_size", "tt_heap_size")
     action_class =  FillProcessPropertiesAction
+    contributes = ("node_type", "jt_heap_size", "nn_heap_size", "dn_heap_size", "tt_heap_size")
 
 
 class CreateNodeTemplate(workflows.Workflow):
@@ -295,17 +263,18 @@ class CreateNodeTemplate(workflows.Workflow):
     success_message = _("Created")
     failure_message = _("Could not create")
     success_url = "horizon:project:hadoop:index"
-    default_steps = (SelectProjectUser, FillProperties, FillProcessProperties)
-
-    def format_status_message(self, message):
-        return message
+    default_steps = (SelectProjectUser, SetNameFlavor, FillProcessProperties)
 
     def handle(self, request, context):
-        name = context["name"]
-        node_type = context["node_type"]
-        flavor_id = context["flavor_id"]
-        jt_opts = {"heap_size": context["jt_heap_size"]}
-        nn_opts = {"heap_size": context["nn_heap_size"]}
-        tt_opts = {"heap_size": context["tt_heap_size"]}
-        dn_opts = {"heap_size": context["dn_heap_size"]}
-        return create_node_template(name, node_type, flavor_id, jt_opts, nn_opts, tt_opts, dn_opts)
+        try:
+            name = context["name"]
+            node_type = context["node_type"]
+            flavor_id = context["flavor_id"]
+            jt_opts = {"heap_size": context["jt_heap_size"]}
+            nn_opts = {"heap_size": context["nn_heap_size"]}
+            tt_opts = {"heap_size": context["tt_heap_size"]}
+            dn_opts = {"heap_size": context["dn_heap_size"]}
+            return create_node_template(name, request.user.tenant_id, node_type, flavor_id, jt_opts, nn_opts, tt_opts, dn_opts, request.user.token.id)
+        except:
+            exceptions.handle(request)
+            return False

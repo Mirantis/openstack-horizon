@@ -10,10 +10,20 @@
         <dd>{{ cluster.name}}</dd>
         <dt>{% trans "ID" %}</dt>
         <dd>{{ cluster.id }}</dd>
+        <dt>{% trans "Tenant" %}</dt>
+        <dd>{{ cluster.tenant_id }}</dd>
         <dt>{% trans "Status" %}</dt>
         <dd>{{ cluster.status }}</dd>
         <dt>{% trans "Base image"%}</dt>
         <dd><a href="/project/images_and_snapshots/{{ cluster.base_image_id }}">{{ base_image_name }}</a></dd>
+        <dt>{% trans "Node Templates" %}</dt>
+        <dd>
+            <ul>
+                {% for name, count in cluster.node_templates.items %}
+                    <li>{{ name }}:&nbsp{{ count }}</li>
+                {% endfor %}
+            </ul>
+        </dd>
         <dt>{% trans "Service URLs" %}</dt>
         <dd>
             <ul>{% for name, url in cluster.service_urls.items %}

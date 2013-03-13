@@ -37,13 +37,11 @@ from horizon import workflows
 
 from openstack_dashboard import api
 from .forms import UpdateInstance, UpdateTemplate
-from .tables import InstancesTable
-from .tables import NodeTemplatesTable
+from .tables import NodeTemplatesTable, ClustersTable
 from .workflows import CreateCluster, CreateNodeTemplate
 from .clusters import Cluster
-from .templates import Template, getImages, addImage
+from .templates import Template
 from .tabs import ClusterDetailTabs, NodeTemplateDetailsTabs
-from .clusters import getClusters, find_cluster
 
 from ehoclient import list_clusters, list_templates
 
@@ -52,39 +50,26 @@ LOG = logging.getLogger(__name__)
 
 
 class IndexView(tables.MultiTableView):
-    table_classes = InstancesTable, NodeTemplatesTable
+    table_classes = ClustersTable, NodeTemplatesTable
     template_name = 'project/hadoop/index.html'
 
-    def get_node_templates_data(self):
-        # Gather our node_templates
-        try:
-            #node_templates = api.nova.server_list(self.request)
-            #image1 = Image(0, "jt_nn.xlarge", "JT+NN", "m1.xlarge" )
-            node_templates = list_templates()
 
-            #get from client
+    def get_node_templates_data(self):
+        try:
+            node_templates = list_templates(self.request.user.tenant_id, self.request.user.token.id)
         except:
             node_templates = []
             exceptions.handle(self.request,
                               _('Unable to retrieve node_templates.'))
-        # Gather our flavors and correlate our node_templates to them
-
         return node_templates
 
     def get_clusters_data(self):
-        # Gather our clusters
         try:
-            #clusters = api.nova.server_list(self.request)
-            #c11 = Cluster(123, "Cluster1", "JT+NN, TT, DN", "m1.xlarge", "active", 10)
-            #c12 = Cluster(456, "Cluster2", "JT, NN", "m1.xlarge", "shutoff", 15)
-            #clusters = [c11, c12]
-            clusters = list_clusters(self.request)
-            #get from client
+            clusters = list_clusters(self.request.user.tenant_id, self.request, self.request.user.token.id)
         except:
             clusters = []
             exceptions.handle(self.request,
                 _('Unable to retrieve clusters.'))
-            # Gather our flavors and correlate our clusters to them
 
         return clusters
 
@@ -102,21 +87,10 @@ class EditClusterView(forms.ModalFormView):
 
     def get_object(self, *args, **kwargs):
         pass
-#        if not hasattr(self, "_object"):
-#            instance_id = self.kwargs['instance_id']
-#            try:
-#                self._object = api.nova.server_get(self.request, instance_id)
-#            except:
-#                redirect = reverse("horizon:project:instances:index")
-#                msg = _('Unable to retrieve instance details.')
-#                exceptions.handle(self.request, msg, redirect=redirect)
-#        return self._object
 
     def get_initial(self):
         pass
-#        return {'instance': self.kwargs['instance_id'],
-#                'tenant_id': self.request.user.tenant_id,
-#                'name': getattr(self.get_object(), 'name', '')}
+#
 
 class EditTemplateView(forms.ModalFormView):
     form_class = UpdateTemplate
