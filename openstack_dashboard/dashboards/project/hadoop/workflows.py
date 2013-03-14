@@ -35,7 +35,7 @@ from openstack_dashboard.api import glance
 from openstack_dashboard.usage import quotas
 
 
-from  ehoclient import list_templates, create_node_template, create_cluster_NEW
+from  ehoclient import list_templates, create_node_template, create_cluster
 
 LOG = logging.getLogger(__name__)
 
@@ -140,7 +140,7 @@ class CreateCluster(workflows.Workflow):
 
     def handle(self, request, context):
         try:
-            return create_cluster_NEW (
+            return create_cluster (
                 context["base_image"],
                 context["name"],
                 request.user.tenant_id,
