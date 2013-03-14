@@ -21,7 +21,7 @@ def get_eho_address(request):
     if eho_address == 'endpoints':
         return url_for(request, 'mapreduce')
 
-    return eho_address
+    return eho_address + "/" + request.user.tenant_id
 
 
 class NodeTemplate(object):
@@ -52,10 +52,9 @@ class ClusterNode(object):
 
 
 def list_clusters(request):
-    tenant_id = request.user.tenant_id
     token = request.user.token.id
     resp = requests.get(
-        get_eho_address(request) + "/" + tenant_id + "/clusters",
+        get_eho_address(request) + "/clusters",
         headers={"x-auth-token": token})
     if resp.status_code == 200:
         clusters_arr = resp.json["clusters"]
@@ -84,10 +83,9 @@ def _format_templates(tmpl_dict):
 
 
 def list_templates(request):
-    tenant_id = request.user.tenant_id
     token = request.user.token.id
     resp = requests.get(
-        get_eho_address(request) + "/" + tenant_id + "/node-templates",
+        get_eho_address(request) + "/node-templates",
         headers={"x-auth-token": token,
                  "Content-Type": "application/json"})
     if resp.status_code == 200:
@@ -106,7 +104,6 @@ def list_templates(request):
 
 
 def create_cluster(request, name, base_image_id, templates):
-    tenant_id = request.user.tenant_id
     token = request.user.token.id
     post_data = {"cluster": {}}
     cluster_data = post_data["cluster"]
@@ -114,7 +111,7 @@ def create_cluster(request, name, base_image_id, templates):
     cluster_data["name"] = name
     cluster_data["node_templates"] = templates
     resp = requests.post(
-        get_eho_address(request) + "/" + tenant_id + "/clusters",
+        get_eho_address(request) + "/clusters",
         data=json.dumps(post_data),
         headers={"x-auth-token": token,
                  "Content-Type": "application/json"})
@@ -125,7 +122,6 @@ def create_cluster(request, name, base_image_id, templates):
 def create_node_template(request, name, node_type, flavor_id,
                          job_tracker_opts, name_node_opts, task_tracker_opts,
                          data_node_opts):
-    tenant_id = request.user.tenant_id
     token = request.user.token.id
     post_data = {"node_template": {}}
     template_data = post_data["node_template"]
@@ -140,7 +136,7 @@ def create_node_template(request, name, node_type, flavor_id,
         template_data["task_tracker"] = task_tracker_opts
     if "dn" in str(node_type).lower():
         template_data["data_node"] = data_node_opts
-    resp = requests.post(get_eho_address(request) + "/" + tenant_id
+    resp = requests.post(get_eho_address(request)
                          + "/node-templates",
                          json.dumps(post_data),
                          headers={
@@ -152,32 +148,27 @@ def create_node_template(request, name, node_type, flavor_id,
 
 
 def terminate_cluster(request, cluster_id):
-    tenant_id = request.user.tenant_id
     token = request.user.token.id
     resp = requests.delete(
-        get_eho_address(request) + "/" + tenant_id + "/clusters/" + cluster_id,
+        get_eho_address(request) + "/clusters/" + cluster_id,
         headers={"x-auth-token": token})
 
     return resp.status_code == 204
 
 
 def delete_template(request, template_id):
-    tenant_id = request.user.tenant_id
     token = request.user.token.id
     resp = requests.delete(
-        get_eho_address(request) + "/" + tenant_id
-        + "/node-templates/" + template_id,
+        get_eho_address(request) + "/node-templates/" + template_id,
         headers={"x-auth-token": token})
 
     return resp.status_code == 204
 
 
 def get_cluster(request, cluster_id):
-    tenant_id = request.user.tenant_id
     token = request.user.token.id
     resp = requests.get(
-        get_eho_address(request) + "/" + tenant_id
-        + "/clusters/" + cluster_id,
+        get_eho_address(request) + "/clusters/" + cluster_id,
         headers={"x-auth-token": token})
     cluster = resp.json["cluster"]
 
@@ -185,11 +176,9 @@ def get_cluster(request, cluster_id):
 
 
 def get_node_template(request, node_template_id):
-    tenant_id = request.user.tenant_id
     token = request.user.token.id
     resp = requests.get(
-        get_eho_address(request) + "/" + tenant_id + "/node-templates/" +
-        node_template_id,
+        get_eho_address(request) + "/node-templates/" + node_template_id,
         headers={"x-auth-token": token})
     node_template = resp.json["node_template"]
 
@@ -197,10 +186,9 @@ def get_node_template(request, node_template_id):
 
 
 def get_cluster_nodes(request, cluster_id):
-    tenant_id = request.user.tenant_id
     token = request.user.token.id
     resp = requests.get(
-        get_eho_address(request) + "/" + tenant_id + "/clusters/" + cluster_id,
+        get_eho_address(request) + "/clusters/" + cluster_id,
         headers={"x-auth-token": token})
     nodes = resp.json["cluster"]["nodes"]
     nodes_with_id = []
