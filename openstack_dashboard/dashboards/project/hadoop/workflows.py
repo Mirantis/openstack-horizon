@@ -112,7 +112,8 @@ class GeneralConfigurationAction(workflows.Action):
 
     def populate_base_image_choices(self, request, context):
         public_images, _more = glance.image_list_detailed(request)
-        return [(image.id, image.name) for image in public_images]
+        return [(image.id, image.name) for image in public_images
+                if ("image.final" in image.name or "hadoop" in image.name or "hdp" in image.name)]
 
 
     class Meta:
