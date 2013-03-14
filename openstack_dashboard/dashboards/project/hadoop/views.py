@@ -40,8 +40,6 @@ from .forms import UpdateInstance, UpdateTemplate
 from openstack_dashboard.api.eho import list_templates, list_clusters
 from .tables import NodeTemplatesTable, ClustersTable
 from .workflows import CreateCluster, CreateNodeTemplate
-from .clusters import Cluster
-from .templates import Template
 from .tabs import ClusterDetailTabs, NodeTemplateDetailsTabs
 
 
