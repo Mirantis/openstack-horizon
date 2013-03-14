@@ -34,7 +34,8 @@ from openstack_dashboard.api import cinder
 from openstack_dashboard.api import glance
 from openstack_dashboard.usage import quotas
 
-from  ehoclient import list_templates, create_cluster, create_node_template
+
+from  ehoclient import list_templates, create_node_template, create_cluster_NEW
 
 LOG = logging.getLogger(__name__)
 
@@ -45,19 +46,15 @@ class SelectProjectUserAction(workflows.Action):
 
     def __init__(self, request, *args, **kwargs):
         super(SelectProjectUserAction, self).__init__(request, *args, **kwargs)
-        # Set our project choices
         projects = [(tenant.id, tenant.name)
                     for tenant in request.user.authorized_tenants]
         self.fields['project_id'].choices = projects
 
-        # Set our user options
         users = [(request.user.id, request.user.username)]
         self.fields['user_id'].choices = users
 
     class Meta:
         name = _("Project & User")
-        # Unusable permission so this is always hidden. However, we
-        # keep this step in the workflow for validation/verification purposes.
         permissions = ("!",)
 
 
@@ -66,79 +63,91 @@ class SelectProjectUser(workflows.Step):
     contributes = ("project_id", "user_id")
 
 
-class SetNameBaseImageAction(workflows.Action):
+class GeneralConfigurationAction(workflows.Action):
+
+    def __init__(self, request, context, *args, **kwargs):
+        super(GeneralConfigurationAction, self).__init__(request, context, *args, **kwargs)
+        templates = list_templates(request.user.tenant_id, request.user.token.id)
+        jt_nn_templates = ((t.name, t.name) for t in templates if ("jt" in t.name and "nn" in t.name))
+        jt_templates = ((t.name, t.name) for t in templates if ("jt" in t.name and not "nn" in t.name))
+        nn_templates = ((t.name, t.name) for t in templates if (not "jt" in t.name and "nn" in t.name))
+        worker_templates = ((t.name, t.name) for t in templates if ("tt" in t.name and "dn" in t.name))
+
+        self.fields['jt_nn_template_choices'].choices = jt_nn_templates
+        self.fields['jt_template_choices'].choices = jt_templates
+        self.fields['nn_template_choices'].choices = nn_templates
+        self.fields['worker_template_choices'].choices = worker_templates
+
     name = forms.CharField(
         label=_("Cluster name"),
         required=True)
+
     base_image = forms.ChoiceField(
         label = _("Base image"),
         required = True)
+
+    hadoop_cluster_topology = forms.ChoiceField(
+        label = _("Hadoop cluster topology"),
+        required = True,
+        choices = [("Single-node mater", "Single-node mater"), ("Multi-node mater", "Multi-node mater")]
+    )
+
+    jt_nn_template_choices = forms.ChoiceField(
+        required = False
+    )
+
+    jt_template_choices = forms.ChoiceField(
+        required = False
+    )
+
+    nn_template_choices = forms.ChoiceField(
+        required = False
+    )
+
+    worker_template_choices = forms.ChoiceField(
+        required = False
+    )
+
+    result_field = forms.CharField(
+        required = True
+    )
 
     def populate_base_image_choices(self, request, context):
         public_images, _more = glance.image_list_detailed(request)
         return [(image.id, image.name) for image in public_images]
 
+
     class Meta:
-        name = _("Cluster name")
+        name = _("General configuration")
         help_text_template = ("project/hadoop/_cluster_general_help.html")
 
-class SetNameBaseImage(workflows.Step):
-    action_class = SetNameBaseImageAction
-    contributes = ("name", "base_image")
+class GeneralConfiguration(workflows.Step):
+    action_class = GeneralConfigurationAction
+    contributes = ("name", "base_image", "templates")
 
-class SelectNodeTemplatesAction(workflows.Action):
-    master_node_template = forms.ChoiceField(
-        label = mark_safe("<h3>Master Node Template</h3><br/><h4>Node Template name</h4>"),
-        required = True
-    )
-
-    worker_node_template = forms.ChoiceField(
-        label = mark_safe("<h3>Worker Node Template</h3><br/><h4>Node Template name</h4>"),
-        required = True
-    )
-
-    worker_node_template_count = forms.IntegerField(
-        label =  _("Nodes number"),
-        initial = 1,
-        required = True)
-
-    def populate_master_node_template_choices(self, request, context):
-        templates = list_templates(request.user.tenant_id, request.user.token.id)
-        primary_templates = ((t.name, t.name) for t in templates if ("jt" in t.name or "nn" in t.name))
-        return primary_templates
-
-    def populate_worker_node_template_choices(self, request, context):
-        templates = list_templates(request.user.tenant_id, request.user.token.id)
-        secondary_templates = ((t.name, t.name) for t in templates if ("tt" in t.name or "dn" in t.name))
-        return secondary_templates
-
-    class Meta:
-        name = _("Node Templates")
-        help_text_template = ("project/hadoop/_cluster_templates_help.html")
-
-
-class SelectNodeTemplates(workflows.Step):
-    action_class = SelectNodeTemplatesAction
-    contributes = ("master_node_template", "worker_node_template", "worker_node_template_count")
-
+    def contribute(self, data, context):
+        context["name"] = data.get('name')
+        context["base_image"] = data.get('base_image')
+        context["templates"] = json.loads(data.get('result_field'))
+        return context
 
 class CreateCluster(workflows.Workflow):
     slug = "create_cluster"
     name = _("Create cluster")
     finalize_button_name = _("Create & Launch")
     success_url = "horizon:project:hadoop:index"
-    default_steps = (SetNameBaseImage, SelectNodeTemplates)
+    default_steps = (GeneralConfiguration, )
 
     def handle(self, request, context):
         try:
-            return create_cluster(
+            return create_cluster_NEW (
                 context["base_image"],
                 context["name"],
                 request.user.tenant_id,
-                context["master_node_template"],
-                context["worker_node_template"],
-                context["worker_node_template_count"],
-                request.user.token.id)
+                context["templates"],
+                request.user.token.id
+            )
+
         except:
             exceptions.handle(request)
             return False
@@ -199,7 +208,6 @@ class FillProcessPropertiesAction(workflows.Action):
 class FillProcessProperties(workflows.Step):
     action_class =  FillProcessPropertiesAction
     contributes = ("node_type", "jt_heap_size", "nn_heap_size", "dn_heap_size", "tt_heap_size")
-
 
 
 class CreateNodeTemplate(workflows.Workflow):
