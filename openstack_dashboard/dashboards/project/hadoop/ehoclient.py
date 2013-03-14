@@ -50,17 +50,7 @@ def list_templates(tenant_id, token):
     else:
         return []
 
-
-def create_cluster(base_image_id, name, tenant_id, primary_node_template, secondary_node_template, secondary_node_template_count, token):
-    post_data = {"cluster": {}}
-    cluster_data = post_data["cluster"]
-    cluster_data["base_image_id"] = base_image_id
-    cluster_data["name"] = name
-    cluster_data["node_templates"] = {primary_node_template: 1, secondary_node_template: secondary_node_template_count}
-    resp = requests.post(EHO_IP + "/" + tenant_id + "/clusters.json", data=json.dumps(post_data), headers={"x-auth-token": token, "Content-Type" : "application/json"})
-    return resp.status_code == 202
-
-def create_cluster_NEW(base_image_id, name, tenant_id, templates, token):
+def create_cluster(base_image_id, name, tenant_id, templates, token):
     post_data = {"cluster": {}}
     cluster_data = post_data["cluster"]
     cluster_data["base_image_id"] = base_image_id
