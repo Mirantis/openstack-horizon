@@ -52,7 +52,7 @@ horizon.addInitFunction(function () {
 //
 
     function addValidationHint(text) {
-        $($("#create_cluster__selectnodetemplatesaction").find("table")[0]).before('<div class="validation-hint"><span class="help-inline label label-important">' + text + '</span><br/><div>');
+        $($("#create_cluster__generalconfigurationaction").find("table")[0]).before('<div class="validation-hint"><span class="help-inline label label-important">' + text + '</span><br/><div>');
     }
 
     function validate() {
@@ -114,31 +114,66 @@ horizon.addInitFunction(function () {
         return JSON.stringify(result);
     }
 
-    function create_inputs() {
+    function create_inputs(type) {
         last_template_idx += 1;
 
         var choice_input = '' +
             '<div class="control-group form-field clearfix">' +
-            '<span id="remove_template_input_' + last_template_idx + '" data-add-to-field="id_keypair" class="btn btn-inline pull-right remove-inputs">-</span>' +
-                '<label for="id_template_' + last_template_idx + '">Node template</label>' +
+                '<div class="' + type + '" style="display:none"></div>';
+            if (type == 'worker') {
+                choice_input += '<span id="remove_template_input_' + last_template_idx + '" data-add-to-field="id_keypair" class="btn btn-inline pull-right remove-inputs">-</span>'
+            }
+        var header;
+        if (type == "jt_nn") {
+            header = "Job Tracker and Name Node node template";
+        }
+        if (type == "jt") {
+            header = "Job Tracker node template";
+        }
+        if (type == "nn") {
+            header = "Name Node node template";
+        }
+        if (type == "worker") {
+            header = "Worker node template";
+        }
+        choice_input +=
+                '<label for="id_template_' + last_template_idx + '">' + header + '</label>' +
                 '<span class="help-block" style="display: none;"></span>' +
                 '<div class="input">' +
                     '<select name="template_' + last_template_idx + '" id="id_template_'+ last_template_idx +'" class="templates_select">' +
-                    $("#id_template_choices").html() +
+                        $("#id_" + type + "_template_choices").html() +
                     '</select>' +
                 '</div>' +
             '</div>';
         var count_input = '' +
             '<div class="control-group form-field clearfix">' +
+                '<div class="' + type + '" style="display:none"></div>' +
                 '<label for="id_count_' + last_template_idx + '">Nodes number</label>' +
                 '<span class="help-block" style="display: none;"></span>'+
                 '<div class="input">'+
-                    '<input type="text" name="count_' + last_template_idx + '" value="0" id="id_count_' + last_template_idx + '" data-original-title="">'+
+                    '<input type="text" name="count_' + last_template_idx + '" value="1" id="id_count_' + last_template_idx + '" data-original-title="">'+
                 '</div>'+
-            '</div>'+
-            '<hr>';
-        $("#id_template_choices").closest(".control-group").before(choice_input + count_input);
+            '</div>';
+        if (type != "worker") {
+            $("#id_hadoop_cluster_topology").closest(".control-group").after(choice_input + count_input);
+        } else {
+            $("#id_result_field").closest(".control-group").before(choice_input + count_input + "<hr>");
+        }
         $("#id_template_"+ last_template_idx).change();
+    }
+
+    function switch_topology() {
+        $(".jt_nn").closest(".control-group").remove();
+        $(".jt").closest(".control-group").remove();
+        $(".nn").closest(".control-group").remove();
+
+        var topology_type = $("#id_hadoop_cluster_topology").val();
+        if (topology_type == "Single-node mater")  {
+            create_inputs("jt_nn");
+        } else {
+            create_inputs("nn");
+            create_inputs("jt");
+        }
     }
 
     $(document).on('change', '.templates_select', function() {
@@ -148,16 +183,20 @@ horizon.addInitFunction(function () {
         var count_selector = $("#id_count_" + block_num);
         if (selected.indexOf("jt") != -1 || selected.indexOf("nn") != -1) {
             count_selector.val(1);
-            count_selector.prop("disabled", true)
+            count_selector.closest('.control-group').hide();
         } else {
-            count_selector.prop("disabled", false)
+            count_selector.closest('.control-group').show();
         }
 
         validate();
     });
 
     $(document).on('click', '#add_template_inputs_btn', function(evt) {
-        create_inputs();
+        create_inputs("worker");
+    });
+
+    $(document).on('change', '#id_hadoop_cluster_topology', function(evt){
+        switch_topology();
     });
 
     $(document).on('click','.remove-inputs', function(evt) {
@@ -177,15 +216,17 @@ horizon.addInitFunction(function () {
             var result = fillResultField();
             $("#id_result_field").val(result);
         });
-        $($("#create_cluster__selectnodetemplatesaction").find("table")[0]).after(
+        $($("#create_cluster__generalconfigurationaction").find("table")[0]).after(
             '<span id="add_template_inputs_btn" data-add-to-field="id_keypair" class="btn btn-inline">+</span>');
 
-        $("#id_template_choices").closest(".control-group").hide();
+        $("#id_jt_nn_template_choices").closest(".control-group").hide();
+        $("#id_jt_template_choices").closest(".control-group").hide();
+        $("#id_nn_template_choices").closest(".control-group").hide();
+        $("#id_worker_template_choices").closest(".control-group").hide();
         $("#id_result_field").closest(".control-group").hide();
 
-        create_inputs()
-
-
+        switch_topology();
+        create_inputs("worker");
     })
 
 

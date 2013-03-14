@@ -63,52 +63,48 @@ class SelectProjectUser(workflows.Step):
     contributes = ("project_id", "user_id")
 
 
-class SetNameBaseImageAction(workflows.Action):
+class GeneralConfigurationAction(workflows.Action):
+
+    def __init__(self, request, context, *args, **kwargs):
+        super(GeneralConfigurationAction, self).__init__(request, context, *args, **kwargs)
+        templates = list_templates(request.user.tenant_id, request.user.token.id)
+        jt_nn_templates = ((t.name, t.name) for t in templates if ("jt" in t.name and "nn" in t.name))
+        jt_templates = ((t.name, t.name) for t in templates if ("jt" in t.name and not "nn" in t.name))
+        nn_templates = ((t.name, t.name) for t in templates if (not "jt" in t.name and "nn" in t.name))
+        worker_templates = ((t.name, t.name) for t in templates if ("tt" in t.name and "dn" in t.name))
+
+        self.fields['jt_nn_template_choices'].choices = jt_nn_templates
+        self.fields['jt_template_choices'].choices = jt_templates
+        self.fields['nn_template_choices'].choices = nn_templates
+        self.fields['worker_template_choices'].choices = worker_templates
+
     name = forms.CharField(
         label=_("Cluster name"),
         required=True)
+
     base_image = forms.ChoiceField(
         label = _("Base image"),
         required = True)
 
-    def populate_base_image_choices(self, request, context):
-        public_images, _more = glance.image_list_detailed(request)
-        return [(image.id, image.name) for image in public_images]
+    hadoop_cluster_topology = forms.ChoiceField(
+        label = _("Hadoop cluster topology"),
+        required = True,
+        choices = [("Single-node mater", "Single-node mater"), ("Multi-node mater", "Multi-node mater")]
+    )
 
-    class Meta:
-        name = _("Cluster name")
-        help_text_template = ("project/hadoop/_cluster_general_help.html")
+    jt_nn_template_choices = forms.ChoiceField(
+        required = False
+    )
 
-class SetNameBaseImage(workflows.Step):
-    action_class = SetNameBaseImageAction
-    contributes = ("name", "base_image")
+    jt_template_choices = forms.ChoiceField(
+        required = False
+    )
 
-def _get_templates(tenant, token):
-    templates = list_templates(tenant, token)
-    prepared_templates = ((t.name, t.name) for t in templates)
-    return prepared_templates
+    nn_template_choices = forms.ChoiceField(
+        required = False
+    )
 
-
-#<div class="control-group form-field clearfix">
-#<label for="id_count_0">Nodes number</label>
-#
-#<span class="help-block" style="display: none;"></span>
-#<div class="input">
-#<input type="text" name="count_0" value="0" id="id_count_0" data-original-title=""><hr>
-#</div>
-#</div>
-class SelectNodeTemplatesAction(workflows.Action):
-
-    def __init__(self, request, *args, **kwargs):
-        super(SelectNodeTemplatesAction, self).__init__(request, *args, **kwargs)
-        templates = list_templates(request.user.tenant_id, request.user.token.id)
-        prepared_templates = ((t.name, t.name) for t in templates)
-        self.fields['template_choices'].choices = prepared_templates
-
-
-
-    template_choices = forms.ChoiceField(
-        label = _("Node template"),
+    worker_template_choices = forms.ChoiceField(
         required = False
     )
 
@@ -116,28 +112,31 @@ class SelectNodeTemplatesAction(workflows.Action):
         required = True
     )
 
+    def populate_base_image_choices(self, request, context):
+        public_images, _more = glance.image_list_detailed(request)
+        return [(image.id, image.name) for image in public_images]
+
+
     class Meta:
-        name = _("Node Templates")
-        help_text_template = ("project/hadoop/_cluster_templates_help.html")
+        name = _("General configuration")
+        help_text_template = ("project/hadoop/_cluster_general_help.html")
 
-
-
-class SelectNodeTemplates(workflows.Step):
-    action_class = SelectNodeTemplatesAction
-    contributes = ("templates",)
+class GeneralConfiguration(workflows.Step):
+    action_class = GeneralConfigurationAction
+    contributes = ("name", "base_image", "templates")
 
     def contribute(self, data, context):
-
+        context["name"] = data.get('name')
+        context["base_image"] = data.get('base_image')
         context["templates"] = json.loads(data.get('result_field'))
         return context
-
 
 class CreateCluster(workflows.Workflow):
     slug = "create_cluster"
     name = _("Create cluster")
     finalize_button_name = _("Create & Launch")
     success_url = "horizon:project:hadoop:index"
-    default_steps = (SetNameBaseImage, SelectNodeTemplates)
+    default_steps = (GeneralConfiguration, )
 
     def handle(self, request, context):
         try:
