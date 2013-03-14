@@ -37,13 +37,13 @@ from horizon import workflows
 
 from openstack_dashboard import api
 from .forms import UpdateInstance, UpdateTemplate
+from openstack_dashboard.api.eho import list_templates, list_clusters
 from .tables import NodeTemplatesTable, ClustersTable
 from .workflows import CreateCluster, CreateNodeTemplate
 from .clusters import Cluster
 from .templates import Template
 from .tabs import ClusterDetailTabs, NodeTemplateDetailsTabs
 
-from ehoclient import list_clusters, list_templates
 
 
 LOG = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class IndexView(tables.MultiTableView):
 
     def get_node_templates_data(self):
         try:
-            node_templates = list_templates(self.request.user.tenant_id, self.request.user.token.id)
+            node_templates = list_templates(self.request)
         except:
             node_templates = []
             exceptions.handle(self.request,
@@ -65,7 +65,7 @@ class IndexView(tables.MultiTableView):
 
     def get_clusters_data(self):
         try:
-            clusters = list_clusters(self.request.user.tenant_id, self.request, self.request.user.token.id)
+            clusters = list_clusters(self.request)
         except:
             clusters = []
             exceptions.handle(self.request,

@@ -23,19 +23,9 @@ from django.template.defaultfilters import title
 from django.utils.http import urlencode
 from django.utils.translation import string_concat, ugettext_lazy as _
 
-from horizon.conf import HORIZON_CONFIG
-from horizon import exceptions
-from horizon import messages
 from horizon import tables
-from horizon.templatetags import sizeformat
-from horizon.utils.filters import replace_underscores
+from openstack_dashboard.api.eho import delete_template, terminate_cluster
 
-from openstack_dashboard import api
-from openstack_dashboard.dashboards.project.access_and_security \
-        .floating_ips.workflows import IPAssociationWorkflow
-from .tabs import ClusterDetailTabs
-
-from ehoclient import terminate_cluster, delete_template
 
 LOG = logging.getLogger(__name__)
 
@@ -76,7 +66,7 @@ class DeleteTemplate(tables.BatchAction):
         return True
 
     def action(self, request, template_id):
-        delete_template(template_id, request.user.tenant_id, request.user.token.id)
+        delete_template(request, template_id)
 
 
 class CreateCluster(tables.LinkAction):
@@ -118,7 +108,7 @@ class TerminateCluster(tables.BatchAction):
         return True
 
     def action(self, request, cluster_id):
-        terminate_cluster(cluster_id, request.user.tenant_id, request.user.token.id)
+        terminate_cluster(request, cluster_id)
 
 
 def render_templates(instance):

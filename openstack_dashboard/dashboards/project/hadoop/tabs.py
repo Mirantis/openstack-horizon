@@ -3,12 +3,11 @@ from django.utils.translation import ugettext_lazy as _
 
 from django.core.urlresolvers import reverse
 from django.utils import safestring
-from horizon import exceptions
 from horizon import tabs, tables
-from ehoclient import get_cluster, get_cluster_nodes, get_node_template
 
-from openstack_dashboard import api
+
 from openstack_dashboard.api import glance
+from openstack_dashboard.api.eho import get_cluster, get_cluster_nodes, get_node_template
 
 class DetailTab(tabs.Tab):
     name = _("Details")
@@ -17,7 +16,7 @@ class DetailTab(tabs.Tab):
                      "_cluster_details_overview.html")
 
     def get_context_data(self, request):
-        cluster = get_cluster(self.tab_group.kwargs['cluster_id'], request.user.tenant_id, request.user.token.id)
+        cluster = get_cluster(request, self.tab_group.kwargs['cluster_id'])
         base_image_name = glance.image_get(request, cluster["base_image_id"]).name
         return {"cluster": cluster, "base_image_name": base_image_name}
 
@@ -48,7 +47,7 @@ class NodesTab(tabs.TableTab):
     template_name = ("project/hadoop/_nodes_overview.html")
 
     def get_cluster_nodes_data(self):
-        nodes = get_cluster_nodes(self.tab_group.kwargs['cluster_id'], self.request.user.tenant_id, self.request, self.request.user.token.id)
+        nodes = get_cluster_nodes(self.request, self.tab_group.kwargs['cluster_id'])
         return nodes
 
 
@@ -64,7 +63,7 @@ class NodeTemplateOverviewTab(tabs.Tab):
     template_name = ("project/hadoop/_node_template_details_overview.html")
 
     def get_context_data(self, request):
-        node_template = get_node_template(self.tab_group.kwargs['node_template_id'], self.request.user.tenant_id, self.request.user.token.id)
+        node_template = get_node_template(request, self.tab_group.kwargs['node_template_id'])
         return {"node_template": node_template}
 
 class NodeTemplateDetailsTabs(tabs.TabGroup):

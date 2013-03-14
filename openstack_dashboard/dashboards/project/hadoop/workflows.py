@@ -32,10 +32,8 @@ from horizon import workflows
 from openstack_dashboard import api
 from openstack_dashboard.api import cinder
 from openstack_dashboard.api import glance
+from openstack_dashboard.api.eho import list_templates, create_cluster, create_node_template
 from openstack_dashboard.usage import quotas
-
-
-from  ehoclient import list_templates, create_node_template, create_cluster
 
 LOG = logging.getLogger(__name__)
 
@@ -67,7 +65,7 @@ class GeneralConfigurationAction(workflows.Action):
 
     def __init__(self, request, context, *args, **kwargs):
         super(GeneralConfigurationAction, self).__init__(request, context, *args, **kwargs)
-        templates = list_templates(request.user.tenant_id, request.user.token.id)
+        templates = list_templates(request)
         jt_nn_templates = ((t.name, t.name) for t in templates if ("jt" in t.name and "nn" in t.name))
         jt_templates = ((t.name, t.name) for t in templates if ("jt" in t.name and not "nn" in t.name))
         nn_templates = ((t.name, t.name) for t in templates if (not "jt" in t.name and "nn" in t.name))
@@ -141,11 +139,10 @@ class CreateCluster(workflows.Workflow):
     def handle(self, request, context):
         try:
             return create_cluster (
-                context["base_image"],
+                request,
                 context["name"],
-                request.user.tenant_id,
+                context["base_image"],
                 context["templates"],
-                request.user.token.id
             )
 
         except:
@@ -228,7 +225,15 @@ class CreateNodeTemplate(workflows.Workflow):
             nn_opts = {"heap_size": context["nn_heap_size"]}
             tt_opts = {"heap_size": context["tt_heap_size"]}
             dn_opts = {"heap_size": context["dn_heap_size"]}
-            return create_node_template(name, request.user.tenant_id, node_type, flavor_id, jt_opts, nn_opts, tt_opts, dn_opts, request.user.token.id)
+            return create_node_template(
+                request,
+                name,
+                node_type,
+                flavor_id,
+                jt_opts,
+                nn_opts,
+                tt_opts,
+                dn_opts)
         except:
             exceptions.handle(request)
             return False
