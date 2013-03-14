@@ -33,8 +33,8 @@ from openstack_dashboard.usage import quotas
 class QuotaTests(test.APITestCase):
     @test.create_stubs({api.nova: ('server_list',
                                    'flavor_list',
-                                   'tenant_floating_ip_list',
                                    'tenant_quota_get',),
+                        api.network: ('tenant_floating_ip_list',),
                         quotas: ('is_service_enabled',),
                         cinder: ('volume_list', 'tenant_quota_get',)})
     def test_tenant_quota_usages(self):
@@ -44,7 +44,7 @@ class QuotaTests(test.APITestCase):
                 .AndReturn(self.flavors.list())
         api.nova.tenant_quota_get(IsA(http.HttpRequest), '1') \
                 .AndReturn(self.quotas.first())
-        api.nova.tenant_floating_ip_list(IsA(http.HttpRequest)) \
+        api.network.tenant_floating_ip_list(IsA(http.HttpRequest)) \
                 .AndReturn(self.floating_ips.list())
         api.nova.server_list(IsA(http.HttpRequest)) \
                 .AndReturn(self.servers.list())
@@ -60,6 +60,8 @@ class QuotaTests(test.APITestCase):
             'injected_file_content_bytes': {'quota': 1},
             'metadata_items': {'quota': 1},
             'injected_files': {'quota': 1},
+            'security_groups': {'quota': 10},
+            'security_group_rules': {'quota': 20},
             'gigabytes': {'available': 920, 'used': 80, 'quota': 1000},
             'ram': {'available': 8976, 'used': 1024, 'quota': 10000},
             'floating_ips': {'available': 0, 'used': 2, 'quota': 1},
@@ -73,8 +75,8 @@ class QuotaTests(test.APITestCase):
 
     @test.create_stubs({api.nova: ('server_list',
                                    'flavor_list',
-                                   'tenant_floating_ip_list',
                                    'tenant_quota_get',),
+                        api.network: ('tenant_floating_ip_list',),
                         quotas: ('is_service_enabled',)})
     def test_tenant_quota_usages_without_volume(self):
         quotas.is_service_enabled(IsA(http.HttpRequest),
@@ -83,7 +85,7 @@ class QuotaTests(test.APITestCase):
                 .AndReturn(self.flavors.list())
         api.nova.tenant_quota_get(IsA(http.HttpRequest), '1') \
                 .AndReturn(self.quotas.first())
-        api.nova.tenant_floating_ip_list(IsA(http.HttpRequest)) \
+        api.network.tenant_floating_ip_list(IsA(http.HttpRequest)) \
                 .AndReturn(self.floating_ips.list())
         api.nova.server_list(IsA(http.HttpRequest)) \
                 .AndReturn(self.servers.list())
@@ -95,6 +97,8 @@ class QuotaTests(test.APITestCase):
             'injected_file_content_bytes': {'quota': 1},
             'metadata_items': {'quota': 1},
             'injected_files': {'quota': 1},
+            'security_groups': {'quota': 10},
+            'security_group_rules': {'quota': 20},
             'ram': {'available': 8976, 'used': 1024, 'quota': 10000},
             'floating_ips': {'available': 0, 'used': 2, 'quota': 1},
             'instances': {'available': 8, 'used': 2, 'quota': 10},
@@ -106,8 +110,8 @@ class QuotaTests(test.APITestCase):
 
     @test.create_stubs({api.nova: ('server_list',
                                    'flavor_list',
-                                   'tenant_floating_ip_list',
                                    'tenant_quota_get',),
+                        api.network: ('tenant_floating_ip_list',),
                         quotas: ('is_service_enabled',)})
     def test_tenant_quota_usages_no_instances_running(self):
         quotas.is_service_enabled(IsA(http.HttpRequest),
@@ -116,7 +120,8 @@ class QuotaTests(test.APITestCase):
                 .AndReturn(self.flavors.list())
         api.nova.tenant_quota_get(IsA(http.HttpRequest), '1') \
                 .AndReturn(self.quotas.first())
-        api.nova.tenant_floating_ip_list(IsA(http.HttpRequest)).AndReturn([])
+        api.network.tenant_floating_ip_list(IsA(http.HttpRequest)) \
+                .AndReturn([])
         api.nova.server_list(IsA(http.HttpRequest)).AndReturn([])
 
         self.mox.ReplayAll()
@@ -126,6 +131,8 @@ class QuotaTests(test.APITestCase):
             'injected_file_content_bytes': {'quota': 1},
             'metadata_items': {'quota': 1},
             'injected_files': {'quota': 1},
+            'security_groups': {'quota': 10},
+            'security_group_rules': {'quota': 20},
             'ram': {'available': 10000, 'used': 0, 'quota': 10000},
             'floating_ips': {'available': 1, 'used': 0, 'quota': 1},
             'instances': {'available': 10, 'used': 0, 'quota': 10},
@@ -137,8 +144,8 @@ class QuotaTests(test.APITestCase):
 
     @test.create_stubs({api.nova: ('server_list',
                                    'flavor_list',
-                                   'tenant_floating_ip_list',
                                    'tenant_quota_get',),
+                        api.network: ('tenant_floating_ip_list',),
                         quotas: ('is_service_enabled',),
                         cinder: ('volume_list', 'tenant_quota_get',)})
     def test_tenant_quota_usages_unlimited_quota(self):
@@ -151,7 +158,7 @@ class QuotaTests(test.APITestCase):
                 .AndReturn(self.flavors.list())
         api.nova.tenant_quota_get(IsA(http.HttpRequest), '1') \
                 .AndReturn(inf_quota)
-        api.nova.tenant_floating_ip_list(IsA(http.HttpRequest)) \
+        api.network.tenant_floating_ip_list(IsA(http.HttpRequest)) \
                 .AndReturn(self.floating_ips.list())
         api.nova.server_list(IsA(http.HttpRequest)) \
                 .AndReturn(self.servers.list())
@@ -167,6 +174,8 @@ class QuotaTests(test.APITestCase):
             'injected_file_content_bytes': {'quota': 1},
             'metadata_items': {'quota': 1},
             'injected_files': {'quota': 1},
+            'security_groups': {'quota': 10},
+            'security_group_rules': {'quota': 20},
             'gigabytes': {'available': 920, 'used': 80, 'quota': 1000},
             'ram': {'available': float("inf"), 'used': 1024,
                     'quota': float("inf")},

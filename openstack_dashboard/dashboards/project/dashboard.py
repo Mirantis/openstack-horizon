@@ -29,7 +29,9 @@ class BasePanels(horizon.PanelGroup):
               'access_and_security',
               'networks',
               'routers',
-              'hadoop')
+              'hadoop',
+              'network_topology',
+              'loadbalancers')
 
 
 class ObjectStorePanels(horizon.PanelGroup):

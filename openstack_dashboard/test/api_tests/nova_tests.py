@@ -59,6 +59,19 @@ class ComputeApiTests(test.APITestCase):
         ret_val = api.nova.server_reboot(self.request, server.id)
         self.assertIsNone(ret_val)
 
+    def test_server_soft_reboot(self):
+        server = self.servers.first()
+        HARDNESS = servers.REBOOT_SOFT
+
+        novaclient = self.stub_novaclient()
+        novaclient.servers = self.mox.CreateMockAnything()
+        novaclient.servers.get(server.id).AndReturn(server)
+        novaclient.servers.reboot(server.id, HARDNESS)
+        self.mox.ReplayAll()
+
+        ret_val = api.nova.server_reboot(self.request, server.id, HARDNESS)
+        self.assertIsNone(ret_val)
+
     def test_server_vnc_console(self):
         server = self.servers.first()
         console = self.servers.vnc_console_data
@@ -137,42 +150,6 @@ class ComputeApiTests(test.APITestCase):
 
         ret_val = api.nova.server_get(self.request, server.id)
         self.assertIsInstance(ret_val, api.nova.Server)
-
-    def test_server_remove_floating_ip(self):
-        server = api.nova.Server(self.servers.first(), self.request)
-        floating_ip = self.floating_ips.first()
-
-        novaclient = self.stub_novaclient()
-        novaclient.servers = self.mox.CreateMockAnything()
-        novaclient.floating_ips = self.mox.CreateMockAnything()
-        novaclient.servers.get(server.id).AndReturn(server)
-        novaclient.floating_ips.get(floating_ip.id).AndReturn(floating_ip)
-        novaclient.servers.remove_floating_ip(server.id, floating_ip.ip) \
-                          .AndReturn(server)
-        self.mox.ReplayAll()
-
-        server = api.nova.server_remove_floating_ip(self.request,
-                                                    server.id,
-                                                    floating_ip.id)
-        self.assertIsInstance(server, api.nova.Server)
-
-    def test_server_add_floating_ip(self):
-        server = api.nova.Server(self.servers.first(), self.request)
-        floating_ip = self.floating_ips.first()
-        novaclient = self.stub_novaclient()
-
-        novaclient.floating_ips = self.mox.CreateMockAnything()
-        novaclient.servers = self.mox.CreateMockAnything()
-        novaclient.servers.get(server.id).AndReturn(server)
-        novaclient.floating_ips.get(floating_ip.id).AndReturn(floating_ip)
-        novaclient.servers.add_floating_ip(server.id, floating_ip.ip) \
-                          .AndReturn(server)
-        self.mox.ReplayAll()
-
-        server = api.nova.server_add_floating_ip(self.request,
-                                                 server.id,
-                                                 floating_ip.id)
-        self.assertIsInstance(server, api.nova.Server)
 
     def test_absolute_limits_handle_unlimited(self):
         values = {"maxTotalCores": -1, "maxTotalInstances": 10}

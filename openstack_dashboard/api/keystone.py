@@ -21,6 +21,7 @@
 
 import logging
 import urlparse
+from pkg_resources import get_distribution
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -115,10 +116,18 @@ def keystoneclient(request, admin=False):
         endpoint = _get_endpoint_url(request, endpoint_type)
         insecure = getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', False)
         LOG.debug("Creating a new keystoneclient connection to %s." % endpoint)
-        conn = keystone_client.Client(
-            token=user.token.id, endpoint=endpoint,
-            original_ip=request.environ.get('REMOTE_ADDR', ''),
-            insecure=insecure)
+
+        # TODO: to be removed in H release
+        kcversion = get_distribution("python-keystoneclient").version
+        if kcversion >= '0.2.0':
+            conn = keystone_client.Client(
+                token=user.token.id, endpoint=endpoint,
+                original_ip=request.environ.get('REMOTE_ADDR', ''),
+                insecure=insecure)
+        else:
+            conn = keystone_client.Client(
+                token=user.token.id, endpoint=endpoint,
+                insecure=insecure)
         setattr(request, cache_attr, conn)
     return conn
 
@@ -277,10 +286,13 @@ def get_user_ec2_credentials(request, user_id, access_token):
 
 
 def keystone_can_edit_user():
-    if hasattr(settings, "OPENSTACK_KEYSTONE_BACKEND"):
-        return settings.OPENSTACK_KEYSTONE_BACKEND['can_edit_user']
-    else:
-        return False
+    backend_settings = getattr(settings, "OPENSTACK_KEYSTONE_BACKEND", {})
+    return backend_settings.get('can_edit_user', True)
+
+
+def keystone_can_edit_project():
+    backend_settings = getattr(settings, "OPENSTACK_KEYSTONE_BACKEND", {})
+    return backend_settings.get('can_edit_project', True)
 
 
 def keystone_backend_name():

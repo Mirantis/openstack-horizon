@@ -19,7 +19,8 @@
 #    under the License.
 
 
-from django.utils.translation import ugettext as _
+from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 
 from horizon import exceptions
@@ -39,17 +40,21 @@ ADD_USER_URL = "horizon:admin:projects:create_user"
 class UpdateProjectQuotaAction(workflows.Action):
     ifcb_label = _("Injected File Content Bytes")
     metadata_items = forms.IntegerField(min_value=-1,
-            label=_("Metadata Items"))
+                                        label=_("Metadata Items"))
     cores = forms.IntegerField(min_value=-1, label=_("VCPUs"))
     instances = forms.IntegerField(min_value=-1, label=_("Instances"))
     injected_files = forms.IntegerField(min_value=-1,
-            label=_("Injected Files"))
+                                        label=_("Injected Files"))
     injected_file_content_bytes = forms.IntegerField(min_value=-1,
                                                      label=ifcb_label)
     volumes = forms.IntegerField(min_value=-1, label=_("Volumes"))
     gigabytes = forms.IntegerField(min_value=-1, label=_("Gigabytes"))
     ram = forms.IntegerField(min_value=-1, label=_("RAM (MB)"))
     floating_ips = forms.IntegerField(min_value=-1, label=_("Floating IPs"))
+    security_groups = forms.IntegerField(min_value=-1,
+                                         label=_("Security Groups"))
+    security_group_rules = forms.IntegerField(min_value=-1,
+                                              label=_("Security Group Rules"))
 
     class Meta:
         name = _("Quota")
@@ -69,7 +74,9 @@ class UpdateProjectQuota(workflows.Step):
                    "volumes",
                    "gigabytes",
                    "ram",
-                   "floating_ips")
+                   "floating_ips",
+                   "security_groups",
+                   "security_group_rules")
 
 
 class CreateProjectInfoAction(workflows.Action):
@@ -110,12 +117,19 @@ class UpdateProjectMembersAction(workflows.Action):
 
         # Get the default role
         try:
-            default_role = api.keystone.get_default_role(self.request).id
+            default_role = api.keystone.get_default_role(self.request)
+            # Default role is necessary to add members to a project
+            if default_role is None:
+                default = getattr(settings,
+                                  "OPENSTACK_KEYSTONE_DEFAULT_ROLE", None)
+                msg = _('Could not find default role "%s" in Keystone'
+                        % default)
+                raise exceptions.NotFound(msg)
         except:
             exceptions.handle(self.request,
                               err_msg,
                               redirect=reverse(INDEX_URL))
-        self.fields['default_role'].initial = default_role
+        self.fields['default_role'].initial = default_role.id
 
         # Get list of available users
         all_users = []
@@ -152,18 +166,20 @@ class UpdateProjectMembersAction(workflows.Action):
                     exceptions.handle(request,
                                       err_msg,
                                       redirect=reverse(INDEX_URL))
-                if roles:
-                    primary_role = roles[0].id
-                    self.fields["role_" + primary_role].initial.append(user.id)
+                for role in roles:
+                    self.fields["role_" + role.id].initial.append(user.id)
 
     class Meta:
         name = _("Project Members")
         slug = "update_members"
 
 
-class UpdateProjectMembers(workflows.Step):
+class UpdateProjectMembers(workflows.UpdateMembersStep):
     action_class = UpdateProjectMembersAction
-    template_name = "admin/projects/_update_members.html"
+    available_list_title = _("All Users")
+    members_list_title = _("Project Members")
+    no_available_text = _("No users found.")
+    no_members_text = _("No users.")
 
     def contribute(self, data, context):
         if data:
@@ -236,17 +252,20 @@ class CreateProject(workflows.Workflow):
         # update the project quota
         ifcb = data['injected_file_content_bytes']
         try:
-            api.nova.tenant_quota_update(request,
-                                         project_id,
-                                         metadata_items=data['metadata_items'],
-                                         injected_file_content_bytes=ifcb,
-                                         volumes=data['volumes'],
-                                         gigabytes=data['gigabytes'],
-                                         ram=data['ram'],
-                                         floating_ips=data['floating_ips'],
-                                         instances=data['instances'],
-                                         injected_files=data['injected_files'],
-                                         cores=data['cores'])
+            api.nova.tenant_quota_update(
+                request,
+                project_id,
+                metadata_items=data['metadata_items'],
+                injected_file_content_bytes=ifcb,
+                volumes=data['volumes'],
+                gigabytes=data['gigabytes'],
+                ram=data['ram'],
+                floating_ips=data['floating_ips'],
+                instances=data['instances'],
+                injected_files=data['injected_files'],
+                cores=data['cores'],
+                security_groups=data['security_groups'],
+                security_group_rules=data['security_group_rules'])
         except:
             exceptions.handle(request, _('Unable to set project quotas.'))
         return True
@@ -370,17 +389,21 @@ class UpdateProject(workflows.Workflow):
             # TODO(gabriel): Once nova-volume is fully deprecated the
             # "volumes" and "gigabytes" quotas should no longer be sent to
             # the nova API to be updated anymore.
-            nova.tenant_quota_update(request,
-                                     project_id,
-                                     metadata_items=data['metadata_items'],
-                                     injected_file_content_bytes=ifcb,
-                                     volumes=data['volumes'],
-                                     gigabytes=data['gigabytes'],
-                                     ram=data['ram'],
-                                     floating_ips=data['floating_ips'],
-                                     instances=data['instances'],
-                                     injected_files=data['injected_files'],
-                                     cores=data['cores'])
+            nova.tenant_quota_update(
+                request,
+                project_id,
+                metadata_items=data['metadata_items'],
+                injected_file_content_bytes=ifcb,
+                volumes=data['volumes'],
+                gigabytes=data['gigabytes'],
+                ram=data['ram'],
+                floating_ips=data['floating_ips'],
+                instances=data['instances'],
+                injected_files=data['injected_files'],
+                cores=data['cores'],
+                security_groups=data['security_groups'],
+                security_group_rules=data['security_group_rules'])
+
             if is_service_enabled(request, 'volume'):
                 cinder.tenant_quota_update(request,
                                            project_id,
