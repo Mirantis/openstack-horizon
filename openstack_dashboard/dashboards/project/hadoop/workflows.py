@@ -30,10 +30,8 @@ from horizon import forms
 from horizon import workflows
 
 from openstack_dashboard import api
-from openstack_dashboard.api import cinder
 from openstack_dashboard.api import glance
 from openstack_dashboard.api.eho import list_templates, create_cluster, create_node_template
-from openstack_dashboard.usage import quotas
 
 LOG = logging.getLogger(__name__)
 
@@ -87,7 +85,7 @@ class GeneralConfigurationAction(workflows.Action):
     hadoop_cluster_topology = forms.ChoiceField(
         label = _("Hadoop cluster topology"),
         required = True,
-        choices = [("Single-node mater", "Single-node mater"), ("Multi-node mater", "Multi-node mater")]
+        choices = [("Single-node master", "Single-node master"), ("Multi-node master", "Multi-node master")]
     )
 
     jt_nn_template_choices = forms.ChoiceField(

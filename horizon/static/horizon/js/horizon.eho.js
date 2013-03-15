@@ -168,7 +168,7 @@ horizon.addInitFunction(function () {
         $(".nn").closest(".control-group").remove();
 
         var topology_type = $("#id_hadoop_cluster_topology").val();
-        if (topology_type == "Single-node mater")  {
+        if (topology_type == "Single-node master")  {
             create_inputs("jt_nn");
         } else {
             create_inputs("nn");

@@ -29,8 +29,6 @@ from openstack_dashboard.api.eho import delete_template, terminate_cluster
 
 LOG = logging.getLogger(__name__)
 
-ACTIVE_STATES = ("ACTIVE",)
-
 class CreateNodeTemplate(tables.LinkAction):
     name = "create_node_template"
     verbose_name = _("Create Template")
@@ -118,9 +116,9 @@ def render_templates(instance):
 
 class ClustersTable(tables.DataTable):
     STATUS_CHOICES = (
-        ("active", True),
-        ("Starting", True),
-        ("Stopping", True),
+        ("Active", True),
+        ("Starting", None),
+        ("Stopping", None)
     )
 
     name = tables.Column("name",
@@ -135,6 +133,7 @@ class ClustersTable(tables.DataTable):
 
     status = tables.Column("status",
                            verbose_name=_("Status"),
+                           status=False,
                            status_choices=STATUS_CHOICES)
 
     nodes_count = tables.Column("nodes_count",
