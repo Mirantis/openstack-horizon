@@ -113,6 +113,48 @@ horizon.addInitFunction(function () {
         });
         return JSON.stringify(result);
     }
+    function update_count_info(block_num, value) {
+        console.log(block_num, value);
+        $("#count_hint_" + block_num).text(value);
+        var header = $("#header_" + block_num);
+        if (header.closest(".well").hasClass("well worker_info")) {
+            if (value == 1) {
+                header.text("Worker Node")
+            } else {
+                header.text("Worker Nodes")
+            }
+        }
+    }
+
+    function update_info(block_num, value) {
+        var info = template_infos[value];
+        $("#" + block_num + "_info_content").text(info);
+    }
+
+    function create_info(type) {
+        var info = '<div class="well ' + type + '_info" id="'+ last_template_idx +'_info"> ' +
+            '<h4><span  id="header_' + last_template_idx + '">';
+            if (type == "jt_nn") {
+                info += "Job Tracker + Name Node"
+            }
+            if (type == "jt") {
+                info += "Job Tracker"
+            }
+            if (type == "nn") {
+                info += "Name Node"
+            }
+            if (type == "worker") {
+                info += "Worker Nodes" + '</span> (<span id="count_hint_' + last_template_idx + '"></span>)'
+            }
+            info += '</h4><div id="' + last_template_idx +'_info_content">'+
+            '</div>'+
+            '<div>';
+        if (type != "worker") {
+            $("#infos").prepend(info)
+        } else {
+            $(".well").last().after(info);
+        }
+    }
 
     function create_inputs(type) {
         last_template_idx += 1;
@@ -125,7 +167,7 @@ horizon.addInitFunction(function () {
             }
         var header;
         if (type == "jt_nn") {
-            header = "Job Tracker and Name Node node template";
+            header = "Job Tracker + Name Node node template";
         }
         if (type == "jt") {
             header = "Job Tracker node template";
@@ -151,7 +193,7 @@ horizon.addInitFunction(function () {
                 '<label for="id_count_' + last_template_idx + '">Nodes number</label>' +
                 '<span class="help-block" style="display: none;"></span>'+
                 '<div class="input">'+
-                    '<input type="text" name="count_' + last_template_idx + '" value="1" id="id_count_' + last_template_idx + '" data-original-title="">'+
+                    '<input type="text" class="count-input" name="count_' + last_template_idx + '" value="1" id="id_count_' + last_template_idx + '" data-original-title="">'+
                 '</div>'+
             '</div>';
         if (type != "worker") {
@@ -159,13 +201,19 @@ horizon.addInitFunction(function () {
         } else {
             $("#id_result_field").closest(".control-group").before(choice_input + count_input + "<hr>");
         }
-        $("#id_template_"+ last_template_idx).change();
+        create_info(type);
+        $("#id_template_" + last_template_idx).change();
+        $("#count_hint_" + last_template_idx).change();
     }
 
     function switch_topology() {
         $(".jt_nn").closest(".control-group").remove();
         $(".jt").closest(".control-group").remove();
         $(".nn").closest(".control-group").remove();
+
+        $(".jt_nn_info").remove();
+        $(".jt_info").remove();
+        $(".nn_info").remove();
 
         var topology_type = $("#id_hadoop_cluster_topology").val();
         if (topology_type == "Single-node master")  {
@@ -180,6 +228,7 @@ horizon.addInitFunction(function () {
         var id = this.id;
         var block_num = id.replace("id_template_", "");
         var selected = $(this).val().toLowerCase();
+        update_info(block_num, selected);
         var count_selector = $("#id_count_" + block_num);
         if (selected.indexOf("jt") != -1 || selected.indexOf("nn") != -1) {
             count_selector.val(1);
@@ -193,10 +242,19 @@ horizon.addInitFunction(function () {
 
     $(document).on('click', '#add_template_inputs_btn', function(evt) {
         create_inputs("worker");
+        $(".count-input").keyup();
     });
 
     $(document).on('change', '#id_hadoop_cluster_topology', function(evt){
         switch_topology();
+        $(".count-input").keyup();
+    });
+
+    $(document).on('keyup', '.count-input', function(evt){
+        var id = this.id;
+        var block_num = id.replace("id_count_", "");
+        var value = $(this).val();
+        update_count_info(block_num, value);
     });
 
     $(document).on('click','.remove-inputs', function(evt) {
@@ -205,6 +263,7 @@ horizon.addInitFunction(function () {
         $("#id_template_" + block_num).closest(".control-group").remove();
         $("#id_count_" + block_num).closest(".control-group").next().remove();
         $("#id_count_" + block_num).closest(".control-group").remove();
+        $("#" + block_num + "_info").remove();
         validate();
     });
 
@@ -227,6 +286,7 @@ horizon.addInitFunction(function () {
 
         switch_topology();
         create_inputs("worker");
+        $(".count-input").keyup();
     })
 
 

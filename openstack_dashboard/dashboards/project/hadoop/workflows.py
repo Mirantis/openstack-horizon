@@ -74,6 +74,15 @@ class GeneralConfigurationAction(workflows.Action):
         self.fields['nn_template_choices'].choices = nn_templates
         self.fields['worker_template_choices'].choices = worker_templates
 
+        self.templates = templates
+        self.template_infos = {}
+        flavors = api.nova.flavor_list(request)
+        for template in templates:
+            flavor_name = template.flavor_name
+            flavor = filter(lambda fl: fl.name == flavor_name, flavors)[0]
+            self.template_infos[template.name] = "%s vcpu, %s Mb RAM, %s Gb disk" % (flavor.vcpus, flavor.ram, flavor.disk)
+
+
     name = forms.CharField(
         label=_("Cluster name"),
         required=True)
@@ -113,6 +122,10 @@ class GeneralConfigurationAction(workflows.Action):
         return [(image.id, image.name) for image in public_images
                 if ("image.final" in image.name or "hadoop" in image.name or "hdp" in image.name)]
 
+    def get_help_text(self):
+        extra = {}
+        extra["template_infos"] = self.template_infos
+        return super(GeneralConfigurationAction, self).get_help_text(extra)
 
     class Meta:
         name = _("General configuration")

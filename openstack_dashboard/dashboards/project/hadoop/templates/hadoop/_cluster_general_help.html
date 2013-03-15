@@ -1,12 +1,18 @@
-<p>
-    Choose name and base image for the new cluster.
-</p>
-<p>
-    There are two cluster topologies available:
-    <dl class="well">
-        <dd>Single-node master</dd>
-        <dd>Multi-node master</dd>
-    </dl>
 
-    Node templates should be provided for master and worker nodes.
+<p class="well">
+    <b>OS</b>: Ubuntu 12.10 x64
+    <br/>
+    <b>Java</b>: Java 1.7.0_13 x64
+    <br/>
+    <b>Hadoop</b>: Apache Hadoop 1.1.1
 </p>
+
+
+<div id="infos"></div>
+<script type="text/javascript" charset="utf-8">
+    template_infos = {};
+    {% for key, val in template_infos.items %}
+        template_infos["{{ key }}"] = "{{ val }}";
+    {% endfor %}
+</script>
+

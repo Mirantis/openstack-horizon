@@ -14,8 +14,6 @@
         <dd>{{ node_template.id }}</dd>
         <dt>{% trans "Flavor" %}</dt>
         <dd>{{ node_template.flavor_id }}</dd>
-        <dt>{% trans "Tenant" %}</dt>
-        <dd>{{ node_template.tenant_id }}</dd>
         <dt>{% trans "Processes" %}</dt>
         <dd><ul>
             {% for process in node_template.node_type.processes %}
