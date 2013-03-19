@@ -29,6 +29,7 @@ from openstack_dashboard.api.eho import delete_template, terminate_cluster
 
 LOG = logging.getLogger(__name__)
 
+
 class CreateNodeTemplate(tables.LinkAction):
     name = "create_node_template"
     verbose_name = _("Create Template")

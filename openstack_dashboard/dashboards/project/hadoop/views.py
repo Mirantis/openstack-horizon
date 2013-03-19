@@ -43,7 +43,6 @@ from .workflows import CreateCluster, CreateNodeTemplate
 from .tabs import ClusterDetailTabs, NodeTemplateDetailsTabs
 
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -87,7 +86,7 @@ class EditClusterView(forms.ModalFormView):
 
     def get_initial(self):
         pass
-#
+
 
 class EditTemplateView(forms.ModalFormView):
     form_class = UpdateTemplate
@@ -157,5 +156,6 @@ class NodeTemplateDetailView(tabs.TabView):
     template_name = 'project/hadoop/node_template_details.html'
 
     def get_context_data(self, **kwargs):
-        context = super(NodeTemplateDetailView, self).get_context_data(**kwargs)
+        context = super(NodeTemplateDetailView, self)\
+            .get_context_data(**kwargs)
         return context

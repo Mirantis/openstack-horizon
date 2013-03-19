@@ -31,7 +31,8 @@ from horizon import workflows
 
 from openstack_dashboard import api
 from openstack_dashboard.api import glance
-from openstack_dashboard.api.eho import list_templates, create_cluster, create_node_template
+from openstack_dashboard.api.eho import list_templates, create_cluster, \
+    create_node_template
 
 LOG = logging.getLogger(__name__)
 
@@ -60,14 +61,18 @@ class SelectProjectUser(workflows.Step):
 
 
 class GeneralConfigurationAction(workflows.Action):
-
     def __init__(self, request, context, *args, **kwargs):
-        super(GeneralConfigurationAction, self).__init__(request, context, *args, **kwargs)
+        super(GeneralConfigurationAction, self).__init__(request, context,
+            *args, **kwargs)
         templates = list_templates(request)
-        jt_nn_templates = ((t.name, t.name) for t in templates if ("jt" in t.name and "nn" in t.name))
-        jt_templates = ((t.name, t.name) for t in templates if ("jt" in t.name and not "nn" in t.name))
-        nn_templates = ((t.name, t.name) for t in templates if (not "jt" in t.name and "nn" in t.name))
-        worker_templates = ((t.name, t.name) for t in templates if ("tt" in t.name and "dn" in t.name))
+        jt_nn_templates = ((t.name, t.name) for t in templates
+            if ("jt" in t.name and "nn" in t.name))
+        jt_templates = ((t.name, t.name) for t in templates
+            if ("jt" in t.name and not "nn" in t.name))
+        nn_templates = ((t.name, t.name) for t in templates
+            if (not "jt" in t.name and "nn" in t.name))
+        worker_templates = ((t.name, t.name) for t in templates
+            if ("tt" in t.name and "dn" in t.name))
 
         self.fields['jt_nn_template_choices'].choices = jt_nn_templates
         self.fields['jt_template_choices'].choices = jt_templates
@@ -80,47 +85,51 @@ class GeneralConfigurationAction(workflows.Action):
         for template in templates:
             flavor_name = template.flavor_name
             flavor = filter(lambda fl: fl.name == flavor_name, flavors)[0]
-            self.template_infos[template.name] = "%s vcpu, %s Mb RAM, %s Gb disk" % (flavor.vcpus, flavor.ram, flavor.disk)
-
+            self.template_infos[template.name] = \
+                "%s vcpu, %s Mb RAM, %s Gb disk" % (
+                flavor.vcpus, flavor.ram, flavor.disk)
 
     name = forms.CharField(
         label=_("Cluster name"),
         required=True)
 
     base_image = forms.ChoiceField(
-        label = _("Base image"),
-        required = True)
+        label=_("Base image"),
+        required=True)
 
     hadoop_cluster_topology = forms.ChoiceField(
-        label = _("Hadoop cluster topology"),
-        required = True,
-        choices = [("Single-node master", "Single-node master"), ("Multi-node master", "Multi-node master")]
+        label=_("Hadoop cluster topology"),
+        required=True,
+        choices=[("Single-node master", "Single-node master"),
+                 ("Multi-node master", "Multi-node master")]
     )
 
     jt_nn_template_choices = forms.ChoiceField(
-        required = False
+        required=False
     )
 
     jt_template_choices = forms.ChoiceField(
-        required = False
+        required=False
     )
 
     nn_template_choices = forms.ChoiceField(
-        required = False
+        required=False
     )
 
     worker_template_choices = forms.ChoiceField(
-        required = False
+        required=False
     )
 
     result_field = forms.CharField(
-        required = True
+        required=True
     )
 
     def populate_base_image_choices(self, request, context):
         public_images, _more = glance.image_list_detailed(request)
         return [(image.id, image.name) for image in public_images
-                if ("image.final" in image.name or "hadoop" in image.name or "hdp" in image.name)]
+                if ("image.final" in image.name
+                    or "hadoop" in image.name
+                    or "hdp" in image.name)]
 
     def get_help_text(self):
         extra = {}
@@ -152,7 +161,7 @@ class CreateCluster(workflows.Workflow):
 
     def handle(self, request, context):
         try:
-            return create_cluster (
+            return create_cluster(
                 request,
                 context["name"],
                 context["base_image"],
@@ -170,8 +179,8 @@ class SetNameFlavorAction(workflows.Action):
         required=True)
 
     flavor_id = forms.ChoiceField(
-        label = _("Flavor"),
-        required = True)
+        label=_("Flavor"),
+        required=True)
 
     class Meta:
         name = _("Template properties")
@@ -190,27 +199,30 @@ class SetNameFlavor(workflows.Step):
 
 
 class FillProcessPropertiesAction(workflows.Action):
-    NODE_TYPE_CHOICES = (("JT+NN", "JT+NN"), ("NN", "NN"), ("JT", "JT"), ("TT+DN", "TT+DN"))
+    NODE_TYPE_CHOICES = (("JT+NN", "JT+NN"),
+                         ("NN", "NN"),
+                         ("JT", "JT"),
+                         ("TT+DN", "TT+DN"))
 
     node_type = forms.ChoiceField(
-        label = _("Nodes type"),
-        required = True,
-        choices = NODE_TYPE_CHOICES)
+        label=_("Nodes type"),
+        required=True,
+        choices=NODE_TYPE_CHOICES)
 
     jt_heap_size = forms.CharField(
-        label= mark_safe("Job tracker<br>heap size"),
+        label=mark_safe("Job tracker<br>heap size"),
         required=False)
 
     nn_heap_size = forms.CharField(
-        label= mark_safe("Name node<br>heap size"),
+        label=mark_safe("Name node<br>heap size"),
         required=False)
 
     tt_heap_size = forms.CharField(
-        label= mark_safe("Task tracker<br>heap size"),
+        label=mark_safe("Task tracker<br>heap size"),
         required=False)
 
     dn_heap_size = forms.CharField(
-        label= mark_safe("Data node<br>heap size"),
+        label=mark_safe("Data node<br>heap size"),
         required=False)
 
     class Meta:
@@ -219,14 +231,18 @@ class FillProcessPropertiesAction(workflows.Action):
 
 
 class FillProcessProperties(workflows.Step):
-    action_class =  FillProcessPropertiesAction
-    contributes = ("node_type", "jt_heap_size", "nn_heap_size", "dn_heap_size", "tt_heap_size")
+    action_class = FillProcessPropertiesAction
+    contributes = ("node_type",
+                   "jt_heap_size",
+                   "nn_heap_size",
+                   "dn_heap_size",
+                   "tt_heap_size")
 
 
 class CreateNodeTemplate(workflows.Workflow):
     slug = "create_node_template"
     name = _("Create Node Template")
-    finalize_button_name =  _("Create")
+    finalize_button_name = _("Create")
     success_message = _("Created")
     failure_message = _("Could not create")
     success_url = "horizon:project:hadoop:index"
