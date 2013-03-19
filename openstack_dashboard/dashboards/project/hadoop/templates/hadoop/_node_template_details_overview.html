@@ -22,11 +22,11 @@
             </ul>
         </dd>
 
-        {% for key, val in node_template.items %}
-            {% if key in node_template.node_type.processes %}
-                <dt>{{ key }}</dt>
-                {% for k, v in val.items %}
-                    <dd>{{ k }}: {{ v }}</dd>
+        {% for process, props in node_template.items %}
+            {% if process in node_template.node_type.processes %}
+                <dt>{{ process }}</dt>
+                {% for key, value in props.items %}
+                    <dd>{{ key }}: {{ value }}</dd>
                 {% endfor %}
             {% endif %}
         {% endfor %}
