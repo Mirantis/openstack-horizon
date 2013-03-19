@@ -20,9 +20,11 @@ class DetailTab(tabs.Tab):
         base_image_name = glance.image_get(request, cluster["base_image_id"]).name
         return {"cluster": cluster, "base_image_name": base_image_name}
 
+
 class TemplateColumn(tables.Column):
     def get_link_url(self, node_template):
         return reverse(self.link, args=(node_template.template_id,))
+
 
 class ClusterNodesTable(tables.DataTable):
 
@@ -39,7 +41,6 @@ class ClusterNodesTable(tables.DataTable):
         verbose_name = _("Cluster Nodes")
 
 
-
 class NodesTab(tabs.TableTab):
     name = _("Nodes")
     slug = "nodes_tab"
@@ -51,11 +52,11 @@ class NodesTab(tabs.TableTab):
         return nodes
 
 
-
 class ClusterDetailTabs(tabs.TabGroup):
     slug = "cluster_details"
     tabs = (DetailTab, NodesTab)
     sticky = True
+
 
 class NodeTemplateOverviewTab(tabs.Tab):
     name = _("Details")
@@ -66,9 +67,8 @@ class NodeTemplateOverviewTab(tabs.Tab):
         node_template = get_node_template(request, self.tab_group.kwargs['node_template_id'])
         return {"node_template": node_template}
 
+
 class NodeTemplateDetailsTabs(tabs.TabGroup):
     slug = "node_template_details"
     tabs = (NodeTemplateOverviewTab,)
     sticky = True
-
-

@@ -131,6 +131,7 @@ class GeneralConfigurationAction(workflows.Action):
         name = _("General configuration")
         help_text_template = ("project/hadoop/_cluster_general_help.html")
 
+
 class GeneralConfiguration(workflows.Step):
     action_class = GeneralConfigurationAction
     contributes = ("name", "base_image", "templates")
@@ -140,6 +141,7 @@ class GeneralConfiguration(workflows.Step):
         context["base_image"] = data.get('base_image')
         context["templates"] = json.loads(data.get('result_field'))
         return context
+
 
 class CreateCluster(workflows.Workflow):
     slug = "create_cluster"
@@ -181,9 +183,11 @@ class SetNameFlavorAction(workflows.Action):
                        for flavor in flavors]
         return flavor_list
 
+
 class SetNameFlavor(workflows.Step):
     action_class = SetNameFlavorAction
     contributes = ("name", "flavor_id")
+
 
 class FillProcessPropertiesAction(workflows.Action):
     NODE_TYPE_CHOICES = (("JT+NN", "JT+NN"), ("NN", "NN"), ("JT", "JT"), ("TT+DN", "TT+DN"))

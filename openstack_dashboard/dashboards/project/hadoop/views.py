@@ -51,7 +51,6 @@ class IndexView(tables.MultiTableView):
     table_classes = ClustersTable, NodeTemplatesTable
     template_name = 'project/hadoop/index.html'
 
-
     def get_node_templates_data(self):
         try:
             node_templates = list_templates(self.request)
@@ -107,6 +106,7 @@ class EditTemplateView(forms.ModalFormView):
     def get_initial(self):
         pass
 
+
 class CreateClusterView(workflows.WorkflowView):
     workflow_class = CreateCluster
     template_name = "project/hadoop/launch.html"
@@ -116,6 +116,7 @@ class CreateClusterView(workflows.WorkflowView):
         initial['project_id'] = self.request.user.tenant_id
         initial['user_id'] = self.request.user.id
         return initial
+
 
 class CreateClusterView(workflows.WorkflowView):
     workflow_class = CreateCluster
@@ -127,6 +128,7 @@ class CreateClusterView(workflows.WorkflowView):
         initial['user_id'] = self.request.user.id
         return initial
 
+
 class CreateNodeTemplateView(workflows.WorkflowView):
     workflow_class = CreateNodeTemplate
     template_name = "project/hadoop/create_node_template.html"
@@ -136,6 +138,7 @@ class CreateNodeTemplateView(workflows.WorkflowView):
         initial['project_id'] = self.request.user.tenant_id
         initial['user_id'] = self.request.user.id
         return initial
+
 
 class ClusterDetailView(tabs.TabView):
     tab_group_class = ClusterDetailTabs

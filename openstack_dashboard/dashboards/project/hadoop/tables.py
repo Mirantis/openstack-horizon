@@ -36,8 +36,7 @@ class CreateNodeTemplate(tables.LinkAction):
     classes = ("btn-create", "ajax-modal")
 
     def allowed(self, request, datum):
-        return True
-
+        return
 
 
 class EditTemplate(tables.LinkAction):
@@ -82,6 +81,7 @@ class CreateCluster(tables.LinkAction):
     def allowed(self, request, datum):
         return True
 
+
 class EditCluster(tables.LinkAction):
     name = "edit"
     verbose_name = _("Edit Cluster")
@@ -90,6 +90,7 @@ class EditCluster(tables.LinkAction):
 
     def allowed(self, request, cluster):
         return True
+
 
 class TerminateCluster(tables.BatchAction):
     name = "terminate"
@@ -113,6 +114,7 @@ def render_templates(instance):
     template_name = 'project/hadoop/_nodes_list.html'
     context = {"cluster": instance}
     return template.loader.render_to_string(template_name, context)
+
 
 class ClustersTable(tables.DataTable):
     STATUS_CHOICES = (
@@ -147,7 +149,6 @@ class ClustersTable(tables.DataTable):
         row_actions = EditCluster, TerminateCluster
 
 
-
 class NodeTemplatesTable(tables.DataTable):
     name = tables.Column("name",
         verbose_name=_("Node template name"),
@@ -160,5 +161,3 @@ class NodeTemplatesTable(tables.DataTable):
         verbose_name = _("Node Templates")
         table_actions = (CreateNodeTemplate, DeleteTemplate)
         row_actions = (EditTemplate, DeleteTemplate)
-
-
