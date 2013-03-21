@@ -114,7 +114,6 @@ horizon.addInitFunction(function () {
         return JSON.stringify(result);
     }
     function update_count_info(block_num, value) {
-        console.log(block_num, value);
         $("#count_hint_" + block_num).text(value);
         var header = $("#header_" + block_num);
         if (header.closest(".well").hasClass("well worker_info")) {
