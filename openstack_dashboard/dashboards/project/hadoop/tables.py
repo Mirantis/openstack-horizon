@@ -38,7 +38,7 @@ class CreateNodeTemplate(tables.LinkAction):
     classes = ("btn-create", "ajax-modal")
 
     def allowed(self, request, datum):
-        return
+        return True
 
 
 class EditTemplate(tables.LinkAction):
