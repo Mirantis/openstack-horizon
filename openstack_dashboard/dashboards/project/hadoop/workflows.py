@@ -170,7 +170,7 @@ class CreateCluster(workflows.Workflow):
             return False
 
 
-class SetNameFlavorAction(workflows.Action):
+class SetNameFlavorTypeAction(workflows.Action):
     name = forms.CharField(
         label=_("Node Template Name"),
         required=True)
@@ -178,6 +178,75 @@ class SetNameFlavorAction(workflows.Action):
     flavor_id = forms.ChoiceField(
         label=_("Flavor"),
         required=True)
+
+    NODE_TYPE_CHOICES = (("JT+NN", "JT+NN"),
+                         ("NN", "NN"),
+                         ("JT", "JT"),
+                         ("TT+DN", "TT+DN"))
+
+    node_type = forms.ChoiceField(
+        label=_("Nodes type"),
+        required=True,
+        choices=NODE_TYPE_CHOICES)
+
+    JT_REQUIRED_OPTS = (("heap_size", "heap_size"),)
+    JT_OPT_CHOICES = (
+        ("dfs.datanode.port", "dfs.datanode.port"),
+        ("dfs.info.port", "dfs.info.port"),
+        ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port")
+        )
+
+    jt_opts = forms.ChoiceField(
+        required=False,
+        choices=JT_OPT_CHOICES
+    )
+    jt_required_opts = forms.ChoiceField(
+        required=False,
+        choices=JT_REQUIRED_OPTS
+    )
+
+    NN_REQUIRED_OPTS = (("heap_size", "heap_size"),)
+    NN_OPT_CHOICES = (
+        ("dfs.datanode.port", "dfs.datanode.port"),
+        ("dfs.info.port", "dfs.info.port"),
+        ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port")
+        )
+
+    nn_opts = forms.ChoiceField(
+        required=False,
+        choices=NN_OPT_CHOICES
+    )
+    nn_required_opts = forms.ChoiceField(
+        required=False,
+        choices=NN_REQUIRED_OPTS
+    )
+
+    TT_REQUIRED_OPTS = (("heap_size", "heap_size"),)
+    TT_OPT_CHOICES = (("dfs.info.port", "dfs.info.port"),)
+
+    tt_opts = forms.ChoiceField(
+        required=False,
+        choices=TT_OPT_CHOICES
+    )
+    tt_required_opts = forms.ChoiceField(
+        required=False,
+        choices=TT_REQUIRED_OPTS
+    )
+
+    DN_REQUIRED_OPTS = (("heap_size", "heap_size"),)
+    DN_OPT_CHOICES = (("dfs.info.port", "dfs.info.port"),)
+
+    dn_opts = forms.ChoiceField(
+        required=False,
+        choices=DN_OPT_CHOICES
+    )
+    dn_required_opts = forms.ChoiceField(
+        required=False,
+        choices=DN_REQUIRED_OPTS
+    )
+
+    template_result_field = forms.CharField(required=False)
+
 
     class Meta:
         name = _("Template properties")
@@ -190,50 +259,16 @@ class SetNameFlavorAction(workflows.Action):
         return flavor_list
 
 
-class SetNameFlavor(workflows.Step):
-    action_class = SetNameFlavorAction
-    contributes = ("name", "flavor_id")
+class SetNameFlavorType(workflows.Step):
+    action_class = SetNameFlavorTypeAction
+    contributes = ("name", "flavor_id", "node_type", "options")
 
-
-class FillProcessPropertiesAction(workflows.Action):
-    NODE_TYPE_CHOICES = (("JT+NN", "JT+NN"),
-                         ("NN", "NN"),
-                         ("JT", "JT"),
-                         ("TT+DN", "TT+DN"))
-
-    node_type = forms.ChoiceField(
-        label=_("Nodes type"),
-        required=True,
-        choices=NODE_TYPE_CHOICES)
-
-    jt_heap_size = forms.CharField(
-        label=mark_safe("Job tracker<br>heap size"),
-        required=False)
-
-    nn_heap_size = forms.CharField(
-        label=mark_safe("Name node<br>heap size"),
-        required=False)
-
-    tt_heap_size = forms.CharField(
-        label=mark_safe("Task tracker<br>heap size"),
-        required=False)
-
-    dn_heap_size = forms.CharField(
-        label=mark_safe("Data node<br>heap size"),
-        required=False)
-
-    class Meta:
-        name = _("Node types")
-        help_text_template = ("project/hadoop/_process_properties_help.html")
-
-
-class FillProcessProperties(workflows.Step):
-    action_class = FillProcessPropertiesAction
-    contributes = ("node_type",
-                   "jt_heap_size",
-                   "nn_heap_size",
-                   "dn_heap_size",
-                   "tt_heap_size")
+    def contribute(self, data, context):
+        context["name"] = data.get('name')
+        context["flavor_id"] = data.get('flavor_id')
+        context["node_type"] = data.get('node_type')
+        context["options"] = json.loads(data.get('template_result_field'))
+        return context
 
 
 class CreateNodeTemplate(workflows.Workflow):
@@ -243,17 +278,18 @@ class CreateNodeTemplate(workflows.Workflow):
     success_message = _("Created")
     failure_message = _("Could not create")
     success_url = "horizon:project:hadoop:index"
-    default_steps = (SelectProjectUser, SetNameFlavor, FillProcessProperties)
+    default_steps = (SelectProjectUser, SetNameFlavorType)
 
     def handle(self, request, context):
         try:
             name = context["name"]
             node_type = context["node_type"]
             flavor_id = context["flavor_id"]
-            jt_opts = {"heap_size": context["jt_heap_size"]}
-            nn_opts = {"heap_size": context["nn_heap_size"]}
-            tt_opts = {"heap_size": context["tt_heap_size"]}
-            dn_opts = {"heap_size": context["dn_heap_size"]}
+            jt_opts = context["options"]["jt"]
+            nn_opts = context["options"]["nn"]
+            tt_opts = context["options"]["tt"]
+            dn_opts = context["options"]["dn"]
+
             return create_node_template(
                 request,
                 name,
