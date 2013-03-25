@@ -30,17 +30,21 @@ horizon.addInitFunction(function () {
 
     function add_options_inputs(type, required, option) {
         last_template_idx += 1;
+        var header = "Option:";
         var choice_input = '' +
             '<div class="control-group form-field clearfix">' +
             '<div class="' + type + '_opts" style="display:none"></div>';
         if (!required) {
-            choice_input += '<span id="remove_template_input_' + last_template_idx + '" class="btn btn-inline pull-right remove-inputs">-</span>';
+            choice_input += '<span id="remove_template_input_' + last_template_idx + '" class="remove-inputs">' +
+                '<span class="table_actions" style="min-width:300px; float:none">' +
+                //'<label for="id_option_' + last_template_idx + '">' + header + '</label>' +
+                '<a class="btn btn-small btn-danger btn-inline" style="margin-left:0">Remove</a></span></span>';
         }
 
-        var header = "Option:";
+
 
         choice_input +=
-            '<label for="id_option_' + last_template_idx + '">' + header + '</label>' +
+                '<label>' + header + '</label>' +
                 '<span class="help-block" style="display: none;"></span>';
                 if (required) {
                     choice_input += '<span>' + option + '</span>' +
@@ -88,7 +92,7 @@ horizon.addInitFunction(function () {
                 '</tr>' +
             '</tbody>' +
         '</table>' +
-        '<span id="add_option_inputs_btn_' + type + '" class="btn btn-inline">+</span>' +
+        '<span id="add_option_inputs_btn_' + type + '"><span class="table_actions" style="float:left"><a href="#" class="btn btn-small btn-create btn-inline" style="float:left; margin-left:0">Add</a></span></span>' +
         '</fieldset>' +
         '<noscript><hr /></noscript>';
 
@@ -270,12 +274,6 @@ horizon.addInitFunction(function () {
     function create_inputs(type) {
         last_template_idx += 1;
 
-        var choice_input = '' +
-            '<div class="control-group form-field clearfix">' +
-                '<div class="' + type + '" style="display:none"></div>';
-            if (type == 'worker') {
-                choice_input += '<span id="remove_template_input_' + last_template_idx + '" data-add-to-field="id_keypair" class="btn btn-inline pull-right remove-inputs">-</span>'
-            }
         var header;
         if (type == "jt_nn") {
             header = "Job Tracker + Name Node node template";
@@ -289,8 +287,19 @@ horizon.addInitFunction(function () {
         if (type == "worker") {
             header = "Worker node template";
         }
+
+        var choice_input = '' +
+            '<div class="control-group form-field clearfix">' +
+                '<div class="' + type + '" style="display:none"></div>';
+            if (type == 'worker') {
+                choice_input += '<span id="remove_template_input_' + last_template_idx + '" data-add-to-field="id_keypair" class="remove-inputs">' +
+                    '<span class="table_actions" style="float:left; min-width:300px; float:none"><a href="#" class="btn btn-small btn-danger btn-inline" style="margin-left:0">Remove</a></span>' +
+                    '<label for="id_template_' + last_template_idx + '">' + header + '</label>'+
+                    '</span>'
+            }
+
         choice_input +=
-                '<label for="id_template_' + last_template_idx + '">' + header + '</label>' +
+
                 '<span class="help-block" style="display: none;"></span>' +
                 '<div class="input">' +
                     '<select name="template_' + last_template_idx + '" id="id_template_'+ last_template_idx +'" class="templates_select">' +
