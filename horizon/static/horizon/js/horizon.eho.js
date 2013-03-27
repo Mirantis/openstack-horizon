@@ -110,16 +110,17 @@ horizon.addInitFunction(function () {
 
     function update_properties_tabs() {
 
-        $("#id_node_type").closest(".modal-body").find("ul").find("li").each(function(index, element) {
+        var node_type = $("#id_node_type");
+        node_type.closest(".modal-body").find("ul").find("li").each(function(index, element) {
             if (index > 0) {
                 element.remove();
             }});
-        $("#id_node_type").closest(".tab-content").find("fieldset").each(function(index, element) {
+        node_type.closest(".tab-content").find("fieldset").each(function(index, element) {
             if (index > 0) {
                 element.remove();
             }});
 
-        var val = $("#id_node_type").val();
+        var val = node_type.val();
 
         if (val.indexOf("JT") != -1) {
             create_properties_tab("jt")
@@ -164,7 +165,138 @@ horizon.addInitFunction(function () {
 ///////////////////////////////
 
     var last_template_idx = 0;
-//
+    var worker_idx = 0;
+
+    function create_override_tab(type, worker_id) {
+        var li_templ;
+        var li_text;
+        var li_id;
+        if (type == "master") {
+            li_templ= "#create_cluster__overridemaster";
+            li_text = "Properties for master node(s)";
+            li_id = "li_override_master";
+        } else {
+            li_templ= "#create_cluster__overrideworker_" + worker_id;
+            li_text = "Properties for worker #" + worker_id;
+            li_id = "li_override_worker_" + worker_id;
+        }
+
+
+        var tab_html = "<li id='" + li_id + "'>" +
+            "<a href='" + li_templ + "' data-toggle='tab' data-target='" + li_templ + "'>" +
+            li_text +
+            "</a></li>";
+
+        $("#id_result_field").closest(".modal-body").find("ul").append(tab_html);
+
+        create_overview_tab_content(type, worker_id);
+    }
+
+    function create_overview_tab_content(type, worker_id) {
+        var tab_id;
+        var left_add_btn_id;
+        var right_add_btn_id;
+        var left_td_class;
+        var right_td_class;
+        var left_header;
+        var right_header;
+
+        if (type == "master") {
+            tab_id = "master";
+            left_add_btn_id = "add_jt_option_inputs_btn";
+            right_add_btn_id = "add_nn_option_inputs_btn";
+            left_td_class = "jt_opts";
+            right_td_class = "nn_opts";
+            left_header = "Job Tracker";
+            right_header = "Name Node";
+        } else {
+            tab_id = "worker_" + worker_id;
+            left_add_btn_id = "add_tt_option_inputs_btn_" + worker_id;
+            right_add_btn_id = "add_dn_option_inputs_btn_" + worker_id;
+            left_td_class = "tt_opts";
+            right_td_class = "dn_opts";
+            left_header = "Task Tracker";
+            right_header = "Data Node";
+        }
+
+
+
+        var tab_html = '<fieldset id="create_cluster__override' + tab_id + '" class="js-tab-pane tab-pane">' +
+
+            '<table>' +
+                '<tbody>' +
+                    '<tr>' +
+                        '<td class="' + left_td_class + ' actions">' +
+                            '<p>Options for ' + left_header + '</p>' +
+                            '<span id="' + left_add_btn_id + '"><span class="table_actions" style="float:left; min-width:100px"><a href="#" class="btn btn-small btn-create btn-inline" style="float:left; margin-left:0">Add</a></span></span>' +
+                        '</td>' +
+                        '<td class="' + right_td_class + ' help_text">' +
+                            '<p>Options for ' + right_header + '</p>' +
+                             '<span id="' + right_add_btn_id + '"><span class="table_actions" style="float:left; min-width:100px"><a href="#" class="btn btn-small btn-create btn-inline" style="float:left; margin-left:0">Add</a></span></span>' +
+                        '</td>' +
+                    '</tr>' +
+                '</tbody>' +
+            '</table>' +
+            '</fieldset>' +
+            '<noscript><hr /></noscript>';
+
+        $("#id_result_field").closest(".tab-content").append(tab_html);
+
+
+        $(document).off("click", "#" + left_add_btn_id);
+        $(document).off("click", "#" + right_add_btn_id);
+        $(document).on("click", "#" + left_add_btn_id, function(evt) {
+            var inputs_type;
+            if (type == "master") {
+                inputs_type = "jt"
+            } else {
+                inputs_type = "tt"
+            }
+            add_override_inputs(inputs_type, $(this).closest("td").find("p"))
+        });
+
+        $(document).on("click", "#" + right_add_btn_id, function(evt) {
+            var inputs_type;
+            if (type == "master") {
+                inputs_type = "nn"
+            } else {
+                inputs_type = "dn"
+            }
+            add_override_inputs(inputs_type, $(this).closest("td").find("p"))
+        });
+    }
+
+    function add_override_inputs(type, place_after) {
+        last_template_idx += 1;
+        var header = "Option:";
+        var choice_input = '' +
+            '<div class="control-group form-field clearfix">' +
+                '<div class="' + type + '_opts" style="display:none"></div>' +
+                    '<span id="remove_template_input_' + last_template_idx + '" class="remove-inputs">' +
+                        '<span class="table_actions" style="min-width:100px; float:none">' +
+                            '<a class="btn btn-small btn-danger btn-inline" style="margin-left:0">Remove</a>' +
+                        '</span>' +
+                    '</span>' +
+                    '<label for="id_option_'+ last_template_idx +'">' + header + '</label>' +
+                    '<span class="help-block" style="display: none;"></span>' +
+                    '<div class="input">' +
+                        '<select name="template_' + last_template_idx + '" id="id_option_'+ last_template_idx +'" class="opts-select">' +
+                            $("#id_" + type + "_opts").html() +
+                        '</select>' +
+                '</div>' +
+            '</div>';
+        var value_input = '' +
+            '<div class="control-group form-field clearfix">' +
+                '<div class="' + type + '-opt-value" style="display:none"></div>' +
+                '<label for="id_opt_' + last_template_idx + '">Value:</label>' +
+                '<span class="help-block" style="display: none;"></span>'+
+                '<div class="input">'+
+                    '<input type="text" class="opt-input" id="id_opt_' + last_template_idx + '" data-original-title=""/>'+
+                '</div>'+
+            '</div><hr/>';
+        place_after.after(choice_input + value_input);
+
+    }
 
     function addValidationHint(text) {
         $($("#create_cluster__generalconfigurationaction").find("table")[0]).before('<div class="validation-hint"><span class="help-inline label label-important">' + text + '</span><br/><div>');
@@ -204,10 +336,11 @@ horizon.addInitFunction(function () {
             valid = false;
         }
 
+        var create_button = $("input[type=submit][value='Create & Launch']");
         if (valid) {
-            $("input[type=submit][value='Create & Launch']").prop("disabled", false);
+            create_button.prop("disabled", false);
         } else {
-            $("input[type=submit][value='Create & Launch']").prop("disabled", true);
+            create_button.prop("disabled", true);
         }
 
         return valid;
@@ -285,15 +418,19 @@ horizon.addInitFunction(function () {
             header = "Name Node node template";
         }
         if (type == "worker") {
-            header = "Worker node template";
+            worker_idx += 1;
+            header = "Worker node template #" + worker_idx;
         }
 
         var choice_input = '' +
             '<div class="control-group form-field clearfix">' +
                 '<div class="' + type + '" style="display:none"></div>';
             if (type == 'worker') {
-                choice_input += '<span id="remove_template_input_' + last_template_idx + '" data-add-to-field="id_keypair" class="remove-inputs">' +
-                    '<span class="table_actions" style="float:left; min-width:300px; float:none"><a href="#" class="btn btn-small btn-danger btn-inline" style="margin-left:0">Remove</a></span>' +
+                choice_input += '<span>' +
+                    '<span class="table_actions" style="float:left; min-width:300px; float:none">' +
+                    '<a href="#" id="remove_template_input_' + last_template_idx + '" class="remove-inputs remove-inputs-template btn btn-small btn-danger btn-inline" style="margin-left:0">Remove</a>&nbsp' +
+                    '<a href="#" id="override_btn_' + worker_idx + '" class="btn btn-small btn-inline override-btn override-btn-worker" style="margin-left:0">Override</a>' +
+                    '</span>' +
                     '<label for="id_template_' + last_template_idx + '">' + header + '</label>'+
                     '</span>'
             }
@@ -380,22 +517,44 @@ horizon.addInitFunction(function () {
 
     $(document).on('click','.remove-inputs', function(evt) {
         var id = this.id;
+
+        //remove override tab li and content
+        if ($(this).is(".remove-inputs-template")) {
+            var worker_id = $(this).next().attr("id").replace("override_btn_", "");
+            $("#li_override_worker_" + worker_id).remove();
+            $("#create_cluster__override" + worker_id).remove();
+        }
+
         var block_num = id.replace("remove_template_input_", "");
         $("#id_template_" + block_num).closest(".control-group").remove();
-        $("#id_count_" + block_num).closest(".control-group").next().remove(); //hr
-        $("#id_count_" + block_num).closest(".control-group").remove();
+        var count_block = $("#id_count_" + block_num);
+        count_block.closest(".control-group").next().remove(); //hr
+        count_block.closest(".control-group").remove();
         $("#" + block_num + "_info").remove();
 
 
         $("#id_option_" + block_num).closest(".control-group").remove();
-        $("#id_opt_" + block_num).closest(".control-group").next().remove(); //hr
-        $("#id_opt_" + block_num).closest(".control-group").remove();
+        var id_block = $("#id_opt_" + block_num);
+        id_block.closest(".control-group").next().remove(); //hr
+        id_block.closest(".control-group").remove();
         validate();
+    });
+
+    $(document).on("click", ".override-btn", function(evt) {
+        var id = this.id;
+        var block_num = id.replace("override_btn_", "");
+        if ($(this).is(".override-btn-worker")) {
+            create_override_tab("worker", block_num);
+        } else {
+            create_override_tab("master", block_num);
+        }
+        $(this).prop("disabled", true);
     });
 
 
     horizon.modals.addModalInitFunction(function (modal) {
         last_template_idx = 0;
+        worker_idx = 0;
 
         //node templates workflow
         $("#id_node_type").change();
@@ -412,6 +571,7 @@ horizon.addInitFunction(function () {
         //clusters workflow
         $("input[type=submit][value='Create & Launch']").bind('click', function() {
             var result = fillClusterResultField();
+            //TODO override parameters
             $("#id_result_field").val(result);
         });
         $("input[type=submit][value='Create']").bind('click', function() {
@@ -419,7 +579,7 @@ horizon.addInitFunction(function () {
             $("#id_template_result_field").val(result);
         });
         $($("#create_cluster__generalconfigurationaction").find("table")[0]).after(
-            '<span id="add_template_inputs_btn" class="btn btn-inline">+</span>');
+            '<span id="add_template_inputs_btn"><span class="table_actions" style="float:left"><a href="#" class="btn btn-small btn-create btn-inline" style="float:left; margin-left:0">Add</a></span></span>');
 
         $("#id_jt_nn_template_choices").closest(".control-group").hide();
         $("#id_jt_template_choices").closest(".control-group").hide();

@@ -117,6 +117,42 @@ class GeneralConfigurationAction(workflows.Action):
         required=False
     )
 
+    JT_OPT_CHOICES = (("heap_size", "heap_size"),
+                      ("dfs.datanode.port", "dfs.datanode.port"),
+                      ("dfs.info.port", "dfs.info.port"),
+                      ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port"))
+    jt_opts = forms.ChoiceField(
+        required=False,
+        choices=JT_OPT_CHOICES
+    )
+
+    NN_OPT_CHOICES = (("heap_size", "heap_size"),
+                      ("dfs.datanode.port", "dfs.datanode.port"),
+                      ("dfs.info.port", "dfs.info.port"),
+                      ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port"))
+    nn_opts = forms.ChoiceField(
+        required=False,
+        choices=NN_OPT_CHOICES
+    )
+
+    TT_OPT_CHOICES = (("heap_size", "heap_size"),
+                      ("dfs.datanode.port", "dfs.datanode.port"),
+                      ("dfs.info.port", "dfs.info.port"),
+                      ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port"))
+    tt_opts = forms.ChoiceField(
+        required=False,
+        choices=TT_OPT_CHOICES
+    )
+
+    DN_OPT_CHOICES = (("heap_size", "heap_size"),
+                      ("dfs.datanode.port", "dfs.datanode.port"),
+                      ("dfs.info.port", "dfs.info.port"),
+                      ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port"))
+    dn_opts = forms.ChoiceField(
+        required=False,
+        choices=DN_OPT_CHOICES
+    )
+
     result_field = forms.CharField(
         required=True
     )
