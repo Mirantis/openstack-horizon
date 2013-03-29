@@ -569,6 +569,13 @@ horizon.addInitFunction(function () {
         $("#id_dn_required_opts").closest(".control-group").hide();
 
         //clusters workflow
+
+        $("#id_hadoop_cluster_topology").closest(".control-group").find("label").before(
+            '<span class="table_actions" style="float:left; min-width:100px; float:none">' +
+                '<a href="#" id="override_btn_master" class="btn btn-small btn-inline override-btn" style="margin-left:0">Override</a>' +
+            '</span>'
+        )
+
         $("input[type=submit][value='Create & Launch']").bind('click', function() {
             var result = fillClusterResultField();
             //TODO override parameters
