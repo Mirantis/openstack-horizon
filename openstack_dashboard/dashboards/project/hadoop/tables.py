@@ -33,9 +33,15 @@ LOG = logging.getLogger(__name__)
 
 class CreateNodeTemplate(tables.LinkAction):
     name = "create_node_template"
-    verbose_name = _("Create Template")
+    verbose_name = _("Create Node Template")
     url = "horizon:project:hadoop:create_template"
     classes = ("btn-create", "ajax-modal")
+
+    action_present = _("Create")
+    action_past = _("Created")
+
+    data_type_singular = _("Node Template")
+    data_type_plural = _("Node Templates")
 
     def allowed(self, request, datum):
         return True
@@ -43,7 +49,7 @@ class CreateNodeTemplate(tables.LinkAction):
 
 class EditTemplate(tables.LinkAction):
     name = "edit"
-    verbose_name = _("Edit Template")
+    verbose_name = _("Edit Node Template")
     url = "horizon:project:hadoop:edit_template"
     classes = ("ajax-modal", "btn-edit")
 
@@ -53,13 +59,13 @@ class EditTemplate(tables.LinkAction):
 
 class DeleteTemplate(tables.BatchAction):
     name = "delete_template"
-    verbose_name = _("Delete Template")
+    verbose_name = _("Delete Node Template")
     classes = ("btn-terminate", "btn-danger")
 
     action_present = _("Delete")
     action_past = _("Deleted")
-    data_type_singular = _("Template")
-    data_type_plural = _("Templates")
+    data_type_singular = _("Node Template")
+    data_type_plural = _("Node Templates")
 
     def allowed(self, request, template):
         return True

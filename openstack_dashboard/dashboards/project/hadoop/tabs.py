@@ -50,8 +50,7 @@ class ClusterNodesTable(tables.DataTable):
         link=("horizon:project:instances:detail"))
     template_name = TemplateColumn("template_name",
         verbose_name=_("Node template name"),
-        link=("horizon:project:hadoop:node_template_details")
-    )
+        link=("horizon:project:hadoop:node_template_details"))
 
     class Meta:
         name = "cluster_nodes"

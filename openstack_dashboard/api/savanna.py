@@ -194,8 +194,12 @@ def get_cluster_nodes(request, cluster_id):
     nodes_with_id = []
     for node in nodes:
         vm = nova.server_get(request, node["vm_id"])
+        addresses = []
+        for network, address in vm.addresses.items():
+            addresses.extend(address)
+
         nodes_with_id.append(ClusterNode(vm.id, "%s (%s)" % (vm.name, ", ".join(
-            [elem['addr'].__str__() for elem in vm.addresses['novanetwork']])),
+            [elem['addr'].__str__() for elem in addresses])),
                                          node["node_template"]["name"],
                                          node["node_template"]["id"]))
 

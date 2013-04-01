@@ -33,15 +33,13 @@ horizon.addInitFunction(function () {
         var header = "Option:";
         var choice_input = '' +
             '<div class="control-group form-field clearfix">' +
-            '<div class="' + type + '_opts" style="display:none"></div>';
+                '<div class="' + type + '_opts" style="display:none"></div>';
         if (!required) {
             choice_input += '<span id="remove_template_input_' + last_template_idx + '" class="remove-inputs">' +
-                '<span class="table_actions" style="min-width:300px; float:none">' +
-                //'<label for="id_option_' + last_template_idx + '">' + header + '</label>' +
-                '<a class="btn btn-small btn-danger btn-inline" style="margin-left:0">Remove</a></span></span>';
+                                '<span class="table_actions" style="min-width:300px; float:none">' +
+                              //'<label for="id_option_' + last_template_idx + '">' + header + '</label>' +
+                                    '<a class="btn btn-small btn-danger btn-inline" style="margin-left:0">Remove</a></span></span>';
         }
-
-
 
         choice_input +=
                 '<label>' + header + '</label>' +
@@ -54,7 +52,7 @@ horizon.addInitFunction(function () {
                 } else {
                     choice_input += '<div class="input">' +
                     '<select name="template_' + last_template_idx + '" id="id_option_'+ last_template_idx +'" class="opts-select">' +
-                    $("#id_" + type + "_opts").html() +
+                        $("#id_" + type + "_opts").html() +
                     '</select>' +
                     '</div>';
 
@@ -62,12 +60,12 @@ horizon.addInitFunction(function () {
         choice_input += '</div>';
         var value_input = '' +
             '<div class="control-group form-field clearfix">' +
-            '<div class="' + type + '-opt-value" style="display:none"></div>' +
-            '<label for="id_opt_' + last_template_idx + '">Value:</label>' +
-            '<span class="help-block" style="display: none;"></span>'+
-            '<div class="input">'+
-            '<input type="text" class="opt-input" id="id_opt_' + last_template_idx + '" data-original-title=""/>'+
-            '</div>'+
+                '<div class="' + type + '-opt-value" style="display:none"></div>' +
+                '<label for="id_opt_' + last_template_idx + '">Value:</label>' +
+                '<span class="help-block" style="display: none;"></span>'+
+                '<div class="input">'+
+                    '<input type="text" class="opt-input" id="id_opt_' + last_template_idx + '" data-original-title=""/>'+
+                '</div>'+
             '</div><hr/>';
         $("#create_node_template__set" + type).find(".actions").append(choice_input + value_input);
     }
@@ -305,10 +303,11 @@ horizon.addInitFunction(function () {
     function validate() {
         $(".validation-hint").remove();
 
-        var jt_count = 0;
-        var nn_count = 0;
+        var jt_count = 1;
+        var nn_count = 1;
         var valid = true;
-        $(".templates_select").each(function() {
+        //this kind of validation is not required now
+        /*$(".templates_select").each(function() {
             var selected = $(this).val().toLowerCase();
             if (selected.indexOf("jt") != -1) {
                 jt_count += 1;
@@ -316,7 +315,7 @@ horizon.addInitFunction(function () {
             if (selected.indexOf("nn") != -1) {
                 nn_count += 1;
             }
-        });
+        });*/
 
         if (jt_count == 0) {
             addValidationHint("Job Tracker is required");
@@ -428,15 +427,14 @@ horizon.addInitFunction(function () {
             if (type == 'worker') {
                 choice_input += '<span>' +
                     '<span class="table_actions" style="float:left; min-width:300px; float:none">' +
-                    '<a href="#" id="remove_template_input_' + last_template_idx + '" class="remove-inputs remove-inputs-template btn btn-small btn-danger btn-inline" style="margin-left:0">Remove</a>&nbsp' +
-                    '<a href="#" id="override_btn_' + worker_idx + '" class="btn btn-small btn-inline override-btn override-btn-worker" style="margin-left:0">Override</a>' +
+                        '<a href="#" id="remove_template_input_' + last_template_idx + '" class="remove-inputs remove-inputs-template btn btn-small btn-danger btn-inline" style="margin-left:0">Remove</a>&nbsp' +
+                        //'<a href="#" id="override_btn_' + worker_idx + '" class="btn btn-small btn-inline override-btn override-btn-worker" style="margin-left:0">Override</a>' +
                     '</span>' +
-                    '<label for="id_template_' + last_template_idx + '">' + header + '</label>'+
-                    '</span>'
+                        '<label for="id_template_' + last_template_idx + '">' + header + '</label>'+
+                '</span>'
             }
 
         choice_input +=
-
                 '<span class="help-block" style="display: none;"></span>' +
                 '<div class="input">' +
                     '<select name="template_' + last_template_idx + '" id="id_template_'+ last_template_idx +'" class="templates_select">' +
@@ -457,6 +455,7 @@ horizon.addInitFunction(function () {
             $("#id_hadoop_cluster_topology").closest(".control-group").after(choice_input + count_input);
         } else {
             $("#id_result_field").closest(".control-group").before(choice_input + count_input + "<hr>");
+            $("#id_template_"+ last_template_idx).addClass("master-template-select");
         }
         create_info(type);
         $("#id_template_" + last_template_idx).change();
@@ -487,7 +486,8 @@ horizon.addInitFunction(function () {
         var selected = $(this).val().toLowerCase();
         update_info(block_num, selected);
         var count_selector = $("#id_count_" + block_num);
-        if (selected.indexOf("jt") != -1 || selected.indexOf("nn") != -1) {
+        //if (selected.indexOf("jt") != -1 || selected.indexOf("nn") != -1) {
+        if (!$(this).is(".master-template-select")) {
             count_selector.val(1);
             count_selector.closest('.control-group').hide();
         } else {
@@ -572,7 +572,7 @@ horizon.addInitFunction(function () {
 
         $("#id_hadoop_cluster_topology").closest(".control-group").find("label").before(
             '<span class="table_actions" style="float:left; min-width:100px; float:none">' +
-                '<a href="#" id="override_btn_master" class="btn btn-small btn-inline override-btn" style="margin-left:0">Override</a>' +
+                //'<a href="#" id="override_btn_master" class="btn btn-small btn-inline override-btn" style="margin-left:0">Override</a>' +
             '</span>'
         )
 

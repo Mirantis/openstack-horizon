@@ -63,13 +63,13 @@ class GeneralConfigurationAction(workflows.Action):
             *args, **kwargs)
         templates = list_templates(request)
         jt_nn_templates = ((t.name, t.name) for t in templates
-            if ("jt" in t.name and "nn" in t.name))
+            if ("JT+NN" == t.node_type))
         jt_templates = ((t.name, t.name) for t in templates
-            if ("jt" in t.name and not "nn" in t.name))
+            if ("JT" == t.node_type))
         nn_templates = ((t.name, t.name) for t in templates
-            if (not "jt" in t.name and "nn" in t.name))
+            if ("NN" == t.node_type))
         worker_templates = ((t.name, t.name) for t in templates
-            if ("tt" in t.name and "dn" in t.name))
+            if ("TT+DN" == t.node_type))
 
         self.fields['jt_nn_template_choices'].choices = jt_nn_templates
         self.fields['jt_template_choices'].choices = jt_templates
@@ -97,8 +97,8 @@ class GeneralConfigurationAction(workflows.Action):
     hadoop_cluster_topology = forms.ChoiceField(
         label=_("Hadoop cluster topology"),
         required=True,
-        choices=[("Single-node master", "Single-node master"),
-                 ("Multi-node master", "Multi-node master")]
+        choices=[("Single-node master", "Single-node master")]
+                 #("Multi-node master", "Multi-node master")]
     )
 
     jt_nn_template_choices = forms.ChoiceField(
@@ -120,7 +120,8 @@ class GeneralConfigurationAction(workflows.Action):
     JT_OPT_CHOICES = (("heap_size", "heap_size"),
                       ("dfs.datanode.port", "dfs.datanode.port"),
                       ("dfs.info.port", "dfs.info.port"),
-                      ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port"))
+                      ("mapred.job.tracker.info.port",
+                       "mapred.job.tracker.info.port"))
     jt_opts = forms.ChoiceField(
         required=False,
         choices=JT_OPT_CHOICES
@@ -129,7 +130,8 @@ class GeneralConfigurationAction(workflows.Action):
     NN_OPT_CHOICES = (("heap_size", "heap_size"),
                       ("dfs.datanode.port", "dfs.datanode.port"),
                       ("dfs.info.port", "dfs.info.port"),
-                      ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port"))
+                      ("mapred.job.tracker.info.port",
+                       "mapred.job.tracker.info.port"))
     nn_opts = forms.ChoiceField(
         required=False,
         choices=NN_OPT_CHOICES
@@ -138,7 +140,8 @@ class GeneralConfigurationAction(workflows.Action):
     TT_OPT_CHOICES = (("heap_size", "heap_size"),
                       ("dfs.datanode.port", "dfs.datanode.port"),
                       ("dfs.info.port", "dfs.info.port"),
-                      ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port"))
+                      ("mapred.job.tracker.info.port",
+                       "mapred.job.tracker.info.port"))
     tt_opts = forms.ChoiceField(
         required=False,
         choices=TT_OPT_CHOICES
@@ -147,7 +150,8 @@ class GeneralConfigurationAction(workflows.Action):
     DN_OPT_CHOICES = (("heap_size", "heap_size"),
                       ("dfs.datanode.port", "dfs.datanode.port"),
                       ("dfs.info.port", "dfs.info.port"),
-                      ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port"))
+                      ("mapred.job.tracker.info.port",
+                       "mapred.job.tracker.info.port"))
     dn_opts = forms.ChoiceField(
         required=False,
         choices=DN_OPT_CHOICES
@@ -216,8 +220,8 @@ class SetNameFlavorTypeAction(workflows.Action):
         required=True)
 
     NODE_TYPE_CHOICES = (("JT+NN", "JT+NN"),
-                         ("NN", "NN"),
-                         ("JT", "JT"),
+                         #("NN", "NN"),
+                         #("JT", "JT"),
                          ("TT+DN", "TT+DN"))
 
     node_type = forms.ChoiceField(
@@ -229,8 +233,7 @@ class SetNameFlavorTypeAction(workflows.Action):
     JT_OPT_CHOICES = (
         ("dfs.datanode.port", "dfs.datanode.port"),
         ("dfs.info.port", "dfs.info.port"),
-        ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port")
-        )
+        ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port"))
 
     jt_opts = forms.ChoiceField(
         required=False,
@@ -245,8 +248,7 @@ class SetNameFlavorTypeAction(workflows.Action):
     NN_OPT_CHOICES = (
         ("dfs.datanode.port", "dfs.datanode.port"),
         ("dfs.info.port", "dfs.info.port"),
-        ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port")
-        )
+        ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port"))
 
     nn_opts = forms.ChoiceField(
         required=False,
@@ -282,7 +284,6 @@ class SetNameFlavorTypeAction(workflows.Action):
     )
 
     template_result_field = forms.CharField(required=False)
-
 
     class Meta:
         name = _("Template properties")
