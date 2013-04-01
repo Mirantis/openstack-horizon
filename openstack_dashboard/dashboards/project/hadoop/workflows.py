@@ -28,7 +28,7 @@ from horizon import workflows
 
 from openstack_dashboard import api
 from openstack_dashboard.api import glance
-from openstack_dashboard.api.eho import list_templates, create_cluster, \
+from openstack_dashboard.api.savanna import list_templates, create_cluster, \
     create_node_template
 
 LOG = logging.getLogger(__name__)

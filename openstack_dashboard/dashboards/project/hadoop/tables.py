@@ -25,7 +25,7 @@ from django.utils.http import urlencode
 from django.utils.translation import string_concat, ugettext_lazy as _
 
 from horizon import tables
-from openstack_dashboard.api.eho import delete_template, terminate_cluster
+from openstack_dashboard.api.savanna import delete_template, terminate_cluster
 
 
 LOG = logging.getLogger(__name__)

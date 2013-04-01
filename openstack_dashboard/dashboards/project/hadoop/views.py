@@ -31,7 +31,7 @@ from horizon import workflows
 
 from openstack_dashboard import api
 from .forms import UpdateInstance, UpdateTemplate
-from openstack_dashboard.api.eho import list_templates, list_clusters
+from openstack_dashboard.api.savanna import list_templates, list_clusters
 from .tables import NodeTemplatesTable, ClustersTable
 from .workflows import CreateCluster, CreateNodeTemplate
 from .tabs import ClusterDetailTabs, NodeTemplateDetailsTabs
