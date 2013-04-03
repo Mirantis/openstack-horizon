@@ -57,7 +57,7 @@ def list_clusters(request):
         get_eho_address(request) + "/clusters",
         headers={"x-auth-token": token})
     if resp.status_code == 200:
-        clusters_arr = resp.json["clusters"]
+        clusters_arr = resp.json()["clusters"]
         clusters = []
         for cl in clusters_arr:
             id = cl["id"]
@@ -89,7 +89,7 @@ def list_templates(request):
         headers={"x-auth-token": token,
                  "Content-Type": "application/json"})
     if resp.status_code == 200:
-        templates_arr = resp.json["node_templates"]
+        templates_arr = resp.json()["node_templates"]
         templates = []
         for template in templates_arr:
             id = template["id"]
@@ -170,7 +170,7 @@ def get_cluster(request, cluster_id):
     resp = requests.get(
         get_eho_address(request) + "/clusters/" + cluster_id,
         headers={"x-auth-token": token})
-    cluster = resp.json["cluster"]
+    cluster = resp.json()["cluster"]
 
     return cluster
 
@@ -180,7 +180,7 @@ def get_node_template(request, node_template_id):
     resp = requests.get(
         get_eho_address(request) + "/node-templates/" + node_template_id,
         headers={"x-auth-token": token})
-    node_template = resp.json["node_template"]
+    node_template = resp.json()["node_template"]
 
     return node_template
 
@@ -190,7 +190,7 @@ def get_cluster_nodes(request, cluster_id):
     resp = requests.get(
         get_eho_address(request) + "/clusters/" + cluster_id,
         headers={"x-auth-token": token})
-    nodes = resp.json["cluster"]["nodes"]
+    nodes = resp.json()["cluster"]["nodes"]
     nodes_with_id = []
     for node in nodes:
         vm = nova.server_get(request, node["vm_id"])
