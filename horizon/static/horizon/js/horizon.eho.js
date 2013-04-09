@@ -89,8 +89,11 @@ horizon.addInitFunction(function () {
                     '</td>' +
                 '</tr>' +
             '</tbody>' +
-        '</table>' +
-        '<span id="add_option_inputs_btn_' + type + '"><span class="table_actions" style="float:left"><a href="#" class="btn btn-small btn-create btn-inline" style="float:left; margin-left:0">Add</a></span></span>' +
+        '</table>';
+	if (type == "tt") {
+		tab_html += '<span id="add_option_inputs_btn_' + type + '"><span class="table_actions" style="float:left"><a href="#" class="btn btn-small btn-create btn-inline" style="float:left; margin-left:0">Add</a></span></span>';
+	}
+	tab_html +=
         '</fieldset>' +
         '<noscript><hr /></noscript>';
 

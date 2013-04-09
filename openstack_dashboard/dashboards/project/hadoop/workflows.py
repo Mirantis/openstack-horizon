@@ -117,41 +117,25 @@ class GeneralConfigurationAction(workflows.Action):
         required=False
     )
 
-    JT_OPT_CHOICES = (("heap_size", "heap_size"),
-                      ("dfs.datanode.port", "dfs.datanode.port"),
-                      ("dfs.info.port", "dfs.info.port"),
-                      ("mapred.job.tracker.info.port",
-                       "mapred.job.tracker.info.port"))
+    JT_OPT_CHOICES = (("heap_size", "heap_size"),)
     jt_opts = forms.ChoiceField(
         required=False,
         choices=JT_OPT_CHOICES
     )
 
-    NN_OPT_CHOICES = (("heap_size", "heap_size"),
-                      ("dfs.datanode.port", "dfs.datanode.port"),
-                      ("dfs.info.port", "dfs.info.port"),
-                      ("mapred.job.tracker.info.port",
-                       "mapred.job.tracker.info.port"))
+    NN_OPT_CHOICES = (("heap_size", "heap_size"),)
     nn_opts = forms.ChoiceField(
         required=False,
         choices=NN_OPT_CHOICES
     )
 
-    TT_OPT_CHOICES = (("heap_size", "heap_size"),
-                      ("dfs.datanode.port", "dfs.datanode.port"),
-                      ("dfs.info.port", "dfs.info.port"),
-                      ("mapred.job.tracker.info.port",
-                       "mapred.job.tracker.info.port"))
+    TT_OPT_CHOICES = (("heap_size", "heap_size"),)
     tt_opts = forms.ChoiceField(
         required=False,
         choices=TT_OPT_CHOICES
     )
 
-    DN_OPT_CHOICES = (("heap_size", "heap_size"),
-                      ("dfs.datanode.port", "dfs.datanode.port"),
-                      ("dfs.info.port", "dfs.info.port"),
-                      ("mapred.job.tracker.info.port",
-                       "mapred.job.tracker.info.port"))
+    DN_OPT_CHOICES = (("heap_size", "heap_size"),)
     dn_opts = forms.ChoiceField(
         required=False,
         choices=DN_OPT_CHOICES
@@ -230,10 +214,7 @@ class SetNameFlavorTypeAction(workflows.Action):
         choices=NODE_TYPE_CHOICES)
 
     JT_REQUIRED_OPTS = (("heap_size", "heap_size"),)
-    JT_OPT_CHOICES = (
-        ("dfs.datanode.port", "dfs.datanode.port"),
-        ("dfs.info.port", "dfs.info.port"),
-        ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port"))
+    JT_OPT_CHOICES = ()
 
     jt_opts = forms.ChoiceField(
         required=False,
@@ -245,10 +226,7 @@ class SetNameFlavorTypeAction(workflows.Action):
     )
 
     NN_REQUIRED_OPTS = (("heap_size", "heap_size"),)
-    NN_OPT_CHOICES = (
-        ("dfs.datanode.port", "dfs.datanode.port"),
-        ("dfs.info.port", "dfs.info.port"),
-        ("mapred.job.tracker.info.port", "mapred.job.tracker.info.port"))
+    NN_OPT_CHOICES = ()
 
     nn_opts = forms.ChoiceField(
         required=False,
@@ -260,7 +238,11 @@ class SetNameFlavorTypeAction(workflows.Action):
     )
 
     TT_REQUIRED_OPTS = (("heap_size", "heap_size"),)
-    TT_OPT_CHOICES = (("dfs.info.port", "dfs.info.port"),)
+    TT_OPT_CHOICES = (("mapred.child.java.opts", "mapred.child.java.opts"),
+			("mapred.tasktracker.map.tasks.maximum",
+			 "mapred.tasktracker.map.tasks.maximum"),
+			("mapred.tasktracker.reduce.tasks.maximum",
+			 "mapred.tasktracker.reduce.tasks.maximum"))
 
     tt_opts = forms.ChoiceField(
         required=False,
@@ -272,7 +254,7 @@ class SetNameFlavorTypeAction(workflows.Action):
     )
 
     DN_REQUIRED_OPTS = (("heap_size", "heap_size"),)
-    DN_OPT_CHOICES = (("dfs.info.port", "dfs.info.port"),)
+    DN_OPT_CHOICES = ()
 
     dn_opts = forms.ChoiceField(
         required=False,
