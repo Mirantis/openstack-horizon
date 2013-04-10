@@ -24,7 +24,7 @@ from openstack_dashboard import api
 INDEX_URL = reverse('horizon:admin:info:index')
 
 
-class ServicessViewTests(test.BaseAdminViewTests):
+class ServicesViewTests(test.BaseAdminViewTests):
     def test_index(self):
         self.mox.StubOutWithMock(api.nova, 'default_quota_get')
         self.mox.StubOutWithMock(api.cinder, 'default_quota_get')
@@ -57,17 +57,7 @@ class ServicessViewTests(test.BaseAdminViewTests):
                                  '<Quota: (gigabytes, 1000)>',
                                  '<Quota: (ram, 10000)>',
                                  '<Quota: (floating_ips, 1)>',
-                                 '<Quota: (instances, 10)>',
-                                 '<Quota: (volumes, 1)>',
-                                 '<Quota: (cores, 10)>',
-                                 '<Quota: (security_groups, 10)>',
-                                 '<Quota: (security_group_rules, 20)>',
-                                 '<Quota: (injected_file_content_bytes, 1)>',
-                                 '<Quota: (metadata_items, 1)>',
-                                 '<Quota: (injected_files, 1)>',
-                                 '<Quota: (gigabytes, 1000)>',
-                                 '<Quota: (ram, 10000)>',
-                                 '<Quota: (floating_ips, 1)>',
+                                 '<Quota: (fixed_ips, 10)>',
                                  '<Quota: (instances, 10)>',
                                  '<Quota: (volumes, 1)>',
                                  '<Quota: (cores, 10)>',

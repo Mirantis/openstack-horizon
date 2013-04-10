@@ -82,7 +82,7 @@ def data(TEST):
                  'device_owner': 'network:dhcp',
                  'fixed_ips': [{'ip_address': '10.0.0.3',
                                 'subnet_id': subnet_dict['id']}],
-                 'id': '3ec7f3db-cb2f-4a34-ab6b-69a64d3f008c',
+                 'id': '063cf7f3-ded1-4297-bc4c-31eae876cc91',
                  'mac_address': 'fa:16:3e:9c:d5:7e',
                  'name': '',
                  'network_id': network_dict['id'],
@@ -197,7 +197,7 @@ def data(TEST):
                  'device_owner': 'network:router_gateway',
                  'fixed_ips': [{'ip_address': '10.0.0.3',
                                 'subnet_id': subnet_dict['id']}],
-                 'id': '3ec7f3db-cb2f-4a34-ab6b-69a64d3f008c',
+                 'id': '44ec6726-4bdc-48c5-94d4-df8d1fbf613b',
                  'mac_address': 'fa:16:3e:9c:d5:7e',
                  'name': '',
                  'network_id': network_dict['id'],
@@ -213,8 +213,8 @@ def data(TEST):
                    'tenant_id': '1'}
     TEST.api_routers.add(router_dict)
     TEST.routers.add(Router(router_dict))
-    router_dict = {'id': '279989f7-54bb-41d9-ba42-0d61f12fda61',
-                   'name': 'router1',
+    router_dict = {'id': '10e3dc42-1ce1-4d48-87cf-7fc333055d6c',
+                   'name': 'router2',
                    'external_gateway_info':
                        {'network_id': ext_net['id']},
                    'tenant_id': '1'}
@@ -282,8 +282,8 @@ def data(TEST):
                    'tenant_id': '1',
                    'pool_id': pool_dict['id'],
                    'address': '10.0.0.11',
-                   'protocol_port': '80',
-                   'weight': '10',
+                   'protocol_port': 80,
+                   'weight': 10,
                    'admin_state_up': True}
     TEST.api_members.add(member_dict)
     TEST.members.add(Member(member_dict))
@@ -293,8 +293,8 @@ def data(TEST):
                   'tenant_id': '1',
                   'pool_id': pool_dict['id'],
                   'address': '10.0.0.12',
-                  'protocol_port': '80',
-                  'weight': '10',
+                  'protocol_port': 80,
+                  'weight': 10,
                   'admin_state_up': True}
     TEST.api_members.add(member_dict)
     TEST.members.add(Member(member_dict))
@@ -331,9 +331,9 @@ def data(TEST):
     # 1st monitor
     monitor_dict = {'id': 'd4a0500f-db2b-4cc4-afcf-ec026febff96',
                     'type': 'PING',
-                    'delay': '10',
-                    'timeout': '10',
-                    'max_retries': '10',
+                    'delay': 10,
+                    'timeout': 10,
+                    'max_retries': 10,
                     'http_method': 'GET',
                     'url_path': '/',
                     'expected_codes': '200',
@@ -344,9 +344,9 @@ def data(TEST):
     # 2nd monitor
     monitor_dict = {'id': 'd4a0500f-db2b-4cc4-afcf-ec026febff97',
                     'type': 'PING',
-                    'delay': '10',
-                    'timeout': '10',
-                    'max_retries': '10',
+                    'delay': 10,
+                    'timeout': 10,
+                    'max_retries': 10,
                     'http_method': 'GET',
                     'url_path': '/',
                     'expected_codes': '200',
