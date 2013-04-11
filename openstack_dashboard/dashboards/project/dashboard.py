@@ -25,6 +25,7 @@ class BasePanels(horizon.PanelGroup):
     panels = ('overview',
               'instances',
               'volumes',
+              'hadoop',
               'images_and_snapshots',
               'access_and_security',)
 
@@ -34,7 +35,6 @@ class NetworkPanels(horizon.PanelGroup):
     name = _("Manage Network")
     panels = ('networks',
               'routers',
-              'hadoop',
               'network_topology',
               'loadbalancers')
 
